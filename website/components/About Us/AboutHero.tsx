@@ -10,7 +10,7 @@ export default function AboutHero() {
       {/* Background Image */}
       <div className="absolute inset-0 w-full h-full">
         <Image
-          src="/hero-aboutUs-3d.png"
+          src="/hero-aboutUs-custom.png"
           alt="About OG Agency Hero"
           fill
           priority
