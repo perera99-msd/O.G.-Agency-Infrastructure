@@ -18,7 +18,7 @@ function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
 
 export default function MissionVision() {
   return (
-    <section className="py-24 bg-gradient-to-b from-main-900 to-main-950 px-6 md:px-12 relative overflow-hidden">
+    <section className="py-24 bg-gradient-to-b from-main-900 to-[#000c10] px-6 md:px-12 relative overflow-hidden">
       {/* Decorative ambient gradients */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-main-500/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-main-300/5 blur-[120px] pointer-events-none" />
@@ -43,7 +43,7 @@ export default function MissionVision() {
           
           {/* Mission Card */}
           <FadeUp delay={0.1}>
-            <div className="group relative h-full bg-white/[0.03] backdrop-blur-md border border-white/10 hover:border-main-500/30 rounded-2xl p-8 md:p-10 transition-all duration-300 hover:-translate-y-1">
+            <div className="group relative h-full bg-white/[0.05] backdrop-blur-md border border-white/10 hover:border-main-500/30 rounded-2xl p-8 md:p-10 transition-all duration-300 hover:-translate-y-1">
               <div className="absolute inset-0 bg-gradient-to-br from-main-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
               
               <div className="relative z-10 flex flex-col h-full">
@@ -55,7 +55,7 @@ export default function MissionVision() {
                   Our Mission
                 </h3>
                 
-                <p className="text-secondary-100/80 font-sans text-base leading-relaxed flex-grow">
+                <p className="text-main-50/90 font-sans text-base leading-relaxed flex-grow">
                   To deliver a high level of competency, professionalism, and satisfaction while maintaining industry leadership and building trusted, long-lasting relationships with our clients and employees.
                 </p>
               </div>
@@ -64,7 +64,7 @@ export default function MissionVision() {
 
           {/* Vision Card */}
           <FadeUp delay={0.2}>
-            <div className="group relative h-full bg-white/[0.03] backdrop-blur-md border border-white/10 hover:border-main-500/30 rounded-2xl p-8 md:p-10 transition-all duration-300 hover:-translate-y-1">
+            <div className="group relative h-full bg-white/[0.05] backdrop-blur-md border border-white/10 hover:border-main-500/30 rounded-2xl p-8 md:p-10 transition-all duration-300 hover:-translate-y-1">
               <div className="absolute inset-0 bg-gradient-to-br from-main-300/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
               
               <div className="relative z-10 flex flex-col h-full">
@@ -76,7 +76,7 @@ export default function MissionVision() {
                   Our Vision
                 </h3>
                 
-                <p className="text-secondary-100/80 font-sans text-base leading-relaxed flex-grow">
+                <p className="text-main-50/90 font-sans text-base leading-relaxed flex-grow">
                   To be recognized as one of the top performers among foreign employment services in Sri Lanka by developing and supplying the best-qualified workers to different countries worldwide.
                 </p>
               </div>

@@ -49,7 +49,7 @@ export default function ChairmanMessage() {
                     sizes="(max-w-768px) 256px, 288px"
                     className="object-cover object-top filter grayscale hover:grayscale-0 transition-all duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-main-950/70 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-main-900/70 via-transparent to-transparent" />
                   
                   {/* Floating title */}
                   <div className="absolute bottom-4 left-4 right-4 text-white">

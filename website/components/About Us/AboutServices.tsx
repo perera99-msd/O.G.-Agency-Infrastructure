@@ -85,7 +85,7 @@ export default function AboutServices() {
 
         {/* Destinations Box */}
         <FadeUp delay={0.15}>
-          <div className="bg-gradient-to-br from-main-900 to-main-950 text-white rounded-3xl p-8 md:p-12 relative overflow-hidden">
+          <div className="bg-gradient-to-br from-main-900 to-[#000c10] text-white rounded-3xl p-8 md:p-12 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-80 h-80 bg-main-500/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">

@@ -55,7 +55,7 @@ export default function Credentials() {
   ];
 
   return (
-    <section className="py-24 bg-gradient-to-b from-main-950 to-main-900 text-white px-6 md:px-12 relative overflow-hidden">
+    <section className="py-24 bg-gradient-to-b from-[#000c10] to-main-900 text-white px-6 md:px-12 relative overflow-hidden">
       {/* Visual glowing orb */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] bg-main-500/10 rounded-full blur-[100px] pointer-events-none" />
 
