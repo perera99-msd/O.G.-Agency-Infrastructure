@@ -67,7 +67,7 @@ export default function WhyChooseSriLankan() {
                 {/* Visual decoration */}
                 <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-white/10 rounded-full blur-xl" />
                 
-                <p className="text-[10px] font-mono tracking-widest text-main-100 font-bold uppercase mb-2">
+                <p className="text-[10px] font-mono tracking-widest text-main-300 font-bold uppercase mb-2">
                   Key Metric
                 </p>
                 <p className="text-6xl md:text-7xl font-heading font-extrabold tracking-tight mb-2">
@@ -76,7 +76,7 @@ export default function WhyChooseSriLankan() {
                 <p className="text-sm font-semibold font-heading text-white mb-1">
                   National Literacy Rate
                 </p>
-                <p className="text-xs text-main-100/90 font-sans leading-relaxed">
+                <p className="text-xs text-main-50/90 font-sans leading-relaxed">
                   One of the highest literacy rates in Asian nations, reflecting highly intelligent and train-ready candidates.
                 </p>
               </div>

@@ -89,7 +89,7 @@ export default function ChairmanMessage() {
 
             {/* Focus Industries list */}
             <FadeUp delay={0.15}>
-              <div className="pt-6 border-t border-secondary-200/50">
+              <div className="pt-6 border-t border-secondary-100">
                 <p className="font-heading font-semibold text-main-900 text-sm mb-3">
                   Core Industry Focus:
                 </p>

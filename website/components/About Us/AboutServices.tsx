@@ -51,7 +51,7 @@ export default function AboutServices() {
       <div className="max-w-5xl mx-auto">
         {/* Section header */}
         <FadeUp>
-          <div className="mb-20 border-b border-secondary-200/50 pb-8">
+          <div className="mb-20 border-b border-secondary-100 pb-8">
             <p className="font-mono text-xs tracking-[0.2em] text-main-500 uppercase mb-3 font-semibold">
               Our Services & Scope
             </p>
@@ -97,7 +97,7 @@ export default function AboutServices() {
                 <h3 className="text-2xl md:text-3xl font-heading font-bold mb-4">
                   Active Recruitment Destinations
                 </h3>
-                <p className="text-secondary-200/90 font-sans text-sm md:text-base leading-relaxed">
+                <p className="text-main-50/90 font-sans text-sm md:text-base leading-relaxed">
                   OG Agency facilitates official placements and processes visas for workers in major labor markets across Europe, Eurasia, and Asia.
                 </p>
               </div>
