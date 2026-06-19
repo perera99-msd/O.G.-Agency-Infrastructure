@@ -51,7 +51,7 @@ export default function Testimonials() {
                                 <div className="flex gap-1 mb-6 text-main-300">
                                     {[...Array(5)].map((_, i) => <Star key={i} size={18} fill="currentColor" />)}
                                 </div>
-                                <p className="text-secondary-900 italic mb-8">"{review.content}"</p>
+                                <p className="text-secondary-900 italic mb-8">&quot;{review.content}&quot;</p>
                             </div>
                             <div className="border-t border-main-900/10 pt-4 mt-auto">
                                 <h5 className="text-main-900 text-lg mb-0.5">{review.name}</h5>
