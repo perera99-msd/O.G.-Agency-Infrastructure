@@ -31,4 +31,4 @@ In case of a technical or personal disagreement:
 
 ## Scope
 
-This Code of Conduct applies within all project spaces (GitHub, Jira, WhatsApp/Slack groups, and university meetings), and it also applies when an individual is representing the project or its community in public spaces.
+This Code of Conduct applies within all project spaces (GitHub, Jira, WhatsApp/Slack groups, and university meetings), and it also applies when an individual is representing the project or its community in public spaces..
