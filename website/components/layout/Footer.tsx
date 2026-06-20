@@ -1,61 +1,62 @@
+"use client";
+
 import Link from "next/link";
-import { Globe2, Mail, Phone, MapPin } from "lucide-react";
+import { Globe2, MapPin, Phone, Mail } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-main-900 text-main-50 pt-16 pb-8 border-t-4 border-main-500">
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-
-        {/* Brand Column */}
+    <footer className="w-full bg-main-900 pt-16 pb-8 px-6 lg:px-16 border-t border-main-900/10">
+      <div className="max-w-[1600px] mx-auto w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
+        
+        {/* Left: Brand */}
         <div className="flex flex-col gap-4">
-          <Link href="/" className="flex items-center gap-2 text-main-50">
-            <Globe2 size={32} className="text-main-300" />
-            <span className="font-heading font-bold text-2xl tracking-tight">O.G. Agency</span>
+          <Link href="/" className="flex items-center gap-2 group w-fit">
+            <Globe2 size={28} className="text-main-50 group-hover:rotate-180 transition-transform duration-700 ease-in-out" />
+            <span className="font-heading font-bold text-2xl tracking-tight text-main-50">O.G. Agency</span>
           </Link>
-          <p className="text-small text-secondary-100 mt-2">
-            Modernizing global employment. Secure, transparent, and efficient visa processing & manpower recruitment.
+          <p className="text-secondary-400 text-xs max-w-sm leading-relaxed font-medium">
+            Empowering the next global era by connecting ambition with world-class opportunities. We build careers, not just visas.
           </p>
         </div>
 
-        {/* Quick Links */}
-        <div className="flex flex-col gap-4">
-          <h4 className="text-main-300 text-lg font-semibold mb-2">Quick Links</h4>
-          <Link href="/about" className="text-secondary-100 hover:text-white transition-colors">About Us</Link>
-          <Link href="/services" className="text-secondary-100 hover:text-white transition-colors">Our Services</Link>
-          <Link href="/jobs" className="text-secondary-100 hover:text-white transition-colors">Job Portal</Link>
-        </div>
-
-        {/* Services */}
-        <div className="flex flex-col gap-4">
-          <h4 className="text-main-300 text-lg font-semibold mb-2">Our Services</h4>
-          <span className="text-secondary-100">Foreign Employment</span>
-          <span className="text-secondary-100">Visa Assistance</span>
-          <span className="text-secondary-100">University Placements</span>
-          <span className="text-secondary-100">Ticketing</span>
-        </div>
-
-        {/* Contact Info */}
-        <div className="flex flex-col gap-4">
-          <h4 className="text-main-300 text-lg font-semibold mb-2">Contact Us</h4>
-          <div className="flex items-center gap-3 text-secondary-100">
-            <Phone size={18} className="text-main-500" />
-            <span>+94 123 456 789</span>
+        {/* Right: Links & Socials */}
+        <div className="flex flex-col md:items-end gap-6">
+          <div className="flex flex-wrap items-center gap-6 md:gap-8">
+            {["About", "Services", "Destinations", "Blog", "Contact"].map((link) => (
+              <Link
+                key={link}
+                href={`/${link.toLowerCase()}`}
+                className="text-[10px] font-bold tracking-[0.2em] uppercase text-main-50/70 hover:text-main-50 transition-colors"
+              >
+                {link}
+              </Link>
+            ))}
           </div>
-          <div className="flex items-center gap-3 text-secondary-100">
-            <Mail size={18} className="text-main-500" />
-            <span>info@ogagency.com</span>
-          </div>
-          <div className="flex items-center gap-3 text-secondary-100">
-            <MapPin size={18} className="text-main-500" />
-            <span>Negombo, Western Province, Sri Lanka</span>
+          
+          <div className="flex items-center gap-4">
+            <Link href="/contact" className="w-10 h-10 rounded-full bg-main-50/5 flex items-center justify-center text-main-50 hover:bg-main-50 hover:text-main-900 transition-all">
+              <MapPin size={16} />
+            </Link>
+            <Link href="/contact" className="w-10 h-10 rounded-full bg-main-50/5 flex items-center justify-center text-main-50 hover:bg-main-50 hover:text-main-900 transition-all">
+              <Phone size={16} />
+            </Link>
+            <Link href="/contact" className="w-10 h-10 rounded-full bg-main-50/5 flex items-center justify-center text-main-50 hover:bg-main-50 hover:text-main-900 transition-all">
+              <Mail size={16} />
+            </Link>
           </div>
         </div>
 
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 border-t border-main-700 pt-8 flex flex-col md:flex-row justify-between items-center text-small text-secondary-300">
-        <p>&copy; {new Date().getFullYear()} O.G. Agency. All rights reserved.</p>
-        <p>Developed by Group CS16</p>
+      {/* Bottom: Copyright */}
+      <div className="max-w-[1600px] mx-auto w-full mt-16 pt-8 border-t border-main-50/10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <p className="text-[10px] text-main-50/50 font-medium tracking-wider uppercase">
+          &copy; {new Date().getFullYear()} O.G. Agency. All rights reserved.
+        </p>
+        <div className="flex items-center gap-6">
+          <Link href="/privacy" className="text-[10px] text-main-50/50 hover:text-main-50 font-medium tracking-wider uppercase transition-colors">Privacy Policy</Link>
+          <Link href="/terms" className="text-[10px] text-main-50/50 hover:text-main-50 font-medium tracking-wider uppercase transition-colors">Terms of Service</Link>
+        </div>
       </div>
     </footer>
   );
