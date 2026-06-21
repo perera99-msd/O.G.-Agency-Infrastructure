@@ -14,7 +14,7 @@ O.G. Agency (managed by Mr. Wasantha) is transitioning from manual, paper-heavy 
 - **Automate** client communications and inquiries via an AI Chatbot.
 - **Streamline** application processes through a dedicated Customer PWA.
 - **Secure** highly sensitive documents using cutting-edge storage (Cloudflare + Blockchain Vault).
-- **Centralize** operations through an Admin Dashboard with strict role-based privacy..
+- **Centralize** operations through an Admin Dashboard with strict role-based privacy.
 
 ---
 
