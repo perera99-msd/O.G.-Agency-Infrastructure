@@ -22,13 +22,19 @@ export default function Footer() {
         {/* Right: Links & Socials */}
         <div className="flex flex-col md:items-end gap-6">
           <div className="flex flex-wrap items-center gap-6 md:gap-8">
-            {["About", "Services", "Destinations", "Blog", "Contact"].map((link) => (
+            {[
+              { name: "About", href: "/about" },
+              { name: "Services", href: "/services" },
+              { name: "Destinations", href: "/destinations" },
+              { name: "Jobs", href: "/jobs" },
+              { name: "Contact", href: "/contact" },
+            ].map((link) => (
               <Link
-                key={link}
-                href={`/${link.toLowerCase()}`}
+                key={link.name}
+                href={link.href}
                 className="text-[10px] font-bold tracking-[0.2em] uppercase text-main-50/70 hover:text-main-50 transition-colors"
               >
-                {link}
+                {link.name}
               </Link>
             ))}
           </div>
@@ -55,7 +61,7 @@ export default function Footer() {
         </p>
         <div className="flex items-center gap-6">
           <Link href="/privacy" className="text-[10px] text-main-50/50 hover:text-main-50 font-medium tracking-wider uppercase transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="text-[10px] text-main-50/50 hover:text-main-50 font-medium tracking-wider uppercase transition-colors">Terms of Service</Link>
+          <Link href="/terms" className="text-[10px] text-main-50/50 hover:text-main-50 font-medium tracking-wider uppercase transition-colors">Terms & Conditions</Link>
         </div>
       </div>
     </footer>

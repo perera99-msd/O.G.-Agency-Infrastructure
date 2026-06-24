@@ -159,13 +159,12 @@ function InputField({
         <div className="relative">
           <Icon
             size={16}
-            className={`absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${
-              hasError
+            className={`absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${hasError
                 ? "text-red-400"
                 : isValid
-                ? "text-main-500"
-                : "text-secondary-300"
-            }`}
+                  ? "text-main-500"
+                  : "text-secondary-300"
+              }`}
           />
           <input
             type={type}
@@ -177,10 +176,9 @@ function InputField({
             onBlur={() => onBlur(name, value)}
             placeholder={placeholder}
             className={`w-full pl-10 pr-10 py-3.5 rounded-xl border-2 bg-white text-main-900 placeholder-secondary-300 text-sm font-sans transition-all outline-none
-              ${
-                hasError
-                  ? "border-red-400 focus:border-red-400 bg-red-50/30"
-                  : isValid
+              ${hasError
+                ? "border-red-400 focus:border-red-400 bg-red-50/30"
+                : isValid
                   ? "border-main-500 focus:border-main-500"
                   : "border-secondary-100 focus:border-main-300 hover:border-secondary-300"
               }`}
@@ -406,13 +404,12 @@ export default function InquiryForm() {
                         <div className="relative">
                           <Globe
                             size={16}
-                            className={`absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${
-                              fields.country.touched && fields.country.error
+                            className={`absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${fields.country.touched && fields.country.error
                                 ? "text-red-400"
                                 : formData.country
-                                ? "text-main-500"
-                                : "text-secondary-300"
-                            }`}
+                                  ? "text-main-500"
+                                  : "text-secondary-300"
+                              }`}
                           />
                           <select
                             id="country"
@@ -422,10 +419,9 @@ export default function InquiryForm() {
                             onChange={handleInputChange}
                             onBlur={handleSelectBlur}
                             className={`w-full pl-10 pr-8 py-3.5 rounded-xl border-2 bg-white text-sm font-sans appearance-none cursor-pointer outline-none transition-all
-                              ${
-                                fields.country.touched && fields.country.error
-                                  ? "border-red-400 bg-red-50/30"
-                                  : formData.country
+                              ${fields.country.touched && fields.country.error
+                                ? "border-red-400 bg-red-50/30"
+                                : formData.country
                                   ? "border-main-500 text-main-900"
                                   : "border-secondary-100 text-secondary-300 hover:border-secondary-300 focus:border-main-300"
                               }`}
@@ -468,10 +464,9 @@ export default function InquiryForm() {
                         onDrop={handleDrop}
                         onClick={() => fileInputRef.current?.click()}
                         className={`relative border-2 border-dashed rounded-xl py-10 px-6 text-center cursor-pointer transition-all select-none
-                          ${
-                            isDragActive
-                              ? "border-main-300 bg-main-300/5 scale-[1.01]"
-                              : "border-secondary-200 hover:border-main-300 hover:bg-main-50/60"
+                          ${isDragActive
+                            ? "border-main-300 bg-main-300/5 scale-[1.01]"
+                            : "border-secondary-200 hover:border-main-300 hover:bg-main-50/60"
                           }`}
                       >
                         <input
@@ -582,11 +577,10 @@ export default function InquiryForm() {
                       />
                       <div
                         className={`w-5 h-5 rounded border-2 transition-all flex items-center justify-center
-                        ${
-                          formData.termsAccepted
+                        ${formData.termsAccepted
                             ? "bg-main-500 border-main-500"
                             : "border-secondary-300 group-hover:border-main-300"
-                        }`}
+                          }`}
                       >
                         {formData.termsAccepted && (
                           <motion.svg
@@ -621,10 +615,9 @@ export default function InquiryForm() {
                     disabled={!isFormValid || isSubmitting}
                     whileTap={isFormValid ? { scale: 0.98 } : {}}
                     className={`w-full flex items-center justify-center gap-2.5 py-4 rounded-xl font-heading font-bold text-sm tracking-wide transition-all
-                      ${
-                        isFormValid && !isSubmitting
-                          ? "bg-gradient-to-r from-main-700 to-main-500 text-white shadow-lg shadow-main-500/30 hover:shadow-main-500/50 hover:from-main-900 hover:to-main-700 cursor-pointer"
-                          : "bg-secondary-100 text-secondary-400 cursor-not-allowed"
+                      ${isFormValid && !isSubmitting
+                        ? "bg-gradient-to-r from-main-700 to-main-500 text-white shadow-lg shadow-main-500/30 hover:shadow-main-500/50 hover:from-main-900 hover:to-main-700 cursor-pointer"
+                        : "bg-secondary-100 text-secondary-400 cursor-not-allowed"
                       }`}
                   >
                     {isSubmitting ? (

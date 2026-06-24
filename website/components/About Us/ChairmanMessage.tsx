@@ -32,14 +32,14 @@ export default function ChairmanMessage() {
     <section className="py-24 bg-main-50 px-6 md:px-12 relative overflow-hidden">
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16 items-center">
-          
+
           {/* Left Column: Portrait */}
           <div className="md:col-span-5 flex justify-center">
             <FadeUp>
               <div className="relative group">
                 {/* Decorative background frame */}
                 <div className="absolute inset-4 -bottom-4 -right-4 border border-main-500 rounded-2xl -z-10 group-hover:inset-3 group-hover:-bottom-3 group-hover:-right-3 transition-all duration-300" />
-                
+
                 {/* Picture Container */}
                 <div className="relative w-64 h-80 md:w-72 md:h-96 rounded-2xl overflow-hidden bg-secondary-100 shadow-2xl">
                   <Image
@@ -50,7 +50,7 @@ export default function ChairmanMessage() {
                     className="object-cover object-top filter grayscale hover:grayscale-0 transition-all duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-main-900/70 via-transparent to-transparent" />
-                  
+
                   {/* Floating title */}
                   <div className="absolute bottom-4 left-4 right-4 text-white">
                     <p className="font-heading font-bold text-base leading-tight">Mr. Wasantha C. Vithanage</p>
