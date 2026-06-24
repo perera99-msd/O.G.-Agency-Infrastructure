@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ChevronLeft, ChevronRight, Globe, Zap, Star, Users } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { ArrowRight, ChevronLeft, ChevronRight, Globe, Star, Users } from "lucide-react";
 
 const premiumEasing: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -12,7 +10,7 @@ const slides = [
   {
     id: 0,
     type: "minimal",
-    title: <>Sri Lanka's Premier <br /><span className="text-main-700">Manpower Experts.</span></>,
+    title: <>Sri Lanka&apos;s Premier <br /><span className="text-main-700">Manpower Experts.</span></>,
     description: "OG Agency (License No. 2751) is a leading recruitment consultant in Sri Lanka, supplying skilled professionals to the world since 2012.",
     image: "/home/Hero Floating Image 01.png",
     bgImage: "/home/Hero Slide 1 BG.jpg",
@@ -132,7 +130,8 @@ export default function Hero() {
 
           {slides[current].type === "gallery-bottom" && (
             <div className="absolute inset-0 bg-white">
-              <img src={slides[current].bgImage} alt="Global Background" className="w-full h-full object-cover filter brightness-[1.05]" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={slides[current].bgImage} alt="Global Background" fetchPriority="high" className="w-full h-full object-cover filter brightness-[1.05]" />
               <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px]" />
               <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-transparent to-white/95" />
             </div>
@@ -140,7 +139,8 @@ export default function Hero() {
 
           {slides[current].type === "three-column" && (
             <div className="absolute inset-0 bg-main-50 overflow-hidden">
-              <img src={slides[current].bgImage} alt="Abstract Background" className="absolute inset-0 w-full h-full object-cover filter brightness-[1.1] grayscale-[0.3] opacity-60 mix-blend-multiply" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={slides[current].bgImage} alt="Abstract Background" fetchPriority="high" className="absolute inset-0 w-full h-full object-cover filter brightness-[1.1] grayscale-[0.3] opacity-60 mix-blend-multiply" />
               <div className="absolute inset-0 bg-gradient-to-br from-white/90 via-white/40 to-white/90" />
               <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-main-300/30 blur-[100px] rounded-full mix-blend-multiply pointer-events-none" />
               <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-secondary-300/20 blur-[100px] rounded-full mix-blend-multiply pointer-events-none" />
@@ -195,9 +195,11 @@ export default function Hero() {
                       transition={{ duration: 1.2, delay: 0.3, ease: premiumEasing }}
                       className="relative w-full h-full flex flex-col items-center justify-center isolate [transform:translateZ(0)]"
                     >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img 
                         src={slides[current].image} 
                         alt="Hero Cutout" 
+                        fetchPriority="high"
                         className="max-w-[95%] lg:max-w-[105%] max-h-[90%] lg:max-h-[105%]"
                         style={{
                           WebkitMaskImage: 'linear-gradient(to top, transparent 0%, black 15%, black 100%), linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)',
@@ -235,9 +237,12 @@ export default function Hero() {
                     className="absolute bottom-[5%] right-[5%] z-30 hidden lg:flex flex-col items-end text-right pointer-events-auto"
                   >
                     <div className="flex items-center -space-x-2 mb-2">
-                      <div className="w-8 h-8 rounded-full border-2 border-main-50 bg-secondary-100 overflow-hidden"><img src="https://i.pravatar.cc/100?img=1" alt="Avatar" /></div>
-                      <div className="w-8 h-8 rounded-full border-2 border-main-50 bg-secondary-300/50 overflow-hidden"><img src="https://i.pravatar.cc/100?img=2" alt="Avatar" /></div>
-                      <div className="w-8 h-8 rounded-full border-2 border-main-50 bg-secondary-300 overflow-hidden"><img src="https://i.pravatar.cc/100?img=3" alt="Avatar" /></div>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <div className="w-8 h-8 rounded-full border-2 border-main-50 bg-secondary-100 overflow-hidden"><img src="https://i.pravatar.cc/100?img=1" alt="Avatar" loading="lazy" /></div>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <div className="w-8 h-8 rounded-full border-2 border-main-50 bg-secondary-300/50 overflow-hidden"><img src="https://i.pravatar.cc/100?img=2" alt="Avatar" loading="lazy" /></div>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <div className="w-8 h-8 rounded-full border-2 border-main-50 bg-secondary-300 overflow-hidden"><img src="https://i.pravatar.cc/100?img=3" alt="Avatar" loading="lazy" /></div>
                       <div className="w-8 h-8 rounded-full border-2 border-main-50 bg-main-900 flex items-center justify-center text-white text-[10px] font-bold">+</div>
                     </div>
                     <div className="font-heading font-black text-3xl text-main-900 leading-none tracking-tight">10K+</div>
@@ -300,9 +305,11 @@ export default function Hero() {
                   transition={{ duration: 1, delay: 0.2, ease: premiumEasing }}
                   className="absolute bottom-[12%] left-1/2 -translate-x-1/2 w-[100%] lg:w-[75%] xl:w-[65%] h-[85%] z-20 pointer-events-none flex items-end justify-center"
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={slides[current].image}
                     alt="Hero Cutout"
+                    fetchPriority="high"
                     className="h-full max-h-full object-contain object-bottom [mask-image:linear-gradient(to_top,transparent_0%,black_15%)]"
                   />
                 </motion.div>

@@ -100,11 +100,10 @@ export default function InteractiveCalculator() {
                     <button
                       key={ind.name}
                       onClick={() => setIndustry(ind.name)}
-                      className={`px-4 py-3 rounded-xl border text-xs sm:text-sm font-medium transition-all text-center cursor-pointer ${
-                        industry === ind.name
+                      className={`px-4 py-3 rounded-xl border text-xs sm:text-sm font-medium transition-all text-center cursor-pointer ${industry === ind.name
                           ? "bg-main-500 border-main-300 text-main-50 shadow-glow-blue"
                           : "bg-transparent border-main-500/30 text-secondary-100 hover:border-main-300 hover:text-main-50"
-                      }`}
+                        }`}
                     >
                       {ind.name.split(" ")[0]}
                     </button>
@@ -185,13 +184,12 @@ export default function InteractiveCalculator() {
               <div className="border-t border-main-500/20 pt-6 space-y-4">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-secondary-300">Industry Sourcing Complexity</span>
-                  <span className={`px-2.5 py-1 rounded font-mono text-xs font-semibold ${
-                    calculation.complexity === "Critical"
+                  <span className={`px-2.5 py-1 rounded font-mono text-xs font-semibold ${calculation.complexity === "Critical"
                       ? "bg-red-500/20 text-red-300"
                       : calculation.complexity === "High"
-                      ? "bg-amber-500/20 text-amber-300"
-                      : "bg-emerald-500/20 text-emerald-300"
-                  }`}>
+                        ? "bg-amber-500/20 text-amber-300"
+                        : "bg-emerald-500/20 text-emerald-300"
+                    }`}>
                     {calculation.complexity}
                   </span>
                 </div>
