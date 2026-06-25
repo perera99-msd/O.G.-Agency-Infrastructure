@@ -3,6 +3,7 @@ import { Inter, Poppins, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import AIChatBot from "@/components/chat/AIChatBot";
 
 // Load Inter for standard body text
 const inter = Inter({ 
@@ -40,6 +41,7 @@ export default function RootLayout({
         <main className="min-h-screen">
           {children}
         </main>
+        <AIChatBot />
         <Footer />
       </body>
     </html>
