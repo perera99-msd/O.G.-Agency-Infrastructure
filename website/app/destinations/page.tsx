@@ -2,7 +2,6 @@ import React from 'react';
 import DestinationsHero from '../../components/destinations/DestinationsHero';
 import CountryGrid from '../../components/destinations/CountryGrid';
 import WhyWorkAbroad from '../../components/destinations/WhyWorkAbroad';
-import FeaturedCountry from '../../components/destinations/FeaturedCountry';
 import JobCategorySection from '../../components/destinations/JobCategorySection';
 import Testimonials from '../../components/destinations/Testimonials';
 
@@ -12,9 +11,8 @@ export default function DestinationsPage() {
       <DestinationsHero />
       <CountryGrid />
       <WhyWorkAbroad />
-      <FeaturedCountry />
-      <JobCategorySection />
       <Testimonials />
+      {/* <JobCategorySection /> */}
     </main>
   );
 }
