@@ -113,6 +113,36 @@ const COUNTRIES: Country[] = [
     tags: ["Mining", "Transport"],
     image: "/images/countryGrid/rissia-cg.jpg",
   },
+  {
+    slug: "oman",
+    name: "Oman",
+    flag: "/home/hero2/om.svg",
+    region: "middle-east",
+    jobCount: "200+",
+    salaryRange: "200 - 300 OMR",
+    tags: ["Mining", "Transport"],
+    image: "/images/countryGrid/oman-cg.jpg",
+  },
+  {
+    slug: "qatar",
+    name: "Qatar",
+    flag: "/home/hero2/qa.svg",
+    region: "middle-east",
+    jobCount: "200+",
+    salaryRange: "200 - 400 QAR",
+    tags: ["Mining", "Transport"],
+    image: "/images/countryGrid/qatar-cg.jpg",
+  },
+  {
+    slug: "saudi-arabia",
+    name: "Saudi Arabia",
+    flag: "/home/hero2/sa.svg",
+    region: "middle-east",
+    jobCount: "200+",
+    salaryRange: "1500 - 2500 SAR",
+    tags: ["Mining", "Transport"],
+    image: "/images/countryGrid/saudiArabia-cg.jpg",
+  },
 ];
 
 const FILTERS: { label: string; value: Region }[] = [
@@ -192,13 +222,14 @@ export default function CountryGrid() {
         })}
       </div>
 
-      {/* Grid */}
+    {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {filtered.map((country) => {
+          const jobPortalCountry = country.name === "United Arab Emirates" ? "UAE" : country.name;
           return (
             <Link
               key={country.slug}
-              href={`/destinations/${country.slug}`}
+              href={`/jobs?country=${encodeURIComponent(jobPortalCountry)}`}
               className="group rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-300 transition-all duration-200 relative block h-64 sm:h-72"
             >
               {/* Image filling the entire card */}
@@ -218,7 +249,7 @@ export default function CountryGrid() {
               </span>
 
               {/* Body (Apple glass view) */}
-              <div className="absolute bottom-3 left-3 right-3 p-3 bg-black/20 backdrop-blur-md backdrop-saturate-200 border border-white/20 rounded-xl flex items-center justify-between z-10 shadow-[0_4px_24px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all duration-300 group-hover:bg-black/30">
+              <div className="absolute bottom-3 left-3 right-3 p-3 bg-black/20 backdrop-blur-md backdrop-saturate-120 border border-white/20 rounded-xl flex items-center justify-between z-10 shadow-[0_4px_24px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all duration-300 group-hover:bg-black/30">
                 <p className="text-base font-semibold text-white drop-shadow-sm flex items-center gap-2 m-0">
                   {country.flag.startsWith('/') || country.flag.startsWith('http') || country.flag.match(/\.(png|jpe?g|svg|gif|webp)$/i) ? (
                     <img src={country.flag.startsWith('/') || country.flag.startsWith('http') ? country.flag : `/${country.flag}`} alt={`${country.name} flag`} className="w-6 h-6 inline-block rounded-full object-cover shadow-sm" />
