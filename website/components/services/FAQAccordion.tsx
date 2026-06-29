@@ -1,29 +1,30 @@
+// components/services/FAQAccordion.tsx
 "use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
+import { ChevronDown, HelpCircle } from "lucide-react";
 
 const faqs = [
   {
-    question: "How does O.G. Agency verify candidate credentials?",
-    answer: "Candidates upload transcripts and credentials to our Customer PWA. We cross-verify records with issuing boards, and write the signed verification records to our Blockchain Vault. This guarantees their authenticity and prevents forgery, simplifying the onboarding audit.",
+    question: "How do you make sure candidates' qualifications are real?",
+    answer: "We ask candidates to upload their degrees, certificates, and references. Our team then contacts the issuing institutions and previous employers to confirm everything. All records are kept secure so you can trust the information.",
   },
   {
-    question: "What industries do you specialize in sourcing?",
-    answer: "We support a wide array of sectors, including IT & Engineering, Healthcare, Construction, Hospitality, and Agriculture. Each pipeline is tailored with specific compliance checklists to meet local labor requirements.",
+    question: "What types of businesses do you work with?",
+    answer: "We support many industries IT, engineering, healthcare, construction, hospitality, and agriculture. We customise our approach to fit the specific rules and needs of each sector.",
   },
   {
-    question: "What is the average timeline for deploying international recruits?",
-    answer: "Sourcing and deployment timelines generally range between 35 and 75 days. When you utilize the Blockchain Verification Vault and Consulate Fast-tracking, processing delays are reduced, saving up to 25 days on average.",
+    question: "How long does it take to hire someone through you?",
+    answer: "Usually between 35 and 75 days, depending on the role and country. Using our verification and expedited visa services can cut that time by up to 25 days.",
   },
   {
-    question: "How do you protect candidate data and corporate documents?",
-    answer: "All documents are encrypted in transit and at rest. Access is governed by role-based privacy restrictions within our backend, ensuring that only designated legal team members and HR coordinators can view sensitive documents.",
+    question: "Is my company's information safe with you?",
+    answer: "Absolutely. All documents are encrypted, and we use strict access controls. Only the people who need to see your data (like your account manager) have permission no one else.",
   },
   {
-    question: "Is there a portal where we can track application progress?",
-    answer: "Yes. Corporate partners receive custom access keys to our Admin Dashboard, which enables real-time tracking of candidate selections, interview schedules, visa application steps, and travel bookings.",
+    question: "Can I track the hiring progress online?",
+    answer: "Yes. We give you a secure login to our dashboard where you can see real‑time updates on candidate selections, interviews, visa steps, and travel arrangements all in one place.",
   },
 ];
 
@@ -45,7 +46,7 @@ export default function FAQAccordion() {
             Frequently Asked Questions
           </h2>
           <p className="text-lg text-secondary-700 max-w-prose mx-auto">
-            Get answers to common inquiries regarding compliance, blockchain security, and recruitment timelines.
+            Quick answers to the most common things people ask us.
           </p>
         </div>
 
