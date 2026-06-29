@@ -1,36 +1,53 @@
+// components/services/ServiceGrid.tsx
 "use client";
 
 import { motion } from "framer-motion";
-import { BrainCircuit, Landmark, ShieldCheck, PlaneTakeoff, CheckCircle2 } from "lucide-react";
+import { Users, FileCheck, ShieldCheck, PlaneTakeoff, CheckCircle2 } from "lucide-react";
 
 const services = [
   {
-    title: "AI-Powered Talent Matching",
-    description: "Accelerate your search with our intelligent candidate vetting. Parse CVs instantly and match profiles based on skills, credentials, and requirements.",
-    icon: BrainCircuit,
+    title: "Smart Candidate Matching",
+    description: "We find the right people for your open roles quickly. No more sifting through hundreds of resumes.",
+    icon: Users,
     color: "text-main-300",
-    bullets: ["Auto CV parsing and translation", "Skills and experience matching index", "Automated interview pre-screening"],
+    bullets: [
+      "Search candidates from our global database",
+      "Match skills, experience, and language abilities",
+      "Pre‑screen interviews to save your time",
+    ],
   },
   {
-    title: "Visa & Compliance Processing",
-    description: "Mitigate immigration risks. We manage documentation and legal requirements directly with embassies to deliver stress-free visa solutions.",
-    icon: Landmark,
+    title: "Visa & Work Permit Support",
+    description: "We handle all immigration paperwork so your hires can start on time, without legal delays.",
+    icon: FileCheck,
     color: "text-secondary-300",
-    bullets: ["Full legal document preparation", "Embassy appointment and tracking", "Local labor law compliance checks"],
+    bullets: [
+      "Complete document preparation",
+      "Embassy appointment scheduling",
+      "Local labour law compliance",
+    ],
   },
   {
-    title: "Blockchain Verification Vault",
-    description: "Prevent fraud and speed up verification. Store and validate employee transcripts, background checks, and certifications on an immutable ledger.",
+    title: "Credential Verification",
+    description: "We confirm every candidate's education and work history so you can trust their qualifications.",
     icon: ShieldCheck,
     color: "text-main-500",
-    bullets: ["Instant credential verification", "Tamper-proof storage vault", "GDPR-compliant security keys"],
+    bullets: [
+      "Verify degrees, certificates, and references",
+      "Protect against forged credentials",
+      "Secure, auditable records",
+    ],
   },
   {
-    title: "Deployment & Onboarding Support",
-    description: "We handle the logistics of relocating personnel, including flight arrangements, transit tracking, housing assistance, and local orientation.",
+    title: "Relocation & Onboarding",
+    description: "From flights to accommodation to orientation we make sure your new employees settle in smoothly.",
     icon: PlaneTakeoff,
     color: "text-secondary-500",
-    bullets: ["Travel booking and flight coordination", "Local orientation seminars", "Ongoing worker support lines"],
+    bullets: [
+      "Travel booking and flight tracking",
+      "Local orientation and culture training",
+      "24/7 support for your new hires",
+    ],
   },
 ];
 
@@ -59,10 +76,10 @@ export default function ServiceGrid() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 font-heading text-main-700">
-            Our Corporate Sourcing Ecosystem
+            What We Do for You
           </h2>
           <p className="text-lg text-secondary-700 max-w-prose mx-auto">
-            From initial identification of candidates to final onboarding and relocation, O.G. Agency operates as a comprehensive, digitally optimized partner.
+            We take care of the entire hiring journey from finding the right people to getting them settled in your company.
           </p>
         </div>
 

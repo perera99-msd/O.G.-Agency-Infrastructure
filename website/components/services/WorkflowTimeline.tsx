@@ -1,37 +1,38 @@
+// components/services/WorkflowTimeline.tsx
 "use client";
 
 import { motion } from "framer-motion";
-import { Search, UserCheck, ShieldAlert, FileText, Send } from "lucide-react";
+import { ClipboardList, UserSearch, ShieldCheck, FileText, Send } from "lucide-react";
 
 const steps = [
   {
     step: "01",
-    title: "Sourcing Planning & Setup",
-    description: "Submit your workforce demands. We configure your candidate criteria, job roles, and relocation timelines in our central system.",
-    icon: Search,
+    title: "Tell Us What You Need",
+    description: "You share your job roles, required skills, and timeline. We set up your hiring project in our system.",
+    icon: ClipboardList,
   },
   {
     step: "02",
-    title: "AI Screening & Shortlisting",
-    description: "Our algorithms filter global candidate listings, extract skills, verify compliance, and compile a shortlist of verified individuals.",
-    icon: UserCheck,
+    title: "We Find the Right People",
+    description: "Our team searches our global network and shortlists candidates that match your requirements.",
+    icon: UserSearch,
   },
   {
     step: "03",
-    title: "Credential Vault Verification",
-    description: "Candidates upload transcripts and credentials to our Blockchain Vault. We cryptographically sign and verify authenticity instantly.",
-    icon: FileText,
+    title: "We Verify Every Candidate",
+    description: "We check education, work history, and references so you can be confident in their background.",
+    icon: ShieldCheck,
   },
   {
     step: "04",
-    title: "Visa Processing & Compliance",
-    description: "Our legal workflows handle embassy clearance, work permits, and medical scheduling, maintaining strict tracking throughout.",
-    icon: ShieldAlert,
+    title: "We Handle All Paperwork",
+    description: "We manage visa applications, work permits, and medical checks everything to keep the process legal and fast.",
+    icon: FileText,
   },
   {
     step: "05",
-    title: "Deployment & Integration",
-    description: "Workers arrive with flight details integrated. You track progress live on the PWA, ensuring a seamless start day.",
+    title: "Your Team Arrives & Starts",
+    description: "We coordinate flights, accommodation, and orientation. You track progress online and welcome your new hires.",
     icon: Send,
   },
 ];
@@ -42,10 +43,10 @@ export default function WorkflowTimeline() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center max-w-3xl mx-auto mb-20">
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 font-heading text-main-700">
-            How Sourcing Works
+            How It Works
           </h2>
           <p className="text-lg text-secondary-700 max-w-prose mx-auto">
-            A secure, automated onboarding path that takes the friction out of cross-border recruitment.
+            A simple, transparent process that takes the stress out of international hiring.
           </p>
         </div>
 
@@ -56,15 +57,12 @@ export default function WorkflowTimeline() {
 
             return (
               <div key={index} className="relative mb-16 last:mb-0 md:flex md:justify-between items-center w-full">
-                {/* Timeline node marker */}
                 <div className="absolute top-0 left-[-17px] md:left-1/2 md:translate-x-[-50%] flex items-center justify-center w-8 h-8 rounded-full bg-main-700 text-main-50 border-4 border-white shadow-md z-10">
                   <span className="text-xs font-bold font-mono">{step.step}</span>
                 </div>
 
-                {/* Left side card placeholder for layout balance */}
                 <div className={`hidden md:block w-[45%] ${isEven ? "order-1" : "order-2"}`} />
 
-                {/* Main Card */}
                 <motion.div
                   initial={{ opacity: 0, x: isEven ? 50 : -50 }}
                   whileInView={{ opacity: 1, x: 0 }}
