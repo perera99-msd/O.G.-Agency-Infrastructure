@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Building2 } from "lucide-react";
+import { ArrowRight, Sparkles, Building2, ShieldCheck, Calendar, Users } from "lucide-react";
 
 export default function ServiceHero() {
   const containerVariants = {
@@ -25,52 +25,77 @@ export default function ServiceHero() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-main-900 via-main-700 to-secondary-900 text-main-50 py-24 md:py-32 px-6">
-      {/* Decorative background glow circles */}
-      <div className="absolute top-1/4 -left-1/4 w-[500px] h-[500px] bg-main-300/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-secondary-300/10 rounded-full blur-[120px] pointer-events-none" />
+    <section className="relative w-full h-[100vh] min-h-[600px] flex items-end overflow-hidden bg-main-900">
+      {/* Background Image */}
+      <div className="absolute inset-0 w-full h-full">
+        <img
+          src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2940&auto=format&fit=crop"
+          alt="Global recruitment and workforce solutions"
+          className="object-cover object-center w-full h-full scale-105"
+          loading="eager"
+        />
+        {/* Gradient overlay matching AboutHero style */}
+        <div className="absolute inset-0 bg-gradient-to-t from-main-900 via-main-900/75 to-main-900/40" />
+      </div>
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col items-center text-center max-w-4xl mx-auto"
-        >
-          {/* Badge */}
+      {/* Content */}
+      <div className="relative z-10 w-full px-6 md:px-16 lg:px-24 pb-20 md:pb-24">
+        <div className="max-w-screen-xl mx-auto">
+          {/* Signature rule */}
           <motion.div
-            variants={itemVariants}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-main-500/10 border border-main-300/30 backdrop-blur-md text-main-300 font-mono text-sm tracking-wide mb-8 shadow-glow-blue"
-          >
-            <Building2 className="w-4 h-4" />
-            <span>ENTERPRISE WORKFORCE SOLUTIONS</span>
-            <Sparkles className="w-4 h-4 animate-pulse" />
-          </motion.div>
+            initial={{ scaleX: 0, originX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+            className="w-20 h-[3px] bg-gradient-to-r from-main-300 to-main-500 mb-8"
+          />
 
-          {/* Heading */}
-          <motion.h1
-            variants={itemVariants}
-            className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8 font-heading text-main-50 leading-[1.1]"
-          >
-            Scale Your Business with{" "}
-            <span className="bg-gradient-to-r from-main-300 to-secondary-300 bg-clip-text text-transparent">
-              Global Sourcing
-            </span>{" "}
-            & Digital Compliance
-          </motion.h1>
-
-          {/* Subtitle */}
           <motion.p
-            variants={itemVariants}
-            className="text-lg md:text-xl text-secondary-100 max-w-2xl mb-12 font-sans font-light leading-relaxed"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="text-main-300 font-mono text-xs md:text-sm tracking-[0.25em] uppercase mb-4 font-bold"
           >
-            End-to-end recruitment, automated visa processing, and secure blockchain verification tailored for enterprise teams. Secure your international talent pipeline.
+            Global Talent Acquisition · Licensed Manpower Consultant
           </motion.p>
 
-          {/* CTA Buttons */}
+          <motion.h1
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.75, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="text-5xl md:text-7xl lg:text-8xl font-heading font-extrabold text-white tracking-tight leading-[0.95] mb-8"
+          >
+            Hire Top Talent Worldwide
+            <br />
+            <span className="bg-gradient-to-r from-main-300 to-secondary-300 bg-clip-text text-transparent">
+              Faster & Easier
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
+            className="text-secondary-100/90 font-sans text-lg md:text-xl max-w-2xl leading-relaxed mb-10"
+          >
+            We connect you with skilled professionals across the globe, handle all the paperwork, and make sure your new hires are ready to work on day one.
+          </motion.p>
+
+          {/* Credential Badges — matching AboutHero style */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl pt-8 border-t border-white/10"
+          >
+            
+
+           
+          </motion.div>
+
+          {/* CTAs — positioned below badges */}
           <motion.div
             variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-5 justify-center w-full sm:w-auto"
+            className="flex flex-col sm:flex-row gap-5 justify-start w-full sm:w-auto mt-10"
           >
             <a href="#partner-form" className="w-full sm:w-auto">
               <motion.button
@@ -78,22 +103,22 @@ export default function ServiceHero() {
                 whileTap={{ scale: 0.98 }}
                 className="w-full sm:w-auto bg-gradient-to-r from-main-300 to-main-500 text-main-900 font-semibold px-8 py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer"
               >
-                Partner with Us
+                Get Started
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </motion.button>
             </a>
 
-            <a href="#calculator" className="w-full sm:w-auto">
+            <a href="#workflow" className="w-full sm:w-auto">
               <motion.button
                 whileHover={{ scale: 1.03, backgroundColor: "rgba(255,255,255,0.08)" }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full sm:w-auto bg-transparent border border-main-300/40 text-main-50 font-medium px-8 py-4 rounded-xl hover:border-main-300 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                Estimate Sourcing Costs
+                See How It Works
               </motion.button>
             </a>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
