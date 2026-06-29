@@ -5,7 +5,7 @@
 
 "use client";
 import { useState, useMemo, useCallback, useEffect } from "react";
-import jobs from "@/utils/data/jobs";
+import { jobs } from "@/utils/data/jobs";
 
 export const JOBS_PER_PAGE = 24;
 
@@ -20,6 +20,7 @@ const defaultFilters = {
   ageMax: 99,
   page: 1,
   sortBy: "urgent_first", // always default
+  savedOnly: false,
 };
 
 export function useJobFilters() {
@@ -98,6 +99,14 @@ export function useJobFilters() {
       );
     }
 
+    if (filters.savedOnly) {
+  let saved = [];
+  try {
+    saved = JSON.parse(localStorage.getItem("og_saved_jobs") || "[]");
+  } catch {}
+  filtered = filtered.filter((job) => saved.includes(job.id));
+}
+
     // 6. Gender preference
     if (filters.genderPreference) {
       filtered = filtered.filter(
@@ -127,7 +136,7 @@ export function useJobFilters() {
   }, [filters]);
 
   const activeFilterCount = Object.entries(filters).filter(([key, val]) => {
-    if (["page", "sortBy"].includes(key)) return false;
+    if (["page", "sortBy", "savedOnly" ].includes(key)) return false;
     if (key === "salaryMin") return val > 0;
     if (key === "salaryMax") return val < 999999;
     if (key === "ageMin") return val > 0;

@@ -3,22 +3,24 @@
 import { useState } from "react";
 import { Search, X } from "lucide-react";
 
-export default function JobSearch({ value, onChange }) {
+export default function JobSearch({ value, onChange, scrolled }) {
   const [focused, setFocused] = useState(false);
 
   return (
     <div
-      className={`flex items-center gap-3 bg-white border-2 transition-colors duration-200 px-4 py-3 ${
+      className={`flex items-center gap-3 border-2 transition-all duration-500 px-4 py-3 ${
+        scrolled ? "bg-white/70 backdrop-blur-md shadow-sm border-main-900/5" : "bg-white"
+      } ${
         focused ? "border-[var(--color-main-500)]" : "border-[var(--color-secondary-200)]"
       }`}
-      style={{ borderRadius: 0 }}
+      style={{ borderRadius: 10 }}
     >
       <Search
         size={18}
         className={focused ? "text-[var(--color-main-500)]" : "text-[var(--color-secondary-400)]"}
       />
       <input
-        type="text"
+        type="text" 
         placeholder="Search by job title, category, or keyword…"
         value={value}
         onChange={(e) => onChange(e.target.value)}

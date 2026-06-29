@@ -32,7 +32,7 @@ export default function JobCard({ job }) {
 
   return (
     <Link href={`/jobs/${job.id}`} className="group block">
-      <article className="relative bg-white border border-[var(--color-secondary-100)] hover:border-[var(--color-main-400)] hover:shadow-md transition-all duration-200 h-full flex flex-col">
+      <article className="relative bg-white border rounded-md border-[var(--color-secondary-100)] hover:border-[var(--color-main-400)] hover:shadow-md transition-all duration-200 h-full flex flex-col overflow-hidden">
         {/* Urgent stripe */}
         {job.isUrgent && (
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-[var(--color-main-500)]" />
@@ -43,7 +43,7 @@ export default function JobCard({ job }) {
           <div className="flex items-start justify-between gap-2">
             <div className="flex flex-wrap gap-1.5">
               {job.isUrgent && (
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-[var(--color-main-500)] text-white">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-[var(--color-main-500)] text-white border border-[var(--color-main-400)] rounded-md">
                   URGENT
                 </span>
               )}
@@ -116,7 +116,7 @@ export default function JobCard({ job }) {
         {/* Bottom CTA */}
         <div className="px-5 pb-4">
           <span className="text-xs font-medium text-[var(--color-main-500)] group-hover:underline underline-offset-2">
-            View details →
+            View details
           </span>
         </div>
       </article>

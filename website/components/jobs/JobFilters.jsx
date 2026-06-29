@@ -2,6 +2,7 @@
 "use client";
 import { X } from "lucide-react";
 import { COUNTRIES, CATEGORIES, GENDER_OPTIONS } from "@/utils/data/jobs";
+import {Bookmark} from "lucide-react";
 
 const SALARY_OPTIONS = [
   { label: "Any salary", min: 0, max: 999999 },
@@ -35,8 +36,7 @@ function SelectFilter({ value, onChange, options, placeholder }) {
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full bg-white border border-[var(--color-secondary-200)] text-sm text-[var(--color-secondary-700)] px-3 py-2 outline-none focus:border-[var(--color-main-500)] transition-colors cursor-pointer"
-      style={{ borderRadius: 0 }}
+      className="w-full bg-white border border-[var(--color-secondary-200)] rounded-md text-sm text-[var(--color-secondary-700)] px-3 py-2 outline-none focus:border-[var(--color-main-500)] transition-colors cursor-pointer"
     >
       <option value="">{placeholder}</option>
       {options.map((opt) => (
@@ -84,7 +84,9 @@ export default function JobFilters({ filters, updateFilter, resetFilters, active
   };
 
   return (
-    <aside className="bg-white border border-[var(--color-secondary-100)] p-5">
+    <aside className="bg-white border border-[var(--color-secondary-100)] p-5 rounded-md">
+
+
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <span className="font-[Poppins] font-semibold text-sm text-[var(--color-secondary-800)]">
@@ -109,7 +111,7 @@ export default function JobFilters({ filters, updateFilter, resetFilters, active
       <FilterSection title="Destination Country">
         <SelectFilter
           value={filters.country}
-          onChange={(v) => updateFilter("country", v)}
+          onChange={(v) => updateFilter("country", v )}
           options={COUNTRIES}
           placeholder="All countries"
         />
