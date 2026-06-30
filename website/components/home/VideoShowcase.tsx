@@ -112,6 +112,9 @@ export default function VideoShowcase() {
         </AnimatePresence>
       </div>
 
+      {/* === TOP SEAMLESS CINEMATIC BLEND === */}
+      <div className="absolute top-0 left-0 right-0 h-20 z-[1] pointer-events-none bg-gradient-to-b from-black/90 via-black/40 to-transparent" />
+
       {/* === LAYER 2: MASSIVE CENTER COUNTRY NAME (Pops up in 1st 1-4 secs, then hides) === */}
       <div className="absolute inset-0 flex items-center justify-center z-[2] pointer-events-none px-6">
         <AnimatePresence>
