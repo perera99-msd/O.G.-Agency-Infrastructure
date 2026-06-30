@@ -1,6 +1,7 @@
 "use client";
 
 import ServiceHero from "@/components/services/ServiceHero";
+import TrustBar from "@/components/services/TrustBar";
 import ServiceGrid from "@/components/services/ServiceGrid";
 import WorkflowTimeline from "@/components/services/WorkflowTimeline";
 import InteractiveCalculator from "@/components/services/InteractiveCalculator";
@@ -11,6 +12,7 @@ export default function ServicesPageClient() {
   return (
     <div className="flex flex-col w-full overflow-hidden">
       <ServiceHero />
+      <TrustBar />
       <ServiceGrid />
       <WorkflowTimeline />
       <InteractiveCalculator />

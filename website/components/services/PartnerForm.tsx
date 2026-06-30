@@ -1,3 +1,4 @@
+// components/services/PartnerForm.tsx
 "use client";
 
 import { useState } from "react";
@@ -7,7 +8,6 @@ import * as z from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, CheckCircle2, ChevronRight, AlertCircle, Building, Mail, User, Briefcase } from "lucide-react";
 
-// Form validation schema with Zod
 const partnerSchema = z.object({
   fullName: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid business email." }),
@@ -42,7 +42,6 @@ export default function PartnerForm() {
 
   const onSubmit = async (data: PartnerFormData) => {
     setIsSubmitting(true);
-    // Simulate API request delay
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setIsSubmitting(false);
     setIsSubmitted(true);
@@ -59,10 +58,10 @@ export default function PartnerForm() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 font-heading text-main-700">
-            Partner with O.G. Agency
+            Let's Talk About Your Hiring Needs
           </h2>
           <p className="text-lg text-secondary-700 max-w-prose mx-auto">
-            Ready to streamline your global hiring operations? Complete the intake form below, and our business development team will schedule a strategy call.
+            Fill in the form below and our team will reach out to understand your requirements and offer a tailored solution.
           </p>
         </div>
 
@@ -79,7 +78,6 @@ export default function PartnerForm() {
                 noValidate
               >
                 <div className="grid md:grid-cols-2 gap-6">
-                  {/* Full Name */}
                   <div className="flex flex-col">
                     <label className="text-sm font-semibold text-main-700 mb-2 flex items-center gap-2">
                       <User className="w-4 h-4 text-main-500" /> Full Name
@@ -101,7 +99,6 @@ export default function PartnerForm() {
                     )}
                   </div>
 
-                  {/* Business Email */}
                   <div className="flex flex-col">
                     <label className="text-sm font-semibold text-main-700 mb-2 flex items-center gap-2">
                       <Mail className="w-4 h-4 text-main-500" /> Business Email
@@ -125,7 +122,6 @@ export default function PartnerForm() {
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
-                  {/* Company Name */}
                   <div className="flex flex-col">
                     <label className="text-sm font-semibold text-main-700 mb-2 flex items-center gap-2">
                       <Building className="w-4 h-4 text-main-500" /> Company Name
@@ -147,7 +143,6 @@ export default function PartnerForm() {
                     )}
                   </div>
 
-                  {/* Industry Selection */}
                   <div className="flex flex-col">
                     <label className="text-sm font-semibold text-main-700 mb-2 flex items-center gap-2">
                       <Briefcase className="w-4 h-4 text-main-500" /> Sourcing Sector
@@ -176,7 +171,6 @@ export default function PartnerForm() {
                   </div>
                 </div>
 
-                {/* Sourcing Volume Selection */}
                 <div className="flex flex-col">
                   <label className="text-sm font-semibold text-main-700 mb-2">
                     Estimated Recruitment Volume (Per Year)
@@ -211,7 +205,6 @@ export default function PartnerForm() {
                   )}
                 </div>
 
-                {/* Sourcing Requirements Message */}
                 <div className="flex flex-col">
                   <label className="text-sm font-semibold text-main-700 mb-2">
                     Describe Sourcing Requirements
@@ -243,7 +236,7 @@ export default function PartnerForm() {
                   {isSubmitting ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Processing Sourcing Plan...</span>
+                      <span>Processing...</span>
                     </>
                   ) : (
                     <>
@@ -265,10 +258,10 @@ export default function PartnerForm() {
                   <CheckCircle2 className="w-20 h-20 animate-bounce" />
                 </div>
                 <h3 className="text-2xl md:text-3xl font-bold font-heading text-main-700 mb-4">
-                  Inquiry Successfully Received!
+                  We've Got Your Inquiry!
                 </h3>
                 <p className="text-secondary-900 max-w-md mx-auto mb-8 font-sans">
-                  Thank you for reaching out to O.G. Agency. Our business development team has logged your requirements and will reach out via email within 24 hours.
+                  Thank you for reaching out. Our team will contact you within 24 hours to discuss your hiring needs.
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -276,7 +269,7 @@ export default function PartnerForm() {
                   onClick={handleReset}
                   className="bg-main-700 text-main-50 hover:bg-main-900 px-6 py-3 rounded-xl font-medium transition-colors cursor-pointer inline-flex items-center gap-2"
                 >
-                  <span>Submit Another Sourcing Query</span>
+                  <span>Submit Another Inquiry</span>
                   <ChevronRight className="w-4 h-4" />
                 </motion.button>
               </motion.div>
