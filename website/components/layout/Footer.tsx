@@ -10,9 +10,9 @@ export default function Footer() {
         
         {/* Left: Brand */}
         <div className="flex flex-col gap-4">
-          <Link href="/" className="flex items-center gap-2 group w-fit">
-            <Globe2 size={28} className="text-main-50 group-hover:rotate-180 transition-transform duration-700 ease-in-out" />
-            <span className="font-heading font-bold text-2xl tracking-tight text-main-50">O.G. Agency</span>
+          <Link href="/" className="flex items-center gap-4 group w-fit">
+            <img src="/Logo/logo.png" alt="O.G. Agency Logo" className="h-16 md:h-20 w-auto object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)]" />
+            <span className="font-[family-name:var(--font-cinzel)] font-bold text-2xl md:text-3xl tracking-[0.08em] uppercase text-main-50">O.G. Agency</span>
           </Link>
           <p className="text-secondary-400 text-xs max-w-sm leading-relaxed font-medium">
             Empowering the next global era by connecting ambition with world-class opportunities. We build careers, not just visas.
