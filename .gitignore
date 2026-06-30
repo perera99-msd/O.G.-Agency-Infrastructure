@@ -7,8 +7,7 @@
 # ------------------------------------------------------------------------------
 node_modules/
 .npm
-jspm_packages/
-package-lock.json
+# package-lock.json
 # Note: Usually package-lock.json is committed, but in monorepos it depends.
 # Assuming standard practice: we do commit package-lock.json. Uncomment below if not.
 # package-lock.json 
