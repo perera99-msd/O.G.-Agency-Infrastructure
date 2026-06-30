@@ -69,9 +69,15 @@ export default function AIChatBot() {
           >
             {/* Header */}
             <div className="bg-main-900 text-main-50 p-4 flex items-center justify-between">
-              <div>
-                <h3 className="font-heading font-bold text-lg">AI Assistant</h3>
-                <p className="text-xs text-main-50/70">Online & ready to help</p>
+              <div className="flex items-center gap-3">
+                <div className="relative flex items-center justify-center w-3 h-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </div>
+                <div>
+                  <h3 className="font-heading font-bold text-lg leading-tight text-main-50">AI Assistant</h3>
+                  <p className="text-xs text-main-50/70">Online & ready to help</p>
+                </div>
               </div>
               <button 
                 onClick={() => setIsOpen(false)}

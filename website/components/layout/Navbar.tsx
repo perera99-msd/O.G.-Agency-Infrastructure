@@ -19,18 +19,28 @@ const navLinks = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isOverDarkSection, setIsOverDarkSection] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
+
+      const navElement = document.getElementById("main-navbar");
+      if (navElement) {
+        const navRect = navElement.getBoundingClientRect();
+        const elementsUnderNav = document.elementsFromPoint(window.innerWidth / 2, navRect.height / 2);
+        const darkSection = elementsUnderNav.some((el) => el.getAttribute("data-nav-theme") === "dark" || el.closest('[data-nav-theme="dark"]'));
+        setIsOverDarkSection(darkSection);
+      }
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const isHome = pathname === "/";
-  const useLightText = !isHome && !scrolled;
+  const useLightText = (!isHome && !scrolled) || isOverDarkSection;
 
   const textColor = useLightText ? "text-white" : "text-main-900";
   const mutedTextColor = useLightText ? "text-white/70" : "text-main-900/60";
@@ -40,14 +50,24 @@ export default function Navbar() {
   const buttonText = useLightText ? "text-main-900" : "text-main-50";
   const buttonHover = useLightText ? "hover:bg-white/90" : "hover:bg-main-700";
 
+  const navBgClass = !scrolled
+    ? "h-[100px] bg-transparent pointer-events-none"
+    : isOverDarkSection
+    ? "h-[80px] bg-black/45 backdrop-blur-md border-b border-white/10 pointer-events-auto"
+    : "h-[80px] bg-white/90 backdrop-blur-md shadow-sm border-b border-main-900/5 pointer-events-auto";
+
   return (
-    <div className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 flex items-center px-6 lg:px-16 ${scrolled ? "h-[80px] bg-white/90 backdrop-blur-md shadow-sm border-b border-main-900/5 pointer-events-auto" : "h-[100px] bg-transparent pointer-events-none"}`}>
+    <div id="main-navbar" className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 flex items-center px-6 lg:px-16 ${navBgClass}`}>
       <nav className="max-w-[1600px] mx-auto w-full flex items-center justify-between pointer-events-auto">
 
         {/* Left: Logo */}
-        <Link href="/" className="flex items-center gap-2 group z-20">
-          <Globe2 size={24} className={`${textColor} group-hover:rotate-180 transition-all duration-700 ease-in-out`} />
-          <span className={`font-heading font-bold text-xl tracking-tight transition-colors duration-300 ${textColor}`}>O.G. Agency</span>
+        <Link href="/" className="flex items-center gap-3.5 group z-20">
+          <img
+            src="/Logo/logo.png"
+            alt="O.G. Agency Logo"
+            className="h-14 md:h-16 w-auto object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-[0_2px_8px_rgba(255,255,255,0.15)]"
+          />
+          <span className={`font-[family-name:var(--font-cinzel)] font-bold text-xl md:text-2xl tracking-[0.08em] uppercase transition-colors duration-300 ${textColor}`}>O.G. Agency</span>
         </Link>
 
         {/* Middle: Flat Navigation Links */}

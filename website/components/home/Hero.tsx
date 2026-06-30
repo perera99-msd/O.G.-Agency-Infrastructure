@@ -506,6 +506,9 @@ export default function Hero() {
         </AnimatePresence>
       </div>
 
+      {/* SEAMLESS BOTTOM BLEND INTO VIDEO SHOWCASE */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black via-black/60 to-transparent z-30 pointer-events-none" />
+
       {/* 
         THE CONTROLS BOUNDING BOX
         Absolute bottom exactly 80px high to match boundaries 
