@@ -9,30 +9,30 @@ const VIDEOS = [
     country: "ROMANIA",
     label: "Europe",
     title: "Romania",
-    videoUrl: "/home/Video/romania-opt.mp4",
+    videoUrl: "/home/Video/Romanian.mp4",
     posterImage: "/images/destinations/sky.png",
-    credits: "Video Reference: YouTube (@_MheMmW06FA)",
-    duration: 25,
+    credits: "",
+    duration: 15,
   },
   {
     id: "bosnia",
     country: "BOSNIA",
     label: "Europe",
-    title: "Bosnia & Herzegovina",
-    videoUrl: "/home/Video/bosnia-opt.mp4",
+    title: "Bosnia",
+    videoUrl: "/home/Video/Bosnian.mp4",
     posterImage: "/images/destinations/sky.png",
-    credits: "Video Reference: YouTube (@n0Rbn-BiHc0)",
-    duration: 25,
+    credits: "",
+    duration: 15,
   },
   {
     id: "russia",
     country: "RUSSIA",
     label: "Eurasia",
     title: "Russia",
-    videoUrl: "/home/Video/russia-opt.mp4",
+    videoUrl: "/home/Video/Russian.mp4",
     posterImage: "/images/destinations/sky.png",
-    credits: "Video Reference: YouTube (@IsqlJBMOPD8)",
-    duration: 25,
+    credits: "",
+    duration: 16,
   },
 ];
 
@@ -113,7 +113,7 @@ export default function VideoShowcase() {
       </div>
 
       {/* === TOP SEAMLESS CINEMATIC BLEND === */}
-      <div className="absolute top-0 left-0 right-0 h-20 z-[1] pointer-events-none bg-gradient-to-b from-black/90 via-black/40 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-24 z-[1] pointer-events-none bg-white/5 backdrop-blur-md [mask-image:linear-gradient(to_bottom,black_20%,transparent_100%)]" />
 
       {/* === LAYER 2: MASSIVE CENTER COUNTRY NAME (Pops up in 1st 1-4 secs, then hides) === */}
       <div className="absolute inset-0 flex items-center justify-center z-[2] pointer-events-none px-6">
@@ -159,9 +159,11 @@ export default function VideoShowcase() {
           <h1 className="text-white text-3xl md:text-4xl font-semibold tracking-tight mb-1">
             {currentSlide.title}
           </h1>
-          <p className="text-white/65 text-xs md:text-sm tracking-wide">
-            {currentSlide.credits}
-          </p>
+          {currentSlide.credits && (
+            <p className="text-white/65 text-xs md:text-sm tracking-wide">
+              {currentSlide.credits}
+            </p>
+          )}
         </div>
 
         {/* Minimal Slide Dots */}
