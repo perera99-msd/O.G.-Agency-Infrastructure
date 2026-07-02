@@ -28,29 +28,29 @@ export default function App() {
   const unreadCount = responses.filter(r => r.status === 'new').length;
 
   // Destinations
-  const addDest = (d: Omit<Destination, 'id'>) => setDestinations(p => [{ ...d, id: Date.now().toString() }, ...p]);
+  const addDest = (d: Omit<Destination, 'id'>) => setDestinations(p => [{ ...d, id: crypto.randomUUID() }, ...p]);
   const updateDest = (id: string, d: Partial<Destination>) => setDestinations(p => p.map(x => x.id === id ? { ...x, ...d } : x));
   const deleteDest = (id: string) => setDestinations(p => p.filter(x => x.id !== id));
 
   // Jobs
-  const addJob = (j: Omit<JobOpening, 'id'>) => setJobs(p => [{ ...j, id: 'j-' + Date.now() }, ...p]);
+  const addJob = (j: Omit<JobOpening, 'id'>) => setJobs(p => [{ ...j, id: crypto.randomUUID() }, ...p]);
   const updateJob = (id: string, j: Partial<JobOpening>) => setJobs(p => p.map(x => x.id === id ? { ...x, ...j } : x));
   const deleteJob = (id: string) => setJobs(p => p.filter(x => x.id !== id));
 
   // Gallery
-  const addGallery = (g: Omit<GalleryItem, 'id'>) => setGallery(p => [{ ...g, id: 'g-' + Date.now() }, ...p]);
+  const addGallery = (g: Omit<GalleryItem, 'id'>) => setGallery(p => [{ ...g, id: crypto.randomUUID() }, ...p]);
   const updateGallery = (id: string, g: Partial<GalleryItem>) => setGallery(p => p.map(x => x.id === id ? { ...x, ...g } : x));
   const deleteGallery = (id: string) => setGallery(p => p.filter(x => x.id !== id));
 
   // Blogs
-  const addBlog = (b: Omit<BlogPost, 'id'>) => setBlogs(p => [{ ...b, id: 'b-' + Date.now() }, ...p]);
+  const addBlog = (b: Omit<BlogPost, 'id'>) => setBlogs(p => [{ ...b, id: crypto.randomUUID() }, ...p]);
   const updateBlog = (id: string, b: Partial<BlogPost>) => setBlogs(p => p.map(x => x.id === id ? { ...x, ...b } : x));
   const deleteBlog = (id: string) => setBlogs(p => p.filter(x => x.id !== id));
 
   // Responses
   const updateResponseStatus = (id: string, status: ContactMessage['status']) => setResponses(p => p.map(x => x.id === id ? { ...x, status } : x));
   const deleteResponse = (id: string) => setResponses(p => p.filter(x => x.id !== id));
-  const addResponse = (m: Omit<ContactMessage, 'id'>) => setResponses(p => [{ ...m, id: 'r-' + Date.now() }, ...p]);
+  const addResponse = (m: Omit<ContactMessage, 'id'>) => setResponses(p => [{ ...m, id: crypto.randomUUID() }, ...p]);
 
   return (
     <div className="app-shell">
