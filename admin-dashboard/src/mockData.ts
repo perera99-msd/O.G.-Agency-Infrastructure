@@ -37,11 +37,7 @@ export const INITIAL_JOBS: JobOpening[] = [
   { id: 'j4', title: 'Heavy Fleet Diesel Mechanic', country: 'Russia', category: 'Logistics & Transport', salary: '$1,800 / mo Net', positionsAvailable: 5, status: 'active' },
 ];
 
-export const INITIAL_GALLERY: GalleryItem[] = [
-  { id: 'g1', title: 'Bucharest Batch 24 Arrival at Otopeni Airport', category: 'Departure', imageUrl: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=600', dateAdded: '2026-06-28' },
-  { id: 'g2', title: 'Cluj-Napoca CNC Workshop Briefing', category: 'Workplace', imageUrl: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=600', dateAdded: '2026-06-25' },
-  { id: 'g3', title: 'Colombo Technical Trade Assessment Day', category: 'Training', imageUrl: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&q=80&w=600', dateAdded: '2026-06-20' },
-];
+export const INITIAL_GALLERY: GalleryItem[] = [];
 
 export const INITIAL_BLOGS: BlogPost[] = [
   { id: 'b1', title: 'Step-by-Step Document Attestation Guide for Romanian Work Visas', category: 'Visa & Legal', readTime: '6 min read', author: 'Legal Compliance Desk', publishDate: '2026-06-30', excerpt: 'Complete checklist of police clearance certificates, medical certifications, and Ministry of Labor clearances.' },
