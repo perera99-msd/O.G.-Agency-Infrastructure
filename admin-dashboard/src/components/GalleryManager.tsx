@@ -6,19 +6,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface GalleryManagerProps {
   gallery: GalleryItem[];
-  onAdd: (item: Omit<GalleryItem, 'id'>) => void;
+  onAdd: (item: Omit<GalleryItem, 'id'> & { file?: File }) => void;
   onUpdate: (id: string, item: Partial<GalleryItem>) => void;
   onDelete: (id: string) => void;
 }
 
-const categoryColor = (c: string) => {
-  const m: Record<string, string> = {
-    Departure: 'tag-blue', Workplace: 'tag-green', Training: 'tag-purple', Embassy: 'tag-amber',
-  };
-  return m[c] ?? 'tag-neutral';
-};
 
-type BatchItem = { id: string; title: string; imageUrl: string };
+
+type BatchItem = { id: string; title: string; imageUrl: string; file?: File };
 const emptyForm: { category: GalleryItem['category']; dateAdded: string; items: BatchItem[] } = {
   category: 'Departure',
   dateAdded: new Date().toISOString().split('T')[0],
@@ -57,7 +52,8 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
           resolve({
             id: crypto.randomUUID(),
             title: file.name.split('.')[0].replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-            imageUrl: e.target?.result as string
+            imageUrl: e.target?.result as string,
+            file: file
           });
         };
         reader.readAsDataURL(file);
@@ -111,7 +107,8 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
           title: item.title,
           category: form.category,
           imageUrl: item.imageUrl,
-          dateAdded: form.dateAdded
+          dateAdded: form.dateAdded,
+          file: item.file
         });
       });
     }

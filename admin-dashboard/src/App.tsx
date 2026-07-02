@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { BentoOverview } from './components/BentoOverview';
@@ -7,6 +7,10 @@ import { JobsManager } from './components/JobsManager';
 import { GalleryManager } from './components/GalleryManager';
 import { BlogsManager } from './components/BlogsManager';
 import { ContactResponsesManager } from './components/ContactResponsesManager';
+
+import { db, storage } from './firebase';
+import { collection, getDocs, setDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 import type { Destination, JobOpening, GalleryItem, BlogPost, ContactMessage, TabType } from './types';
 import {
@@ -25,6 +29,17 @@ export default function App() {
   const [blogs, setBlogs] = useState<BlogPost[]>(INITIAL_BLOGS);
   const [responses, setResponses] = useState<ContactMessage[]>(INITIAL_RESPONSES);
 
+  useEffect(() => {
+    getDocs(collection(db, 'gallery'))
+      .then(snapshot => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as GalleryItem));
+        if (data.length > 0) {
+          setGallery(data);
+        }
+      })
+      .catch(err => console.error('Error fetching gallery:', err));
+  }, []);
+
   const unreadCount = responses.filter(r => r.status === 'new').length;
 
   // Destinations
@@ -38,9 +53,55 @@ export default function App() {
   const deleteJob = (id: string) => setJobs(p => p.filter(x => x.id !== id));
 
   // Gallery
-  const addGallery = (g: Omit<GalleryItem, 'id'>) => setGallery(p => [{ ...g, id: crypto.randomUUID() }, ...p]);
-  const updateGallery = (id: string, g: Partial<GalleryItem>) => setGallery(p => p.map(x => x.id === id ? { ...x, ...g } : x));
-  const deleteGallery = (id: string) => setGallery(p => p.filter(x => x.id !== id));
+  const addGallery = async (g: Omit<GalleryItem, 'id'> & { file?: File }) => {
+    try {
+      let finalImageUrl = g.imageUrl;
+      const id = crypto.randomUUID();
+
+      if (g.file) {
+        const storageRef = ref(storage, `gallery/${id}_${g.file.name}`);
+        const snapshot = await uploadBytes(storageRef, g.file);
+        finalImageUrl = await getDownloadURL(snapshot.ref);
+      }
+      
+      const newItem: GalleryItem = { 
+        id,
+        title: g.title,
+        category: g.category,
+        imageUrl: finalImageUrl,
+        dateAdded: g.dateAdded,
+      };
+
+      setGallery(p => [newItem, ...p]);
+      await setDoc(doc(db, 'gallery', id), newItem);
+    } catch (err) {
+      console.error('Error adding gallery item:', err);
+    }
+  };
+  
+  const updateGallery = async (id: string, g: Partial<GalleryItem>) => {
+    setGallery(p => p.map(x => x.id === id ? { ...x, ...g } : x));
+    try {
+      await updateDoc(doc(db, 'gallery', id), g);
+    } catch(err) {
+      console.error('Error updating gallery item:', err);
+    }
+  };
+  
+  const deleteGallery = async (id: string) => {
+    const item = gallery.find(x => x.id === id);
+    setGallery(p => p.filter(x => x.id !== id));
+    
+    try {
+      await deleteDoc(doc(db, 'gallery', id));
+      if (item && item.imageUrl.includes('firebasestorage.googleapis.com')) {
+        const fileRef = ref(storage, item.imageUrl);
+        await deleteObject(fileRef).catch(console.error);
+      }
+    } catch (err) {
+      console.error('Error deleting gallery item:', err);
+    }
+  };
 
   // Blogs
   const addBlog = (b: Omit<BlogPost, 'id'>) => setBlogs(p => [{ ...b, id: crypto.randomUUID() }, ...p]);
