@@ -24,7 +24,7 @@ import {
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [destinations, setDestinations] = useState<Destination[]>(INITIAL_DESTINATIONS);
-  const [jobs, setJobs] = useState<JobOpening[]>(INITIAL_JOBS);
+  const [jobs, setJobs] = useState<JobOpening[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>(INITIAL_GALLERY);
   const [blogs, setBlogs] = useState<BlogPost[]>(INITIAL_BLOGS);
   const [responses, setResponses] = useState<ContactMessage[]>(INITIAL_RESPONSES);
@@ -38,6 +38,20 @@ export default function App() {
         }
       })
       .catch(err => console.error('Error fetching gallery:', err));
+
+    // Fetch jobs from backend API
+    fetch('http://localhost:5000/api/v1/admin/jobs', {
+      headers: {
+        'Authorization': 'Bearer dev-mock-token'
+      }
+    })
+      .then(res => res.json())
+      .then(json => {
+        if (json.success) {
+          setJobs(json.data || []);
+        }
+      })
+      .catch(err => console.error('Error fetching jobs:', err));
   }, []);
 
   const unreadCount = responses.filter(r => r.status === 'new').length;
@@ -48,9 +62,58 @@ export default function App() {
   const deleteDest = (id: string) => setDestinations(p => p.filter(x => x.id !== id));
 
   // Jobs
-  const addJob = (j: Omit<JobOpening, 'id'>) => setJobs(p => [{ ...j, id: crypto.randomUUID() }, ...p]);
-  const updateJob = (id: string, j: Partial<JobOpening>) => setJobs(p => p.map(x => x.id === id ? { ...x, ...j } : x));
-  const deleteJob = (id: string) => setJobs(p => p.filter(x => x.id !== id));
+  const addJob = async (j: Omit<JobOpening, 'id'>) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/v1/admin/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer dev-mock-token' },
+        body: JSON.stringify(j)
+      });
+      const json = await res.json();
+      if (json.success) {
+        setJobs(p => [json.data, ...p]);
+      } else {
+        alert(json.message || 'Failed to add job');
+      }
+    } catch (err) {
+      console.error('Error adding job:', err);
+    }
+  };
+
+  const updateJob = async (id: string, j: Partial<JobOpening>) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/v1/admin/jobs/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer dev-mock-token' },
+        body: JSON.stringify(j)
+      });
+      const json = await res.json();
+      if (json.success) {
+        setJobs(p => p.map(x => x.id === id ? { ...x, ...j } : x));
+      } else {
+        alert(json.message || 'Failed to update job');
+      }
+    } catch (err) {
+      console.error('Error updating job:', err);
+    }
+  };
+
+  const deleteJob = async (id: string) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/v1/admin/jobs/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer dev-mock-token' }
+      });
+      const json = await res.json();
+      if (json.success) {
+        setJobs(p => p.filter(x => x.id !== id));
+      } else {
+        alert(json.message || 'Failed to delete job');
+      }
+    } catch (err) {
+      console.error('Error deleting job:', err);
+    }
+  };
 
   // Gallery
   const addGallery = async (g: Omit<GalleryItem, 'id'> & { file?: File }) => {

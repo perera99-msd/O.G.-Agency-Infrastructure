@@ -5,7 +5,6 @@
 
 "use client";
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { jobs } from "@/utils/data/jobs";
 
 export const JOBS_PER_PAGE = 24;
 
@@ -25,6 +24,31 @@ const defaultFilters = {
 
 export function useJobFilters() {
   const [filters, setFilters] = useState(defaultFilters);
+  const [jobsList, setJobsList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch jobs from backend
+  useEffect(() => {
+    async function fetchJobs() {
+      try {
+        const res = await fetch("http://localhost:5000/api/v1/website/jobs");
+        if (!res.ok) throw new Error("Failed to fetch jobs");
+        const json = await res.json();
+        if (json.success) {
+          setJobsList(json.data || []);
+        } else {
+          throw new Error(json.message || "Failed to fetch jobs");
+        }
+      } catch (err) {
+        console.error("Error fetching jobs:", err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchJobs();
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -58,9 +82,8 @@ export function useJobFilters() {
   }, []);
 
   // --- FILTERING LOGIC ---
-  // To go server-side: delete this useMemo, add useEffect with fetch() instead.
   const { results, totalCount, totalPages } = useMemo(() => {
-    let filtered = [...jobs];
+    let filtered = [...jobsList];
 
     // 1. Urgent always on top
     filtered.sort((a, b) => {
@@ -100,12 +123,12 @@ export function useJobFilters() {
     }
 
     if (filters.savedOnly) {
-  let saved = [];
-  try {
-    saved = JSON.parse(localStorage.getItem("og_saved_jobs") || "[]");
-  } catch {}
-  filtered = filtered.filter((job) => saved.includes(job.id));
-}
+      let saved = [];
+      try {
+        saved = JSON.parse(localStorage.getItem("og_saved_jobs") || "[]");
+      } catch {}
+      filtered = filtered.filter((job) => saved.includes(job.id));
+    }
 
     // 6. Gender preference
     if (filters.genderPreference) {
@@ -133,7 +156,7 @@ export function useJobFilters() {
     const results = filtered.slice(start, start + JOBS_PER_PAGE);
 
     return { results, totalCount, totalPages };
-  }, [filters]);
+  }, [filters, jobsList]);
 
   const activeFilterCount = Object.entries(filters).filter(([key, val]) => {
     if (["page", "sortBy", "savedOnly" ].includes(key)) return false;
@@ -153,5 +176,7 @@ export function useJobFilters() {
     updateFilter,
     resetFilters,
     setPage,
+    isLoading,
+    error,
   };
 }

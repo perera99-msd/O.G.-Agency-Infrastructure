@@ -26,19 +26,45 @@ const validateContactSubmission = (data) => {
 
 const validateJobPosting = (data) => {
   const errors = [];
-  if (!data.title) errors.push('Job title is required.');
-  if (!data.country) errors.push('Destination country is required.');
-  if (!data.category) errors.push('Job category is required.');
+  
+  if (!data.title || typeof data.title !== 'string') errors.push('Job title is required.');
+  if (!data.country || typeof data.country !== 'string') errors.push('Destination country is required.');
+  if (!data.category || typeof data.category !== 'string') errors.push('Job category is required.');
+  if (!data.deadline || typeof data.deadline !== 'string') errors.push('Application deadline is required.');
+  if (!data.description || typeof data.description !== 'string') errors.push('Job description is required.');
+
+  if (!data.salary || typeof data.salary.min !== 'number' || typeof data.salary.max !== 'number') {
+    errors.push('Salary object with numeric min and max values is required.');
+  }
+
+  const title = data.title?.trim() || '';
 
   return {
     isValid: errors.length === 0,
     errors,
     sanitizedData: {
-      title: data.title?.trim(),
-      country: data.country?.trim(),
+      title,
+      slug: data.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
       category: data.category?.trim(),
-      salary: data.salary || 'Negotiable',
+      tags: Array.isArray(data.tags) ? data.tags : [],
+      country: data.country?.trim(),
+      salary: {
+        min: data.salary?.min || 0,
+        max: data.salary?.max || 0,
+        currency: data.salary?.currency || 'USD'
+      },
+      deadline: data.deadline?.trim(),
+      postedAt: data.postedAt || new Date().toISOString().split('T')[0],
+      isUrgent: typeof data.isUrgent === 'boolean' ? data.isUrgent : false,
+      genderPreference: data.genderPreference || 'No Preference',
+      ageRange: {
+        min: data.ageRange?.min || 18,
+        max: data.ageRange?.max || 60
+      },
+      description: data.description?.trim(),
       requirements: Array.isArray(data.requirements) ? data.requirements : [],
+      benefits: Array.isArray(data.benefits) ? data.benefits : [],
+      companyLogo: data.companyLogo || null,
       active: typeof data.active === 'boolean' ? data.active : true,
       createdAt: new Date().toISOString(),
     },
