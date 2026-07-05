@@ -1,10 +1,9 @@
 // app/jobs/[id]/page.jsx
 "use client";
-import { use } from "react";
+import { use, useState, useEffect } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MapPin, DollarSign, Clock, Users, Calendar, ArrowLeft, Bookmark, ExternalLink } from "lucide-react";
-import { jobs } from "@/utils/data/jobs";
 import { useBookmarks } from "@/utils/hooks/useBookmarks";
 import ShareMenu from "@/components/jobs/ShareMenu";
 import JobCard from "@/components/jobs/JobCard";
@@ -38,9 +37,43 @@ const CATEGORY_COLORS = {
 
 export default function JobDetailPage({ params }) {
   const { id } = use(params);
-  const job = jobs.find((j) => j.id === id);
+  
+  const [jobs, setJobs] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchJobs() {
+      try {
+        const res = await fetch("http://localhost:5000/api/v1/website/jobs");
+        const json = await res.json();
+        if (json.success) {
+          setJobs(json.data || []);
+        }
+      } catch (err) {
+        console.error("Error fetching jobs:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchJobs();
+  }, []);
 
   const { toggleBookmark, isBookmarked } = useBookmarks();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[var(--color-secondary-50)] pt-24 flex items-center justify-center">
+        <p className="text-[var(--color-secondary-500)]">Loading job details...</p>
+      </div>
+    );
+  }
+
+  const job = jobs.find((j) => j.id === id);
+
+  if (!job) {
+    return notFound();
+  }
+
   const saved = isBookmarked(job.id);
   const days = daysUntil(job.deadline);
 

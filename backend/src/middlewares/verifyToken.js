@@ -17,8 +17,9 @@ const verifyToken = async (req, res, next) => {
 
     const idToken = authHeader.split('Bearer ')[1];
 
-    if (!auth || !auth.verifyIdToken) {
+    if (!auth || !auth.verifyIdToken || (process.env.NODE_ENV === 'development' && idToken === 'dev-mock-token')) {
       // Fallback verification mode if Firebase Auth isn't connected in dev
+      // Or if we are in dev mode and using the hardcoded mock token from the frontend
       if (process.env.NODE_ENV === 'development') {
         req.user = { uid: 'dev-mock-uid', role: 'admin' };
         return next();

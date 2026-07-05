@@ -18,6 +18,7 @@ export default function JobsPage() {
     updateFilter,
     resetFilters,
     setPage,
+    isLoading,
   } = useJobFilters();
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -159,12 +160,18 @@ export default function JobsPage() {
                 <span className="font-semibold">{totalCount}</span> positions found
               </p>
             </div>
-            <JobGrid jobs={results} totalCount={totalCount} viewMode={viewMode} />
-            <JobPagination
-              currentPage={filters.page}
-              totalPages={totalPages}
-              onPageChange={setPage}
-            />
+            {isLoading ? (
+              <div className="py-20 text-center text-secondary-500">Loading jobs...</div>
+            ) : (
+              <>
+                <JobGrid jobs={results} totalCount={totalCount} viewMode={viewMode} />
+                <JobPagination
+                  currentPage={filters.page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                />
+              </>
+            )}
           </div>
         </div>
       </div>

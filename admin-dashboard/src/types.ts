@@ -13,9 +13,18 @@ export interface JobOpening {
   title: string;
   country: string;
   category: string;
-  salary: string;
-  positionsAvailable: number;
-  status: 'active' | 'filled' | 'draft';
+  salary: { min: number; max: number; currency: string };
+  deadline: string;
+  description: string;
+  isUrgent?: boolean;
+  genderPreference?: string;
+  ageRange?: { min: number; max: number };
+  tags?: string[];
+  requirements?: string[];
+  benefits?: { title: string; description: string }[];
+  companyLogo?: string | null;
+  active: boolean;
+  postedAt?: string;
 }
 
 export interface GalleryItem {
