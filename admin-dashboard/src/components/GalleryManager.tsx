@@ -4,14 +4,7 @@ import type { GalleryItem } from '../types';
 import { Plus, Edit3, Trash2, Image as ImageIcon, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface GalleryManagerProps {
-  gallery: GalleryItem[];
-  onAdd: (item: Omit<GalleryItem, 'id'> & { file?: File }) => void;
-  onUpdate: (id: string, item: Partial<GalleryItem>) => void;
-  onDelete: (id: string) => void;
-}
-
-
+import { useAdmin } from '../context/AdminContext';
 
 type BatchItem = { id: string; title: string; imageUrl: string; file?: File };
 const emptyForm: { category: GalleryItem['category']; dateAdded: string; items: BatchItem[] } = {
@@ -20,24 +13,33 @@ const emptyForm: { category: GalleryItem['category']; dateAdded: string; items: 
   items: [],
 };
 
-export const GalleryManager: React.FC<GalleryManagerProps> = ({
-  gallery, onAdd, onUpdate, onDelete,
-}) => {
+export const GalleryManager: React.FC = () => {
+  const { gallery, addGallery: onAdd, updateGallery: onUpdate, deleteGallery: onDelete } = useAdmin();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...emptyForm });
   const [urlInput, setUrlInput] = useState('');
   const [filter, setFilter] = useState<string>('All');
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragging(true);
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(false);
+    e.stopPropagation();
+    // Only reset if we truly left the drop zone (not just moved to a child element)
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
+      setIsDragging(false);
+    }
   };
 
   const processFiles = async (files: FileList | null) => {
@@ -89,30 +91,40 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
     setOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.items.length === 0) return;
     
-    if (editId) {
-      onUpdate(editId, { 
-        title: form.items[0].title, 
-        category: form.category, 
-        imageUrl: form.items[0].imageUrl, 
-        dateAdded: form.dateAdded 
-      });
-    } else {
-      form.items.forEach(item => {
-        if (!item.title) return;
-        onAdd({
-          title: item.title,
-          category: form.category,
-          imageUrl: item.imageUrl,
-          dateAdded: form.dateAdded,
-          file: item.file
+    setIsUploading(true);
+    setUploadError(null);
+    try {
+      if (editId) {
+        await onUpdate(editId, { 
+          title: form.items[0].title, 
+          category: form.category, 
+          imageUrl: form.items[0].imageUrl, 
+          dateAdded: form.dateAdded 
         });
-      });
+      } else {
+        await Promise.all(
+          form.items
+            .filter(item => !!item.title)
+            .map(item => onAdd({
+              title: item.title,
+              category: form.category,
+              imageUrl: item.imageUrl,
+              dateAdded: form.dateAdded,
+              file: item.file
+            }))
+        );
+      }
+      setOpen(false);
+    } catch (err: any) {
+      console.error('Upload failed:', err);
+      setUploadError(err?.message ?? 'Upload failed. Check Firebase Storage rules and CORS settings.');
+    } finally {
+      setIsUploading(false);
     }
-    setOpen(false);
   };
 
   const categories = ['All', 'Departure', 'Workplace', 'Training', 'Embassy'];
@@ -213,7 +225,7 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
                   >
                     <button 
                       onClick={(e) => { e.stopPropagation(); openEdit(item); }}
-                      style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255, 255, 255, 0.95)', color: '#0f172a', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
+                      style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(15, 23, 42, 0.7)', color: 'var(--text-primary)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
                       onMouseEnter={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.transform = 'scale(1.1)'; }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)'; e.currentTarget.style.transform = 'scale(1)'; }}
                     >
@@ -298,8 +310,8 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
               {/* Sleek Header without border */}
               <div style={{ padding: '32px 32px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: '#fff', flexShrink: 0 }}>
                 <div>
-                  <h3 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px' }}>{editId ? 'Edit Gallery Asset' : 'Upload Assets'}</h3>
-                  <p style={{ color: '#64748b', fontSize: 14, margin: '6px 0 0', fontWeight: 500 }}>{editId ? 'Modify the details of your gallery image.' : 'Add stunning new photos to your gallery.'}</p>
+                  <h3 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.5px' }}>{editId ? 'Edit Gallery Asset' : 'Upload Assets'}</h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: '6px 0 0', fontWeight: 500 }}>{editId ? 'Modify the details of your gallery image.' : 'Add stunning new photos to your gallery.'}</p>
                 </div>
                 <button 
                   type="button"
@@ -319,8 +331,8 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
                   {/* Clean 2-Column Grid */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Category</label>
-                      <select className="field-input" value={form.category} onChange={e => setForm({ ...form, category: e.target.value as any })} style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: '#0f172a', transition: 'all 0.2s', boxShadow: 'inset 0 0 0 1px #e2e8f0', appearance: 'none', cursor: 'pointer' }} onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'} onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'}>
+                      <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>Category</label>
+                      <select className="field-input" value={form.category} onChange={e => setForm({ ...form, category: e.target.value as any })} style={{ background: 'var(--surface)', borderColor: 'var(--border)', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: 'var(--text-primary)', transition: 'all 0.2s', appearance: 'none', cursor: 'pointer' }} onFocus={e => e.currentTarget.style.borderColor = 'var(--accent)'} onBlur={e => e.currentTarget.style.borderColor = 'var(--border)'}>
                         <option>Departure</option>
                         <option>Workplace</option>
                         <option>Training</option>
@@ -328,8 +340,8 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
                       </select>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Date Recorded</label>
-                      <input className="field-input" type="date" value={form.dateAdded} onChange={e => setForm({ ...form, dateAdded: e.target.value })} style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: '#0f172a', transition: 'all 0.2s', boxShadow: 'inset 0 0 0 1px #e2e8f0' }} onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'} onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'} />
+                      <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>Date Recorded</label>
+                      <input className="field-input" type="date" value={form.dateAdded} onChange={e => setForm({ ...form, dateAdded: e.target.value })} style={{ background: 'var(--surface)', borderColor: 'var(--border)', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: 'var(--text-primary)', transition: 'all 0.2s' }} onFocus={e => e.currentTarget.style.borderColor = 'var(--accent)'} onBlur={e => e.currentTarget.style.borderColor = 'var(--border)'} />
                     </div>
                   </div>
 
@@ -362,7 +374,7 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
                           <Upload size={form.items.length > 0 ? 20 : 26} style={{ color: isDragging ? '#ffffff' : '#64748b' }} />
                         </div>
                         <div>
-                          <p style={{ fontSize: 15, color: '#0f172a', margin: 0, fontWeight: 700 }}>
+                          <p style={{ fontSize: 15, color: 'var(--text-primary)', margin: 0, fontWeight: 700 }}>
                             {isDragging ? 'Drop files here!' : 'Click to upload'}
                           </p>
                           {form.items.length === 0 && (
@@ -393,7 +405,7 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
                     {!editId && (
                       <div style={{ display: 'flex', gap: 12, marginBottom: form.items.length > 0 ? 16 : 24 }}>
                         <input className="field-input" type="url" placeholder="https://images.unsplash.com/..." value={urlInput} onChange={e => setUrlInput(e.target.value)} style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, flex: 1, borderRadius: 12, boxShadow: 'inset 0 0 0 1px #e2e8f0', transition: 'all 0.2s' }} onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'} onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'} />
-                        <button type="button" onClick={() => { if (urlInput) { setForm(p => ({ ...p, items: [...p.items, { id: crypto.randomUUID(), title: 'Image from URL', imageUrl: urlInput }] })); setUrlInput(''); } }} style={{ padding: '0 20px', fontSize: 14, borderRadius: 12, background: '#f1f5f9', color: '#0f172a', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = '#e2e8f0'} onMouseLeave={e => e.currentTarget.style.background = '#f1f5f9'}>Add URL</button>
+                        <button type="button" onClick={() => { if (urlInput) { setForm(p => ({ ...p, items: [...p.items, { id: crypto.randomUUID(), title: 'Image from URL', imageUrl: urlInput }] })); setUrlInput(''); } }} style={{ padding: '0 20px', fontSize: 14, borderRadius: 12, background: 'var(--surface-raised)', color: 'var(--text-primary)', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--accent-light)'} onMouseLeave={e => e.currentTarget.style.background = 'var(--surface-raised)'}>Add URL</button>
                       </div>
                     )}
 
@@ -407,8 +419,8 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
                                 const newItems = [...form.items];
                                 newItems[index].title = e.target.value;
                                 setForm(p => ({ ...p, items: newItems }));
-                              }} placeholder="Add a descriptive caption..." style={{ background: 'transparent', border: 'none', padding: 0, fontSize: 14, fontWeight: 500, color: '#0f172a', width: '100%', outline: 'none' }} />
-                              <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4, fontWeight: 500 }}>Asset • {item.title ? item.title.length : 0} chars</div>
+                              }} placeholder="Add a descriptive caption..." style={{ background: 'transparent', border: 'none', padding: 0, fontSize: 14, fontWeight: 500, color: 'var(--text-primary)', width: '100%', outline: 'none' }} />
+                              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4, fontWeight: 500 }}>Asset • {item.title ? item.title.length : 0} chars</div>
                             </div>
                             {!editId && (
                               <button type="button" onClick={() => setForm(p => ({ ...p, items: p.items.filter(x => x.id !== item.id) }))} style={{ background: '#f8fafc', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 10, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#ef4444'; }} onMouseLeave={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#94a3b8'; }}>
@@ -423,13 +435,25 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
                 </div>
 
                 {/* Floating Footer */}
-                <div style={{ padding: '24px 32px', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: 16, width: '100%', flexShrink: 0, borderTop: '1px solid rgba(0,0,0,0.03)' }}>
-                  <button type="button" onClick={() => setOpen(false)} style={{ padding: '12px 24px', background: 'transparent', color: '#64748b', fontSize: 14, fontWeight: 700, border: 'none', borderRadius: 12, cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = '#e2e8f0'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                    Cancel
-                  </button>
-                  <button type="submit" style={{ padding: '12px 28px', background: '#0f172a', color: '#fff', borderRadius: 12, fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 8px 16px -4px rgba(15, 23, 42, 0.25)', transition: 'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 10px 20px -4px rgba(15, 23, 42, 0.3)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 16px -4px rgba(15, 23, 42, 0.25)'; }}>
-                    {editId ? 'Save Changes' : 'Upload Asset(s)'}
-                  </button>
+                <div style={{ padding: '16px 32px 24px', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: 12, width: '100%', flexShrink: 0, borderTop: '1px solid rgba(0,0,0,0.03)' }}>
+                  {uploadError && (
+                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#b91c1c', fontWeight: 500, lineHeight: 1.5 }}>
+                      ⚠️ {uploadError}
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16 }}>
+                    <button type="button" onClick={() => setOpen(false)} disabled={isUploading} style={{ padding: '12px 24px', background: 'transparent', color: isUploading ? '#cbd5e1' : '#64748b', fontSize: 14, fontWeight: 700, border: 'none', borderRadius: 12, cursor: isUploading ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => { if (!isUploading) e.currentTarget.style.background = '#e2e8f0'; }} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      Cancel
+                    </button>
+                    <button type="submit" disabled={isUploading} style={{ padding: '12px 28px', background: isUploading ? 'var(--surface-raised)' : 'var(--accent)', color: '#fff', borderRadius: 12, fontSize: 14, fontWeight: 700, border: 'none', cursor: isUploading ? 'not-allowed' : 'pointer', boxShadow: '0 8px 16px -4px rgba(99, 102, 241, 0.25)', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 8 }} onMouseEnter={e => { if (!isUploading) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 10px 20px -4px rgba(99, 102, 241, 0.4)'; } }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 16px -4px rgba(99, 102, 241, 0.25)'; }}>
+                      {isUploading && (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}>
+                          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                        </svg>
+                      )}
+                      {isUploading ? 'Uploading...' : editId ? 'Save Changes' : 'Upload Asset(s)'}
+                    </button>
+                  </div>
                 </div>
               </form>
             </motion.div>

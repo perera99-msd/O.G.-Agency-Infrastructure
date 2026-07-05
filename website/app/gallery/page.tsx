@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import GalleryContent from "@/components/gallery/GalleryContent";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { collection, getDocs, query } from "firebase/firestore";
 
 export const metadata: Metadata = {
   title: "Garment Factory Placements Gallery | O.G. Agency",

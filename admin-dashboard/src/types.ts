@@ -47,4 +47,4 @@ export interface ContactMessage {
   status: 'new' | 'replied' | 'archived';
 }
 
-export type TabType = 'overview' | 'destinations' | 'jobs' | 'gallery' | 'blogs' | 'responses';
+export type TabType = 'overview' | 'destinations' | 'jobs' | 'gallery' | 'blogs' | 'responses' | 'dashdark';

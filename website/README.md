@@ -1,6 +1,6 @@
 # O.G. Agency | Digital Recruitment Platform
 
-Welcome to the frontend repository for the **O.G. Agency Infrastructure** project (Group CS16). This platform aims to modernize global employment, visa processing, and manpower recruitment using Next-Gen technologies.
+Welcome to the frontend repository for the **O.G.** project (Group CS16). This platform aims to modernize global employment, visa processing, and manpower recruitment using Next-Gen technologies.
 
 ## 🚀 Tech Stack
 

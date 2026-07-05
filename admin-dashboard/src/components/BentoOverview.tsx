@@ -1,18 +1,11 @@
-import type { Destination, JobOpening, GalleryItem, BlogPost, ContactMessage, TabType } from '../types';
 import { Globe2, Briefcase, Image as ImageIcon, FileText, MessageSquare, ArrowUpRight } from 'lucide-react';
+import { useAdmin } from '../context/AdminContext';
+import { useNavigate } from 'react-router';
 
-interface BentoOverviewProps {
-  destinations: Destination[];
-  jobs: JobOpening[];
-  gallery: GalleryItem[];
-  blogs: BlogPost[];
-  responses: ContactMessage[];
-  setActiveTab: (tab: TabType) => void;
-}
+export const BentoOverview: React.FC = () => {
+  const { destinations, jobs, gallery, blogs, responses } = useAdmin();
+  const navigate = useNavigate();
 
-export const BentoOverview: React.FC<BentoOverviewProps> = ({
-  destinations, jobs, gallery, blogs, responses, setActiveTab,
-}) => {
   const newResponses = responses.filter(r => r.status === 'new').length;
   const totalPositions = jobs.reduce((a, j) => a + j.positionsAvailable, 0);
 
@@ -64,17 +57,17 @@ export const BentoOverview: React.FC<BentoOverviewProps> = ({
             Executive Command Center
           </p>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.5px', lineHeight: 1.2 }}>
-            O.G. Agency Infrastructure
+            O.G.
           </h1>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 5, maxWidth: 500 }}>
             Manage destinations, vacancies, gallery, editorial content, and client inquiries — all in one place.
           </p>
         </div>
         <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
-          <button className="btn btn-secondary" onClick={() => setActiveTab('jobs')}>
+          <button className="btn btn-secondary" onClick={() => navigate('/jobs')}>
             Post a Job
           </button>
-          <button className="btn btn-primary" onClick={() => setActiveTab('responses')}>
+          <button className="btn btn-primary" onClick={() => navigate('/responses')}>
             <MessageSquare size={14} strokeWidth={2} />
             Inquiries {newResponses > 0 && `(${newResponses})`}
           </button>
@@ -87,7 +80,7 @@ export const BentoOverview: React.FC<BentoOverviewProps> = ({
           <div
             key={id}
             className="card card-clickable stat-card"
-            onClick={() => setActiveTab(id)}
+            onClick={() => navigate(`/${id}`)}
             style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -130,7 +123,7 @@ export const BentoOverview: React.FC<BentoOverviewProps> = ({
                 cursor: 'pointer',
                 transition: 'background 0.12s',
               }}
-              onClick={() => setActiveTab('responses')}
+              onClick={() => navigate('/responses')}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg)')}
               onMouseLeave={e => (e.currentTarget.style.background = '')}
             >
@@ -155,7 +148,7 @@ export const BentoOverview: React.FC<BentoOverviewProps> = ({
             </div>
           ))}
           <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)' }}>
-            <button className="btn btn-ghost" style={{ fontSize: 12, padding: '5px 8px' }} onClick={() => setActiveTab('responses')}>
+            <button className="btn btn-ghost" style={{ fontSize: 12, padding: '5px 8px' }} onClick={() => navigate('/responses')}>
               View all inquiries →
             </button>
           </div>

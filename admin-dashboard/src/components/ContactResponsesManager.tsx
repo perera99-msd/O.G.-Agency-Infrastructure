@@ -4,19 +4,13 @@ import {
   Trash2, MessageSquare, CheckCircle2, Archive, Mail, Phone, Send, Globe2,
 } from 'lucide-react';
 
-interface ContactResponsesManagerProps {
-  responses: ContactMessage[];
-  onUpdateStatus: (id: string, status: ContactMessage['status']) => void;
-  onDelete: (id: string) => void;
-  onAddReplySim: (msg: Omit<ContactMessage, 'id'>) => void;
-}
+import { useAdmin } from '../context/AdminContext';
 
 const statusColor = (s: string) =>
   s === 'new' ? 'tag-red' : s === 'replied' ? 'tag-green' : 'tag-neutral';
 
-export const ContactResponsesManager: React.FC<ContactResponsesManagerProps> = ({
-  responses, onUpdateStatus, onDelete, onAddReplySim,
-}) => {
+export const ContactResponsesManager: React.FC = () => {
+  const { responses, updateResponseStatus: onUpdateStatus, deleteResponse: onDelete, addResponse: onAddReplySim } = useAdmin();
   const [filter, setFilter] = useState<'all' | 'new' | 'replied' | 'archived'>('all');
   const [selected, setSelected] = useState<ContactMessage | null>(null);
   const [reply, setReply] = useState('');

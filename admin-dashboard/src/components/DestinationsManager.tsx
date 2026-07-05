@@ -2,12 +2,7 @@ import { useState } from 'react';
 import type { Destination } from '../types';
 import { Plus, Edit3, Trash2, Globe2, Star } from 'lucide-react';
 
-interface DestinationsManagerProps {
-  destinations: Destination[];
-  onAdd: (dest: Omit<Destination, 'id'>) => void;
-  onUpdate: (id: string, dest: Partial<Destination>) => void;
-  onDelete: (id: string) => void;
-}
+import { useAdmin } from '../context/AdminContext';
 
 const emptyForm = {
   country: '',
@@ -18,9 +13,8 @@ const emptyForm = {
   featured: false,
 };
 
-export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
-  destinations, onAdd, onUpdate, onDelete,
-}) => {
+export const DestinationsManager: React.FC = () => {
+  const { destinations, addDest: onAdd, updateDest: onUpdate, deleteDest: onDelete } = useAdmin();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...emptyForm });

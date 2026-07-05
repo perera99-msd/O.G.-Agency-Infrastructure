@@ -1,11 +1,13 @@
 // lib/hooks/useJobFilters.js
-// Hybrid approach: client-side filtering on mock data now.
-// To switch to server-side: replace the `useMemo` block with a `useEffect`
+// Hybrid approach: client-side filtering on merged (static + Firestore) data.
+// To switch to fully server-side: replace the `useMemo` block with a `useEffect`
 // that calls your API with `filters` as query params, and set results via setState.
 
 "use client";
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { jobs } from "@/utils/data/jobs";
+import { jobs as staticJobs } from "@/utils/data/jobs";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export const JOBS_PER_PAGE = 24;
 
@@ -23,9 +25,38 @@ const defaultFilters = {
   savedOnly: false,
 };
 
+/** Maps an admin-dashboard JobOpening document to the website job schema */
+function mapFirestoreJob(data) {
+  return {
+    id: data.id,
+    title: data.title,
+    slug: data.title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
+    category: data.category,
+    tags: [data.category.toUpperCase()],
+    country: data.country,
+    salary: {
+      min: 0,
+      max: 0,
+      currency: "USD",
+      display: data.salary,
+    },
+    deadline: "",
+    postedAt: new Date().toISOString().split("T")[0],
+    isUrgent: data.status === "active",
+    genderPreference: "No Preference",
+    ageRange: { min: 18, max: 60 },
+    description: `${data.title} — ${data.positionsAvailable ?? ""} position(s) available in ${data.country}.`,
+    requirements: [],
+    benefits: [],
+    companyLogo: null,
+  };
+}
+
 export function useJobFilters() {
   const [filters, setFilters] = useState(defaultFilters);
+  const [firestoreJobs, setFirestoreJobs] = useState([]);
 
+  // Read URL query params once on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -44,6 +75,23 @@ export function useJobFilters() {
     }
   }, []);
 
+  // Fetch admin-posted jobs from Firestore on mount
+  useEffect(() => {
+    getDocs(collection(db, "jobs"))
+      .then((snapshot) => {
+        const data = snapshot.docs.map((d) => mapFirestoreJob({ id: d.id, ...d.data() }));
+        setFirestoreJobs(data);
+      })
+      .catch((err) => console.error("Error fetching Firestore jobs:", err));
+  }, []);
+
+  // Merged job list: static first, then Firestore additions (deduped by id)
+  const allJobs = useMemo(() => {
+    const staticIds = new Set(staticJobs.map((j) => j.id));
+    const newOnly = firestoreJobs.filter((j) => !staticIds.has(j.id));
+    return [...staticJobs, ...newOnly];
+  }, [firestoreJobs]);
+
   // --- FILTER UPDATERS ---
   const updateFilter = useCallback((key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
@@ -60,7 +108,7 @@ export function useJobFilters() {
   // --- FILTERING LOGIC ---
   // To go server-side: delete this useMemo, add useEffect with fetch() instead.
   const { results, totalCount, totalPages } = useMemo(() => {
-    let filtered = [...jobs];
+    let filtered = [...allJobs];
 
     // 1. Urgent always on top
     filtered.sort((a, b) => {
@@ -100,12 +148,12 @@ export function useJobFilters() {
     }
 
     if (filters.savedOnly) {
-  let saved = [];
-  try {
-    saved = JSON.parse(localStorage.getItem("og_saved_jobs") || "[]");
-  } catch {}
-  filtered = filtered.filter((job) => saved.includes(job.id));
-}
+      let saved = [];
+      try {
+        saved = JSON.parse(localStorage.getItem("og_saved_jobs") || "[]");
+      } catch {}
+      filtered = filtered.filter((job) => saved.includes(job.id));
+    }
 
     // 6. Gender preference
     if (filters.genderPreference) {
@@ -133,10 +181,10 @@ export function useJobFilters() {
     const results = filtered.slice(start, start + JOBS_PER_PAGE);
 
     return { results, totalCount, totalPages };
-  }, [filters]);
+  }, [filters, allJobs]);
 
   const activeFilterCount = Object.entries(filters).filter(([key, val]) => {
-    if (["page", "sortBy", "savedOnly" ].includes(key)) return false;
+    if (["page", "sortBy", "savedOnly"].includes(key)) return false;
     if (key === "salaryMin") return val > 0;
     if (key === "salaryMax") return val < 999999;
     if (key === "ageMin") return val > 0;
@@ -154,4 +202,4 @@ export function useJobFilters() {
     resetFilters,
     setPage,
   };
-}
+}

@@ -2,12 +2,7 @@ import { useState } from 'react';
 import type { BlogPost } from '../types';
 import { Plus, Edit3, Trash2, FileText, Clock, User } from 'lucide-react';
 
-interface BlogsManagerProps {
-  blogs: BlogPost[];
-  onAdd: (blog: Omit<BlogPost, 'id'>) => void;
-  onUpdate: (id: string, blog: Partial<BlogPost>) => void;
-  onDelete: (id: string) => void;
-}
+import { useAdmin } from '../context/AdminContext';
 
 const categoryColor = (c: string) => {
   const m: Record<string, string> = {
@@ -28,9 +23,8 @@ const emptyForm: {
   excerpt: '',
 };
 
-export const BlogsManager: React.FC<BlogsManagerProps> = ({
-  blogs, onAdd, onUpdate, onDelete,
-}) => {
+export const BlogsManager: React.FC = () => {
+  const { blogs, addBlog: onAdd, updateBlog: onUpdate, deleteBlog: onDelete } = useAdmin();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...emptyForm });

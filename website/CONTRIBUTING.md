@@ -1,4 +1,4 @@
-# Contributing to O.G. Agency Infrastructure
+# Contributing to O.G.
 
 First off, thank you for contributing! As a member of Group CS16, this document outlines our standard procedures for developing the O.G. Agency platform.
 

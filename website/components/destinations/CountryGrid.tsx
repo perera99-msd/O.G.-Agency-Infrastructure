@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 type Region = "all" | "europe" | "middle-east" | "asia" | "eurasia";
 
@@ -153,8 +155,36 @@ const FILTERS: { label: string; value: Region }[] = [
   { label: "Eurasia", value: "eurasia" },
 ];
 
+interface FirestoreDestination {
+  id: string;
+  country: string;
+  region: string;
+  heroImage: string;
+  activeJobs: number;
+  visaProcessingDays: number;
+  featured: boolean;
+}
+
 export default function CountryGrid() {
   const [activeRegion, setActiveRegion] = useState<Region>("all");
+  const [firestoreDests, setFirestoreDests] = useState<FirestoreDestination[]>([]);
+
+  useEffect(() => {
+    getDocs(collection(db, "destinations"))
+      .then((snapshot) => {
+        const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as FirestoreDestination));
+        setFirestoreDests(data);
+      })
+      .catch((err) => console.error("Error fetching destinations:", err));
+  }, []);
+
+  // Static country names (lowercase) for deduplication
+  const staticNames = new Set(COUNTRIES.map((c) => c.name.toLowerCase()));
+
+  // Only show Firestore entries whose country name isn't already in the static list
+  const newFirestoreCards = firestoreDests.filter(
+    (d) => !staticNames.has(d.country.toLowerCase())
+  );
 
   const filtered = COUNTRIES.filter(
     (c) => activeRegion === "all" || c.region === activeRegion
@@ -269,7 +299,41 @@ export default function CountryGrid() {
             </Link>
           );
         })}
+
+        {/* Firestore-added destinations from the admin dashboard */}
+        {newFirestoreCards.map((dest) => (
+          <Link
+            key={dest.id}
+            href={`/jobs?country=${encodeURIComponent(dest.country)}`}
+            className="group rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-300 transition-all duration-200 relative block h-64 sm:h-72"
+          >
+            <div className="absolute inset-0">
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                style={{ backgroundImage: `url(${dest.heroImage})` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 -z-10" />
+              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+            </div>
+
+            <span className="absolute top-3 left-3 text-xs text-white bg-black/40 rounded-full px-2.5 py-1 backdrop-blur-sm capitalize z-10">
+              {dest.region}
+            </span>
+
+            <div className="absolute bottom-3 left-3 right-3 p-3 bg-black/20 backdrop-blur-md backdrop-saturate-120 border border-white/20 rounded-xl flex items-center justify-between z-10 shadow-[0_4px_24px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all duration-300 group-hover:bg-black/30">
+              <p className="text-base font-semibold text-white drop-shadow-sm flex items-center gap-2 m-0">
+                <span>{dest.country}</span>
+              </p>
+              <span className="w-7 h-7 rounded-full bg-white/20 border border-white/30 flex items-center justify-center transition-transform duration-150 group-hover:scale-110 flex-shrink-0 backdrop-blur-md">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                  <path d="M2 9L9 2M9 2H3M9 2V8" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </div>
+          </Link>
+        ))}
       </div>
+
     </section>
   );
 }

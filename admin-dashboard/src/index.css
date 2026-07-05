@@ -4,53 +4,53 @@
    DESIGN TOKENS — Executive Ultra-Premium Light Glass
    ============================================================ */
 :root {
-  --bg: #f3f5f9;
-  --surface: #ffffff;
-  --surface-raised: #fafbfc;
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface-raised: #334155;
   
   /* Frosted Glass System */
-  --glass: rgba(255, 255, 255, 0.78);
-  --glass-border: rgba(255, 255, 255, 0.85);
-  --glass-border-subtle: rgba(15, 23, 42, 0.07);
-  --glass-shadow: 0 4px 24px -2px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(15, 23, 42, 0.05), inset 0 1px 1px rgba(255, 255, 255, 1);
-  --glass-shadow-hover: 0 16px 36px -4px rgba(99, 102, 241, 0.10), 0 0 0 1px rgba(99, 102, 241, 0.25), inset 0 1px 1px rgba(255, 255, 255, 1);
+  --glass: rgba(30, 41, 59, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-border-subtle: rgba(255, 255, 255, 0.02);
+  --glass-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  --glass-shadow-hover: 0 16px 36px -4px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(99, 102, 241, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
 
   /* Primary Colors */
   --accent: #6366f1;
   --accent-hover: #4f46e5;
-  --accent-light: rgba(99, 102, 241, 0.08);
-  --accent-light-hover: rgba(99, 102, 241, 0.14);
+  --accent-light: rgba(99, 102, 241, 0.15);
+  --accent-light-hover: rgba(99, 102, 241, 0.25);
 
   /* Semantic Palettes */
   --green: #10b981;
-  --green-bg: rgba(16, 185, 129, 0.08);
-  --green-border: rgba(16, 185, 129, 0.22);
+  --green-bg: rgba(16, 185, 129, 0.15);
+  --green-border: rgba(16, 185, 129, 0.3);
 
   --amber: #f59e0b;
-  --amber-bg: rgba(245, 158, 11, 0.08);
-  --amber-border: rgba(245, 158, 11, 0.22);
+  --amber-bg: rgba(245, 158, 11, 0.15);
+  --amber-border: rgba(245, 158, 11, 0.3);
 
   --red: #ef4444;
-  --red-bg: rgba(239, 68, 68, 0.08);
-  --red-border: rgba(239, 68, 68, 0.22);
+  --red-bg: rgba(239, 68, 68, 0.15);
+  --red-border: rgba(239, 68, 68, 0.3);
 
   --blue: #3b82f6;
-  --blue-bg: rgba(59, 130, 246, 0.08);
-  --blue-border: rgba(59, 130, 246, 0.22);
+  --blue-bg: rgba(59, 130, 246, 0.15);
+  --blue-border: rgba(59, 130, 246, 0.3);
 
   --purple: #8b5cf6;
-  --purple-bg: rgba(139, 92, 246, 0.08);
-  --purple-border: rgba(139, 92, 246, 0.22);
+  --purple-bg: rgba(139, 92, 246, 0.15);
+  --purple-border: rgba(139, 92, 246, 0.3);
 
   /* Typography */
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
-  --text-faint: #94a3b8;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-faint: #64748b;
 
   /* Layout Spacing */
-  --border: rgba(15, 23, 42, 0.07);
-  --border-strong: rgba(15, 23, 42, 0.12);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
 
   --radius-sm: 10px;
   --radius: 14px;
@@ -215,6 +215,11 @@ img { display: block; max-width: 100%; }
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .header-notif {

@@ -6,6 +6,7 @@ import {
   Image as ImageIcon,
   FileText,
   MessageSquare,
+  Monitor,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -21,6 +22,7 @@ const navItems: { id: TabType; label: string; Icon: React.FC<{ size?: number; st
   { id: 'gallery', label: 'Gallery', Icon: ImageIcon },
   { id: 'blogs', label: 'Blogs & News', Icon: FileText },
   { id: 'responses', label: 'Inquiries', Icon: MessageSquare },
+  { id: 'dashdark', label: 'Dashdark UI', Icon: Monitor },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount }) => {

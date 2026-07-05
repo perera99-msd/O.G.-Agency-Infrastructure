@@ -2,12 +2,7 @@ import { useState } from 'react';
 import type { JobOpening } from '../types';
 import { Plus, Edit3, Trash2, MapPin, DollarSign, Briefcase } from 'lucide-react';
 
-interface JobsManagerProps {
-  jobs: JobOpening[];
-  onAdd: (job: Omit<JobOpening, 'id'>) => void;
-  onUpdate: (id: string, job: Partial<JobOpening>) => void;
-  onDelete: (id: string) => void;
-}
+import { useAdmin } from '../context/AdminContext';
 
 const emptyForm: {
   title: string; country: string; category: string;
@@ -20,9 +15,8 @@ const emptyForm: {
 const statusColor = (s: string) =>
   s === 'active' ? 'tag-green' : s === 'filled' ? 'tag-blue' : 'tag-neutral';
 
-export const JobsManager: React.FC<JobsManagerProps> = ({
-  jobs, onAdd, onUpdate, onDelete,
-}) => {
+export const JobsManager: React.FC = () => {
+  const { jobs, addJob: onAdd, updateJob: onUpdate, deleteJob: onDelete } = useAdmin();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...emptyForm });

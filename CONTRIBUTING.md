@@ -1,4 +1,4 @@
-# 🤝 Contributing to O.G. Agency Infrastructure
+# 🤝 Contributing to O.G.
 
 First off, thank you for being a part of **Development Team CS16, University of Bedfordshire**! 🎉
 

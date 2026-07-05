@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight, Clock, Calendar, Tag, Search, Sparkles } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 interface BlogPost {
   id: number;
@@ -91,8 +93,40 @@ const CATEGORIES = [
 export default function BlogGrid() {
   const [activeCategory, setActiveCategory] = useState("All Articles");
   const [searchQuery, setSearchQuery] = useState("");
+  const [firestoreBlogs, setFirestoreBlogs] = useState<BlogPost[]>([]);
 
-  const filteredPosts = INITIAL_BLOGS.filter(post => {
+  // Fetch admin-published blogs from Firestore on mount
+  useEffect(() => {
+    getDocs(collection(db, "blogs"))
+      .then((snapshot) => {
+        const data = snapshot.docs.map((d) => {
+          const raw = d.data();
+          return {
+            id: d.id as unknown as number,
+            title: raw.title ?? "",
+            excerpt: raw.excerpt ?? "",
+            category: raw.category ?? "Industry News",
+            readTime: raw.readTime ?? "5 min read",
+            date: raw.publishDate ?? new Date().toISOString().split("T")[0],
+            image: raw.imageUrl ?? "/gallery/garment-team-pink.jpg",
+            author: raw.author ?? "Editorial Team",
+          } as BlogPost;
+        });
+        setFirestoreBlogs(data);
+      })
+      .catch((err) => console.error("Error fetching Firestore blogs:", err));
+  }, []);
+
+  // Merge static + Firestore blogs (deduplicated by title)
+  const allBlogs = useMemo(() => {
+    const staticTitles = new Set(INITIAL_BLOGS.map((b) => b.title.toLowerCase()));
+    const newOnly = firestoreBlogs.filter(
+      (b) => !staticTitles.has(b.title.toLowerCase())
+    );
+    return [...INITIAL_BLOGS, ...newOnly];
+  }, [firestoreBlogs]);
+
+  const filteredPosts = allBlogs.filter(post => {
     const matchesCategory = activeCategory === "All Articles" || post.category === activeCategory;
     const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
