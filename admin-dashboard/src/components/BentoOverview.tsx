@@ -14,14 +14,14 @@ export const BentoOverview: React.FC<BentoOverviewProps> = ({
   destinations, jobs, gallery, blogs, responses, setActiveTab,
 }) => {
   const newResponses = responses.filter(r => r.status === 'new').length;
-  const totalPositions = jobs.reduce((a, j) => a + ((j as any).positionsAvailable || 0), 0);
+  const totalPositions = jobs.reduce((a, j) => a + j.positionsAvailable, 0);
 
   const stats = [
     {
       id: 'destinations' as TabType,
       label: 'Active Corridors',
       value: destinations.length,
-      sub: destinations.length > 0 ? destinations.slice(0, 3).map(d => d.country).join(' · ') : 'No active corridors',
+      sub: 'Romania · Bosnia · Russia',
       Icon: Globe2,
       color: 'var(--blue)',
       colorBg: 'var(--blue-bg)',
@@ -48,7 +48,7 @@ export const BentoOverview: React.FC<BentoOverviewProps> = ({
       id: 'blogs' as TabType,
       label: 'Published Articles',
       value: blogs.length,
-      sub: blogs.length > 0 ? Array.from(new Set(blogs.map(b => b.category))).slice(0, 3).join(' · ') : 'No published articles',
+      sub: 'Visa · Industry · Stories',
       Icon: FileText,
       color: 'var(--amber)',
       colorBg: 'var(--amber-bg)',
@@ -118,48 +118,42 @@ export const BentoOverview: React.FC<BentoOverviewProps> = ({
               <span className="tag tag-red">{newResponses} New</span>
             )}
           </div>
-          {responses.length === 0 ? (
-            <div style={{ padding: '30px 20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-              No recent inquiries
-            </div>
-          ) : (
-            responses.slice(0, 4).map((r, i) => (
-              <div
-                key={r.id}
-                style={{
-                  padding: '13px 20px',
-                  borderBottom: i < 3 && i < responses.length - 1 ? '1px solid var(--border)' : 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 14,
-                  cursor: 'pointer',
-                  transition: 'background 0.12s',
-                }}
-                onClick={() => setActiveTab('responses')}
-                onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg)')}
-                onMouseLeave={e => (e.currentTarget.style.background = '')}
-              >
-                <div style={{
-                  width: 34, height: 34, borderRadius: 8,
-                  background: 'var(--accent-light)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: 700, fontSize: 12, color: 'var(--accent)', flexShrink: 0,
-                }}>
-                  {r.senderName.charAt(0)}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{r.senderName}</p>
-                  <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }} className="truncate">{r.message}</p>
-                </div>
-                <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                  <span className={`tag ${r.status === 'new' ? 'tag-red' : r.status === 'replied' ? 'tag-green' : 'tag-neutral'}`}>
-                    {r.status}
-                  </span>
-                  <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>{r.submittedAt}</span>
-                </div>
+          {responses.slice(0, 4).map((r, i) => (
+            <div
+              key={r.id}
+              style={{
+                padding: '13px 20px',
+                borderBottom: i < 3 && i < responses.length - 1 ? '1px solid var(--border)' : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+                cursor: 'pointer',
+                transition: 'background 0.12s',
+              }}
+              onClick={() => setActiveTab('responses')}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg)')}
+              onMouseLeave={e => (e.currentTarget.style.background = '')}
+            >
+              <div style={{
+                width: 34, height: 34, borderRadius: 8,
+                background: 'var(--accent-light)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: 700, fontSize: 12, color: 'var(--accent)', flexShrink: 0,
+              }}>
+                {r.senderName.charAt(0)}
               </div>
-            ))
-          )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{r.senderName}</p>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }} className="truncate">{r.message}</p>
+              </div>
+              <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                <span className={`tag ${r.status === 'new' ? 'tag-red' : r.status === 'replied' ? 'tag-green' : 'tag-neutral'}`}>
+                  {r.status}
+                </span>
+                <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>{r.submittedAt}</span>
+              </div>
+            </div>
+          ))}
           <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)' }}>
             <button className="btn btn-ghost" style={{ fontSize: 12, padding: '5px 8px' }} onClick={() => setActiveTab('responses')}>
               View all inquiries →

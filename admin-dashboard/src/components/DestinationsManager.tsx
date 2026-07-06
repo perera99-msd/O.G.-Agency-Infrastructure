@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { createPortal } from 'react-dom';
 import type { Destination } from '../types';
-import { Plus, Edit3, Trash2, Globe2, Star, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Edit3, Trash2, Globe2, Star } from 'lucide-react';
 
 interface DestinationsManagerProps {
   destinations: Destination[];
@@ -138,117 +136,50 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
         </div>
       )}
 
-      {/* Styled Popup Modal */}
-      {typeof document !== 'undefined' && createPortal(
-        <AnimatePresence>
-        {open && (
-          <motion.div 
-            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }} 
-            animate={{ opacity: 1, backdropFilter: 'blur(8px)' }} 
-            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }} 
-            className="modal-overlay" 
-            style={{ 
-              background: 'rgba(15, 23, 42, 0.4)', 
-              position: 'fixed', 
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 1000, 
-              display: 'grid', 
-              placeItems: 'center', 
-              padding: 24,
-              overflow: 'hidden'
-            }}
-          >
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }} 
-              animate={{ scale: 1, opacity: 1, y: 0 }} 
-              exit={{ scale: 0.9, opacity: 0, y: 20 }} 
-              transition={{ type: 'spring', bounce: 0.35, duration: 0.4 }} 
-              className="modal" 
-              style={{ 
-                background: '#ffffff', 
-                borderRadius: 24, 
-                padding: 0, 
-                maxHeight: 'calc(100vh - 48px)', 
-                width: '100%', 
-                maxWidth: 540, 
-                border: 'none', 
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.05)'
-              }}
-            >
-              {/* Sleek Header without border */}
-              <div style={{ padding: '32px 32px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: '#fff', flexShrink: 0 }}>
+      {/* Modal */}
+      {open && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3 className="modal-title">{editId ? 'Edit Destination' : 'New Destination'}</h3>
+              <button className="modal-close" onClick={() => setOpen(false)}>×</button>
+            </div>
+            <form onSubmit={handleSubmit}>
+              <div className="modal-body">
                 <div>
-                  <h3 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px' }}>{editId ? 'Edit Destination' : 'New Destination'}</h3>
-                  <p style={{ color: '#64748b', fontSize: 14, margin: '6px 0 0', fontWeight: 500 }}>{editId ? 'Modify the details of this employment corridor.' : 'Add a new employment corridor to your system.'}</p>
+                  <label className="field-label">Country Name *</label>
+                  <input className="field-input" type="text" required placeholder="e.g. Poland, Hungary…" value={form.country} onChange={e => setForm({ ...form, country: e.target.value })} />
                 </div>
-                <button 
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  style={{ background: '#f8fafc', border: 'none', cursor: 'pointer', color: '#64748b', padding: 8, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = '#e2e8f0'; e.currentTarget.style.color = '#0f172a'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#64748b'; }}
-                >
-                  <X size={20} strokeWidth={2.5} />
-                </button>
+                <div>
+                  <label className="field-label">Region / Jurisdiction</label>
+                  <input className="field-input" type="text" placeholder="e.g. Central Europe (Schengen)" value={form.region} onChange={e => setForm({ ...form, region: e.target.value })} />
+                </div>
+                <div>
+                  <label className="field-label">Hero Image URL</label>
+                  <input className="field-input" type="url" placeholder="https://images.unsplash.com/..." value={form.heroImage} onChange={e => setForm({ ...form, heroImage: e.target.value })} />
+                </div>
+                <div className="field-row">
+                  <div>
+                    <label className="field-label">Active Jobs</label>
+                    <input className="field-input" type="number" value={form.activeJobs} onChange={e => setForm({ ...form, activeJobs: Number(e.target.value) })} />
+                  </div>
+                  <div>
+                    <label className="field-label">Visa Timeline (days)</label>
+                    <input className="field-input" type="number" value={form.visaProcessingDays} onChange={e => setForm({ ...form, visaProcessingDays: Number(e.target.value) })} />
+                  </div>
+                </div>
+                <div className="checkbox-row">
+                  <input type="checkbox" id="featured" checked={form.featured} onChange={e => setForm({ ...form, featured: e.target.checked })} />
+                  <label htmlFor="featured" className="checkbox-label">Feature on the public website landing page</label>
+                </div>
               </div>
-
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', minHeight: 0 }}>
-                {/* Scrollable Form Body */}
-                <div style={{ padding: '0 32px 32px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: 20, minHeight: 0 }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Country Name *</label>
-                    <input className="field-input" type="text" required placeholder="e.g. Poland, Hungary…" value={form.country} onChange={e => setForm({ ...form, country: e.target.value })} style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: '#0f172a', transition: 'all 0.2s', boxShadow: 'inset 0 0 0 1px #e2e8f0' }} onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'} onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'} />
-                  </div>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Region / Jurisdiction</label>
-                    <input className="field-input" type="text" placeholder="e.g. Central Europe (Schengen)" value={form.region} onChange={e => setForm({ ...form, region: e.target.value })} style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: '#0f172a', transition: 'all 0.2s', boxShadow: 'inset 0 0 0 1px #e2e8f0' }} onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'} onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'} />
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Hero Image URL</label>
-                    <input className="field-input" type="url" placeholder="https://images.unsplash.com/..." value={form.heroImage} onChange={e => setForm({ ...form, heroImage: e.target.value })} style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: '#0f172a', transition: 'all 0.2s', boxShadow: 'inset 0 0 0 1px #e2e8f0' }} onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'} onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'} />
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Active Jobs</label>
-                      <input className="field-input" type="number" value={form.activeJobs} onChange={e => setForm({ ...form, activeJobs: Number(e.target.value) })} style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: '#0f172a', transition: 'all 0.2s', boxShadow: 'inset 0 0 0 1px #e2e8f0' }} onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'} onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'} />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Visa Timeline (days)</label>
-                      <input className="field-input" type="number" value={form.visaProcessingDays} onChange={e => setForm({ ...form, visaProcessingDays: Number(e.target.value) })} style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: '#0f172a', transition: 'all 0.2s', boxShadow: 'inset 0 0 0 1px #e2e8f0' }} onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'} onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'} />
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
-                    <input type="checkbox" id="featured" checked={form.featured} onChange={e => setForm({ ...form, featured: e.target.checked })} style={{ width: 18, height: 18, accentColor: '#4f46e5', cursor: 'pointer' }} />
-                    <label htmlFor="featured" style={{ fontSize: 14, color: '#334155', fontWeight: 500, cursor: 'pointer', userSelect: 'none' }}>Feature on the public website landing page</label>
-                  </div>
-                </div>
-
-                {/* Floating Footer */}
-                <div style={{ padding: '24px 32px', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: 16, width: '100%', flexShrink: 0, borderTop: '1px solid rgba(0,0,0,0.03)' }}>
-                  <button type="button" onClick={() => setOpen(false)} style={{ padding: '12px 24px', background: 'transparent', color: '#64748b', fontSize: 14, fontWeight: 700, border: 'none', borderRadius: 12, cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = '#e2e8f0'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                    Cancel
-                  </button>
-                  <button type="submit" style={{ padding: '12px 28px', background: '#0f172a', color: '#fff', borderRadius: 12, fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 8px 16px -4px rgba(15, 23, 42, 0.25)', transition: 'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 10px 20px -4px rgba(15, 23, 42, 0.3)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 16px -4px rgba(15, 23, 42, 0.25)'; }}>
-                    {editId ? 'Save Changes' : 'Add Destination'}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-        </AnimatePresence>,
-        document.body
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setOpen(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary">{editId ? 'Save Changes' : 'Add Destination'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
