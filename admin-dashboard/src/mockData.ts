@@ -3,49 +3,58 @@ import type { Destination, JobOpening, GalleryItem, BlogPost, ContactMessage } f
 export const INITIAL_DESTINATIONS: Destination[] = [
   {
     id: '1',
-    country: 'Romania',
-    region: 'European Union (Schengen Area)',
-    heroImage: 'https://images.unsplash.com/photo-1584646098378-0874589d76b1?auto=format&fit=crop&q=80&w=800',
+    country: 'Qatar',
+    region: 'Middle East',
+    heroImage: 'https://images.unsplash.com/photo-1549813069-f95e44d7f498?w=800&q=80',
     activeJobs: 24,
-    visaProcessingDays: 45,
+    visaProcessingDays: 14,
     featured: true,
   },
   {
     id: '2',
-    country: 'Bosnia & Herzegovina',
-    region: 'Southeast Europe',
-    heroImage: 'https://images.unsplash.com/photo-1555990793-1122b5133b3a?auto=format&fit=crop&q=80&w=800',
+    country: 'Saudi Arabia',
+    region: 'Middle East',
+    heroImage: 'https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?w=800&q=80',
     activeJobs: 18,
-    visaProcessingDays: 30,
+    visaProcessingDays: 21,
     featured: true,
   },
   {
     id: '3',
-    country: 'Russia',
-    region: 'Eurasia Industrial Hub',
-    heroImage: 'https://images.unsplash.com/photo-1513326738677-b964603b136d?auto=format&fit=crop&q=80&w=800',
-    activeJobs: 35,
-    visaProcessingDays: 21,
-    featured: true,
+    country: 'UAE',
+    region: 'Middle East',
+    heroImage: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80',
+    activeJobs: 31,
+    visaProcessingDays: 10,
+    featured: false,
   },
 ];
 
-export const INITIAL_JOBS: JobOpening[] = [
-  { id: 'j1', title: 'Senior Industrial Welder (MIG/TIG)', country: 'Romania', category: 'Heavy Engineering', salary: '€1,600 / mo + Overtime', positionsAvailable: 12, status: 'active' },
-  { id: 'j2', title: 'Precision CNC Machine Operator', country: 'Romania', category: 'Manufacturing', salary: '€1,500 / mo + Accommodation', positionsAvailable: 8, status: 'active' },
-  { id: 'j3', title: 'Automated Garment Quality Controller', country: 'Bosnia & Herzegovina', category: 'Textiles', salary: '€1,200 / mo + Meals', positionsAvailable: 15, status: 'active' },
-  { id: 'j4', title: 'Heavy Fleet Diesel Mechanic', country: 'Russia', category: 'Logistics & Transport', salary: '$1,800 / mo Net', positionsAvailable: 5, status: 'active' },
-];
+export const INITIAL_JOBS: JobOpening[] = [];
 
 export const INITIAL_GALLERY: GalleryItem[] = [];
 
-export const INITIAL_BLOGS: BlogPost[] = [
-  { id: 'b1', title: 'Step-by-Step Document Attestation Guide for Romanian Work Visas', category: 'Visa & Legal', readTime: '6 min read', author: 'Legal Compliance Desk', publishDate: '2026-06-30', excerpt: 'Complete checklist of police clearance certificates, medical certifications, and Ministry of Labor clearances.' },
-  { id: 'b2', title: 'European Garment Manufacturing: Safety Standards & Overtime Rates 2026', category: 'Industry News', readTime: '5 min read', author: 'European Dispatch Team', publishDate: '2026-06-24', excerpt: 'How EU labor protections guarantee standardized health benefits, paid holidays, and double pay for weekend shifts.' },
-];
+export const INITIAL_BLOGS: BlogPost[] = [];
 
 export const INITIAL_RESPONSES: ContactMessage[] = [
-  { id: 'r1', senderName: 'Kasun Bandara', email: 'kasun.b@gmail.com', phone: '+94 77 123 4567', destinationOfInterest: 'Romania', message: 'I have 6 years of experience in MIG welding at Colombo Shipyard. Looking for Romanian industrial openings.', submittedAt: '2 mins ago', status: 'new' },
-  { id: 'r2', senderName: 'Nuwan Perera', email: 'nuwan.p@yahoo.com', phone: '+94 71 987 6543', destinationOfInterest: 'Bosnia & Herzegovina', message: 'Could you clarify if accommodation is provided for textile operators in Sarajevo?', submittedAt: '1 hour ago', status: 'new' },
-  { id: 'r3', senderName: 'Dimalsha Silva', email: 'dimalsha@company.lk', phone: '+94 76 555 1122', destinationOfInterest: 'Russia', message: 'We are looking to deploy a batch of 20 logistics drivers next month. Let us schedule a consultation.', submittedAt: 'Yesterday', status: 'replied' },
+  {
+    id: '1',
+    senderName: 'Arun Thapa',
+    email: 'arun.thapa@email.com',
+    phone: '+977-9841234567',
+    destinationOfInterest: 'Qatar',
+    message: 'I am interested in construction jobs in Qatar. Please provide more details.',
+    submittedAt: '2026-07-01T08:30:00Z',
+    status: 'new',
+  },
+  {
+    id: '2',
+    senderName: 'Sunita Rai',
+    email: 'sunita.rai@email.com',
+    phone: '+977-9857654321',
+    destinationOfInterest: 'UAE',
+    message: 'Looking for housekeeping opportunities in UAE. What documents are needed?',
+    submittedAt: '2026-07-03T14:15:00Z',
+    status: 'new',
+  },
 ];

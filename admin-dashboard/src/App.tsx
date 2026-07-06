@@ -8,9 +8,9 @@ import { GalleryManager } from './components/GalleryManager';
 import { BlogsManager } from './components/BlogsManager';
 import { ContactResponsesManager } from './components/ContactResponsesManager';
 
-import { db, storage } from './firebase';
+import { db } from './firebase';
 import { collection, getDocs, setDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { compressImage } from './imageCompressor';
 
 import type { Destination, JobOpening, GalleryItem, BlogPost, ContactMessage, TabType } from './types';
 import {
@@ -23,13 +23,14 @@ import {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
-  const [destinations, setDestinations] = useState<Destination[]>(INITIAL_DESTINATIONS);
+  const [destinations, setDestinations] = useState<Destination[]>([]);
   const [jobs, setJobs] = useState<JobOpening[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>(INITIAL_GALLERY);
   const [blogs, setBlogs] = useState<BlogPost[]>(INITIAL_BLOGS);
   const [responses, setResponses] = useState<ContactMessage[]>(INITIAL_RESPONSES);
 
   useEffect(() => {
+    // Fetch Gallery
     getDocs(collection(db, 'gallery'))
       .then(snapshot => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as GalleryItem));
@@ -38,6 +39,16 @@ export default function App() {
         }
       })
       .catch(err => console.error('Error fetching gallery:', err));
+
+    // Fetch Destinations
+    getDocs(collection(db, 'destinations'))
+      .then(snapshot => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Destination));
+        if (data.length > 0) {
+          setDestinations(data);
+        }
+      })
+      .catch(err => console.error('Error fetching destinations:', err));
 
     // Fetch jobs from backend API
     fetch('http://localhost:5000/api/v1/admin/jobs', {
@@ -52,14 +63,49 @@ export default function App() {
         }
       })
       .catch(err => console.error('Error fetching jobs:', err));
+
+    // Fetch Blogs
+    getDocs(collection(db, 'blogs'))
+      .then(snapshot => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+        if (data.length > 0) {
+          setBlogs(data);
+        }
+      })
+      .catch(err => console.error('Error fetching blogs:', err));
   }, []);
 
   const unreadCount = responses.filter(r => r.status === 'new').length;
 
   // Destinations
-  const addDest = (d: Omit<Destination, 'id'>) => setDestinations(p => [{ ...d, id: crypto.randomUUID() }, ...p]);
-  const updateDest = (id: string, d: Partial<Destination>) => setDestinations(p => p.map(x => x.id === id ? { ...x, ...d } : x));
-  const deleteDest = (id: string) => setDestinations(p => p.filter(x => x.id !== id));
+  const addDest = async (d: Omit<Destination, 'id'>) => {
+    const id = crypto.randomUUID();
+    const newDest = { ...d, id };
+    setDestinations(p => [newDest, ...p]);
+    try {
+      await setDoc(doc(db, 'destinations', id), newDest);
+    } catch (err) {
+      console.error('Error adding destination:', err);
+    }
+  };
+
+  const updateDest = async (id: string, d: Partial<Destination>) => {
+    setDestinations(p => p.map(x => x.id === id ? { ...x, ...d } : x));
+    try {
+      await updateDoc(doc(db, 'destinations', id), d);
+    } catch (err) {
+      console.error('Error updating destination:', err);
+    }
+  };
+
+  const deleteDest = async (id: string) => {
+    setDestinations(p => p.filter(x => x.id !== id));
+    try {
+      await deleteDoc(doc(db, 'destinations', id));
+    } catch (err) {
+      console.error('Error deleting destination:', err);
+    }
+  };
 
   // Jobs
   const addJob = async (j: Omit<JobOpening, 'id'>) => {
@@ -115,61 +161,80 @@ export default function App() {
     }
   };
 
-  // Gallery
-  const addGallery = async (g: Omit<GalleryItem, 'id'> & { file?: File }) => {
-    try {
-      let finalImageUrl = g.imageUrl;
-      const id = crypto.randomUUID();
+  // Gallery — images compressed client-side and stored as base64 in Firestore
+  const addGallery = async (g: Omit<GalleryItem, 'id'> & { file?: File }): Promise<void> => {
+    const id = crypto.randomUUID();
+    let finalImageUrl = g.imageUrl; // already base64 from FileReader preview
 
-      if (g.file) {
-        const storageRef = ref(storage, `gallery/${id}_${g.file.name}`);
-        const snapshot = await uploadBytes(storageRef, g.file);
-        finalImageUrl = await getDownloadURL(snapshot.ref);
-      }
-      
-      const newItem: GalleryItem = { 
-        id,
-        title: g.title,
-        category: g.category,
-        imageUrl: finalImageUrl,
-        dateAdded: g.dateAdded,
-      };
-
-      setGallery(p => [newItem, ...p]);
-      await setDoc(doc(db, 'gallery', id), newItem);
-    } catch (err) {
-      console.error('Error adding gallery item:', err);
+    if (g.file) {
+      // Compress with Canvas API → JPEG base64 ~80-200 KB (under Firestore 1MB limit)
+      finalImageUrl = await compressImage(g.file, {
+        maxWidth: 900,
+        maxHeight: 900,
+        quality: 0.72,
+        maxSizeKB: 750,
+      });
     }
+
+    const newItem: GalleryItem = {
+      id,
+      title: g.title,
+      category: g.category,
+      imageUrl: finalImageUrl,  // base64 JPEG stored in Firestore
+      dateAdded: g.dateAdded,
+    };
+
+    setGallery(p => [newItem, ...p]);
+    await setDoc(doc(db, 'gallery', id), newItem);
   };
-  
+
   const updateGallery = async (id: string, g: Partial<GalleryItem>) => {
     setGallery(p => p.map(x => x.id === id ? { ...x, ...g } : x));
     try {
       await updateDoc(doc(db, 'gallery', id), g);
-    } catch(err) {
+    } catch (err) {
       console.error('Error updating gallery item:', err);
     }
   };
-  
+
   const deleteGallery = async (id: string) => {
-    const item = gallery.find(x => x.id === id);
     setGallery(p => p.filter(x => x.id !== id));
-    
     try {
       await deleteDoc(doc(db, 'gallery', id));
-      if (item && item.imageUrl.includes('firebasestorage.googleapis.com')) {
-        const fileRef = ref(storage, item.imageUrl);
-        await deleteObject(fileRef).catch(console.error);
-      }
     } catch (err) {
-      console.error('Error deleting gallery item:', err);
+      console.error('Error deleting gallery item from Firestore:', err);
     }
   };
 
   // Blogs
-  const addBlog = (b: Omit<BlogPost, 'id'>) => setBlogs(p => [{ ...b, id: crypto.randomUUID() }, ...p]);
-  const updateBlog = (id: string, b: Partial<BlogPost>) => setBlogs(p => p.map(x => x.id === id ? { ...x, ...b } : x));
-  const deleteBlog = (id: string) => setBlogs(p => p.filter(x => x.id !== id));
+  const addBlog = async (b: Omit<BlogPost, 'id'>) => {
+    const id = crypto.randomUUID();
+    const newBlog = { ...b, id };
+    setBlogs(p => [newBlog, ...p]);
+    try {
+      await setDoc(doc(db, 'blogs', id), newBlog);
+    } catch (err) {
+      console.error('Error adding blog:', err);
+    }
+  };
+
+  const updateBlog = async (id: string, b: Partial<BlogPost>) => {
+    setBlogs(p => p.map(x => x.id === id ? { ...x, ...b } : x));
+    try {
+      await updateDoc(doc(db, 'blogs', id), b);
+    } catch (err) {
+      console.error('Error updating blog:', err);
+    }
+  };
+
+  const deleteBlog = async (id: string) => {
+    setBlogs(p => p.filter(x => x.id !== id));
+    try {
+      await deleteDoc(doc(db, 'blogs', id));
+    } catch (err) {
+      console.error('Error deleting blog:', err);
+    }
+  };
 
   // Responses
   const updateResponseStatus = (id: string, status: ContactMessage['status']) => setResponses(p => p.map(x => x.id === id ? { ...x, status } : x));
