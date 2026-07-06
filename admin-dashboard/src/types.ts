@@ -16,7 +16,7 @@ export interface JobOpening {
   salary: { min: number; max: number; currency: string };
   deadline: string;
   description: string;
-  isUrgent?: boolean;
+  isUrgent: boolean;
   genderPreference?: string;
   ageRange?: { min: number; max: number };
   tags?: string[];
