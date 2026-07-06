@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { BlogPost } from '../types';
-import { Plus, Edit3, Trash2, FileText, Clock, User } from 'lucide-react';
+import { Plus, Edit3, Trash2, FileText, Clock, User, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface BlogsManagerProps {
   blogs: BlogPost[];
@@ -120,64 +122,132 @@ export const BlogsManager: React.FC<BlogsManagerProps> = ({
         </div>
       )}
 
-      {/* Modal */}
-      {open && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h3 className="modal-title">{editId ? 'Edit Article' : 'New Article'}</h3>
-              <button className="modal-close" onClick={() => setOpen(false)}>×</button>
-            </div>
-            <form onSubmit={handleSubmit}>
-              <div className="modal-body">
+      {/* Styled Popup Modal */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+        {open && (
+          <motion.div 
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }} 
+            animate={{ opacity: 1, backdropFilter: 'blur(8px)' }} 
+            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }} 
+            className="modal-overlay" 
+            style={{ 
+              background: 'rgba(15, 23, 42, 0.4)', 
+              position: 'fixed', 
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 1000, 
+              display: 'grid', 
+              placeItems: 'center', 
+              padding: 24,
+              overflow: 'hidden'
+            }}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.9, opacity: 0, y: 20 }} 
+              transition={{ type: 'spring', bounce: 0.35, duration: 0.4 }} 
+              className="modal" 
+              style={{ 
+                background: '#ffffff', 
+                borderRadius: 24, 
+                padding: 0, 
+                maxHeight: 'calc(100vh - 48px)', 
+                width: '100%', 
+                maxWidth: 540, 
+                border: 'none', 
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.05)'
+              }}
+            >
+              {/* Sleek Header without border */}
+              <div style={{ padding: '32px 32px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: '#fff', flexShrink: 0 }}>
                 <div>
-                  <label className="field-label">Headline *</label>
-                  <input className="field-input" type="text" required placeholder="e.g. Navigating Romanian Medical Clearances in 2026" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+                  <h3 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px' }}>{editId ? 'Edit Article' : 'New Article'}</h3>
+                  <p style={{ color: '#64748b', fontSize: 14, margin: '6px 0 0', fontWeight: 500 }}>{editId ? 'Update the content and metadata of this post.' : 'Publish a new editorial article or industry update.'}</p>
                 </div>
-                <div className="field-row">
-                  <div>
-                    <label className="field-label">Category</label>
-                    <select className="field-input" value={form.category} onChange={e => setForm({ ...form, category: e.target.value as any })}>
-                      <option value="Visa & Legal">Visa & Legal</option>
-                      <option value="Success Stories">Success Stories</option>
-                      <option value="Industry News">Industry News</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="field-label">Read Time</label>
-                    <input className="field-input" type="text" placeholder="5 min read" value={form.readTime} onChange={e => setForm({ ...form, readTime: e.target.value })} />
-                  </div>
-                </div>
-                <div className="field-row">
-                  <div>
-                    <label className="field-label">Author / Division</label>
-                    <input className="field-input" type="text" value={form.author} onChange={e => setForm({ ...form, author: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="field-label">Publication Date</label>
-                    <input className="field-input" type="date" value={form.publishDate} onChange={e => setForm({ ...form, publishDate: e.target.value })} />
-                  </div>
-                </div>
-                <div>
-                  <label className="field-label">Excerpt / Summary *</label>
-                  <textarea
-                    className="field-input"
-                    rows={4}
-                    required
-                    placeholder="Brief summary of the article content…"
-                    value={form.excerpt}
-                    onChange={e => setForm({ ...form, excerpt: e.target.value })}
-                    style={{ resize: 'vertical' }}
-                  />
-                </div>
+                <button 
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  style={{ background: '#f8fafc', border: 'none', cursor: 'pointer', color: '#64748b', padding: 8, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#e2e8f0'; e.currentTarget.style.color = '#0f172a'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#64748b'; }}
+                >
+                  <X size={20} strokeWidth={2.5} />
+                </button>
               </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">{editId ? 'Save Changes' : 'Publish'}</button>
-              </div>
-            </form>
-          </div>
-        </div>
+
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+                {/* Scrollable Form Body */}
+                <div style={{ padding: '0 32px 32px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: 20, minHeight: 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Headline *</label>
+                    <input className="field-input" type="text" required placeholder="e.g. Navigating Romanian Medical Clearances in 2026" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: '#0f172a', transition: 'all 0.2s', boxShadow: 'inset 0 0 0 1px #e2e8f0' }} onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'} onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'} />
+                  </div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Category</label>
+                      <select className="field-input" value={form.category} onChange={e => setForm({ ...form, category: e.target.value as any })} style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: '#0f172a', transition: 'all 0.2s', boxShadow: 'inset 0 0 0 1px #e2e8f0', appearance: 'none', cursor: 'pointer' }} onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'} onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'}>
+                        <option value="Visa & Legal">Visa & Legal</option>
+                        <option value="Success Stories">Success Stories</option>
+                        <option value="Industry News">Industry News</option>
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Read Time</label>
+                      <input className="field-input" type="text" placeholder="5 min read" value={form.readTime} onChange={e => setForm({ ...form, readTime: e.target.value })} style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: '#0f172a', transition: 'all 0.2s', boxShadow: 'inset 0 0 0 1px #e2e8f0' }} onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'} onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Author / Division</label>
+                      <input className="field-input" type="text" value={form.author} onChange={e => setForm({ ...form, author: e.target.value })} style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: '#0f172a', transition: 'all 0.2s', boxShadow: 'inset 0 0 0 1px #e2e8f0' }} onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'} onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Publication Date</label>
+                      <input className="field-input" type="date" value={form.publishDate} onChange={e => setForm({ ...form, publishDate: e.target.value })} style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: '#0f172a', transition: 'all 0.2s', boxShadow: 'inset 0 0 0 1px #e2e8f0' }} onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'} onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Excerpt / Summary *</label>
+                    <textarea
+                      className="field-input"
+                      rows={4}
+                      required
+                      placeholder="Brief summary of the article content…"
+                      value={form.excerpt}
+                      onChange={e => setForm({ ...form, excerpt: e.target.value })}
+                      style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: '#0f172a', transition: 'all 0.2s', boxShadow: 'inset 0 0 0 1px #e2e8f0', resize: 'vertical' }}
+                      onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'}
+                      onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'}
+                    />
+                  </div>
+                </div>
+
+                {/* Floating Footer */}
+                <div style={{ padding: '24px 32px', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: 16, width: '100%', flexShrink: 0, borderTop: '1px solid rgba(0,0,0,0.03)' }}>
+                  <button type="button" onClick={() => setOpen(false)} style={{ padding: '12px 24px', background: 'transparent', color: '#64748b', fontSize: 14, fontWeight: 700, border: 'none', borderRadius: 12, cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = '#e2e8f0'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    Cancel
+                  </button>
+                  <button type="submit" style={{ padding: '12px 28px', background: '#0f172a', color: '#fff', borderRadius: 12, fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 8px 16px -4px rgba(15, 23, 42, 0.25)', transition: 'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 10px 20px -4px rgba(15, 23, 42, 0.3)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 16px -4px rgba(15, 23, 42, 0.25)'; }}>
+                    {editId ? 'Save Changes' : 'Publish'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+        </AnimatePresence>,
+        document.body
       )}
     </div>
   );

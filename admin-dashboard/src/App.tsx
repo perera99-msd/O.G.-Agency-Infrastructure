@@ -13,21 +13,15 @@ import { collection, getDocs, setDoc, doc, deleteDoc, updateDoc } from 'firebase
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 import type { Destination, JobOpening, GalleryItem, BlogPost, ContactMessage, TabType } from './types';
-import {
-  INITIAL_DESTINATIONS,
-  INITIAL_JOBS,
-  INITIAL_GALLERY,
-  INITIAL_BLOGS,
-  INITIAL_RESPONSES,
-} from './mockData';
+
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
-  const [destinations, setDestinations] = useState<Destination[]>(INITIAL_DESTINATIONS);
+  const [destinations, setDestinations] = useState<Destination[]>([]);
   const [jobs, setJobs] = useState<JobOpening[]>([]);
-  const [gallery, setGallery] = useState<GalleryItem[]>(INITIAL_GALLERY);
-  const [blogs, setBlogs] = useState<BlogPost[]>(INITIAL_BLOGS);
-  const [responses, setResponses] = useState<ContactMessage[]>(INITIAL_RESPONSES);
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [responses, setResponses] = useState<ContactMessage[]>([]);
 
   useEffect(() => {
     getDocs(collection(db, 'gallery'))
