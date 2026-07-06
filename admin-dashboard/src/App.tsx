@@ -23,13 +23,14 @@ import {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
-  const [destinations, setDestinations] = useState<Destination[]>(INITIAL_DESTINATIONS);
+  const [destinations, setDestinations] = useState<Destination[]>([]);
   const [jobs, setJobs] = useState<JobOpening[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>(INITIAL_GALLERY);
   const [blogs, setBlogs] = useState<BlogPost[]>(INITIAL_BLOGS);
   const [responses, setResponses] = useState<ContactMessage[]>(INITIAL_RESPONSES);
 
   useEffect(() => {
+    // Fetch Gallery
     getDocs(collection(db, 'gallery'))
       .then(snapshot => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as GalleryItem));
@@ -38,6 +39,16 @@ export default function App() {
         }
       })
       .catch(err => console.error('Error fetching gallery:', err));
+
+    // Fetch Destinations
+    getDocs(collection(db, 'destinations'))
+      .then(snapshot => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Destination));
+        if (data.length > 0) {
+          setDestinations(data);
+        }
+      })
+      .catch(err => console.error('Error fetching destinations:', err));
 
     // Fetch jobs from backend API
     fetch('http://localhost:5000/api/v1/admin/jobs', {
@@ -57,9 +68,34 @@ export default function App() {
   const unreadCount = responses.filter(r => r.status === 'new').length;
 
   // Destinations
-  const addDest = (d: Omit<Destination, 'id'>) => setDestinations(p => [{ ...d, id: crypto.randomUUID() }, ...p]);
-  const updateDest = (id: string, d: Partial<Destination>) => setDestinations(p => p.map(x => x.id === id ? { ...x, ...d } : x));
-  const deleteDest = (id: string) => setDestinations(p => p.filter(x => x.id !== id));
+  const addDest = async (d: Omit<Destination, 'id'>) => {
+    const id = crypto.randomUUID();
+    const newDest = { ...d, id };
+    setDestinations(p => [newDest, ...p]);
+    try {
+      await setDoc(doc(db, 'destinations', id), newDest);
+    } catch (err) {
+      console.error('Error adding destination:', err);
+    }
+  };
+
+  const updateDest = async (id: string, d: Partial<Destination>) => {
+    setDestinations(p => p.map(x => x.id === id ? { ...x, ...d } : x));
+    try {
+      await updateDoc(doc(db, 'destinations', id), d);
+    } catch (err) {
+      console.error('Error updating destination:', err);
+    }
+  };
+
+  const deleteDest = async (id: string) => {
+    setDestinations(p => p.filter(x => x.id !== id));
+    try {
+      await deleteDoc(doc(db, 'destinations', id));
+    } catch (err) {
+      console.error('Error deleting destination:', err);
+    }
+  };
 
   // Jobs
   const addJob = async (j: Omit<JobOpening, 'id'>) => {

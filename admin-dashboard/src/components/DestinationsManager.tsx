@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Destination } from '../types';
-import { Plus, Edit3, Trash2, Globe2, Star } from 'lucide-react';
+import { Plus, Edit3, Trash2, Globe2, Star, Upload } from 'lucide-react';
 
 interface DestinationsManagerProps {
   destinations: Destination[];
@@ -49,7 +49,8 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
   };
 
   return (
-    <div className="animate-in">
+    <>
+      <div className="animate-in">
       {/* Page Header */}
       <div className="page-header">
         <div>
@@ -135,52 +136,65 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
           ))}
         </div>
       )}
+      </div>
 
       {/* Modal */}
       {open && (
         <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h3 className="modal-title">{editId ? 'Edit Destination' : 'New Destination'}</h3>
-              <button className="modal-close" onClick={() => setOpen(false)}>×</button>
+          <div className="modal" style={{ maxWidth: 480, background: '#ffffff' }}>
+            <div className="modal-header" style={{ borderBottom: 'none', paddingBottom: 0, alignItems: 'flex-start' }}>
+              <div>
+                <h3 className="modal-title" style={{ fontSize: 22 }}>{editId ? 'Edit Destination' : 'Add Destination'}</h3>
+                <p style={{ fontSize: 13.5, color: 'var(--accent)', marginTop: 4, fontWeight: 500 }}>
+                  {editId ? 'Update details for this location.' : 'Add a new employment corridor to your catalog.'}
+                </p>
+              </div>
+              <button className="modal-close" onClick={() => setOpen(false)} style={{ borderRadius: '50%', background: 'var(--bg)', border: 'none', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
             </div>
+            
             <form onSubmit={handleSubmit}>
-              <div className="modal-body">
-                <div>
-                  <label className="field-label">Country Name *</label>
-                  <input className="field-input" type="text" required placeholder="e.g. Poland, Hungary…" value={form.country} onChange={e => setForm({ ...form, country: e.target.value })} />
+              <div className="modal-body" style={{ gap: 20 }}>
+                <div className="field-row">
+                  <div>
+                    <label className="field-label">Country Name *</label>
+                    <input className="field-input" type="text" required placeholder="e.g. Poland" value={form.country} onChange={e => setForm({ ...form, country: e.target.value })} style={{ borderRadius: 12 }} />
+                  </div>
+                  <div>
+                    <label className="field-label">Region / Jurisdiction</label>
+                    <input className="field-input" type="text" placeholder="e.g. Central Europe" value={form.region} onChange={e => setForm({ ...form, region: e.target.value })} style={{ borderRadius: 12 }} />
+                  </div>
                 </div>
-                <div>
-                  <label className="field-label">Region / Jurisdiction</label>
-                  <input className="field-input" type="text" placeholder="e.g. Central Europe (Schengen)" value={form.region} onChange={e => setForm({ ...form, region: e.target.value })} />
-                </div>
+
                 <div>
                   <label className="field-label">Hero Image URL</label>
-                  <input className="field-input" type="url" placeholder="https://images.unsplash.com/..." value={form.heroImage} onChange={e => setForm({ ...form, heroImage: e.target.value })} />
+                  <input className="field-input" type="url" placeholder="https://images.unsplash.com/..." value={form.heroImage} onChange={e => setForm({ ...form, heroImage: e.target.value })} style={{ borderRadius: 12 }} />
                 </div>
+
                 <div className="field-row">
                   <div>
                     <label className="field-label">Active Jobs</label>
-                    <input className="field-input" type="number" value={form.activeJobs} onChange={e => setForm({ ...form, activeJobs: Number(e.target.value) })} />
+                    <input className="field-input" type="number" value={form.activeJobs} onChange={e => setForm({ ...form, activeJobs: Number(e.target.value) })} style={{ borderRadius: 12 }} />
                   </div>
                   <div>
                     <label className="field-label">Visa Timeline (days)</label>
-                    <input className="field-input" type="number" value={form.visaProcessingDays} onChange={e => setForm({ ...form, visaProcessingDays: Number(e.target.value) })} />
+                    <input className="field-input" type="number" value={form.visaProcessingDays} onChange={e => setForm({ ...form, visaProcessingDays: Number(e.target.value) })} style={{ borderRadius: 12 }} />
                   </div>
                 </div>
+
                 <div className="checkbox-row">
                   <input type="checkbox" id="featured" checked={form.featured} onChange={e => setForm({ ...form, featured: e.target.checked })} />
                   <label htmlFor="featured" className="checkbox-label">Feature on the public website landing page</label>
                 </div>
               </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">{editId ? 'Save Changes' : 'Add Destination'}</button>
+
+              <div className="modal-footer" style={{ borderTop: 'none', paddingTop: 8, justifyContent: 'center', gap: 16 }}>
+                <button type="button" className="btn btn-ghost" onClick={() => setOpen(false)} style={{ color: 'var(--text-secondary)', fontWeight: 600, padding: '10px 24px' }}>Cancel</button>
+                <button type="submit" className="btn" style={{ background: '#0f172a', color: 'white', padding: '10px 24px', borderRadius: 12, flex: 1, justifyContent: 'center' }}>{editId ? 'Save Changes' : 'Add Destination'}</button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
