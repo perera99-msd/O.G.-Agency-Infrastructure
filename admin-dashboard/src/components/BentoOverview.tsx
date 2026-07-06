@@ -14,7 +14,7 @@ export const BentoOverview: React.FC<BentoOverviewProps> = ({
   destinations, jobs, gallery, blogs, responses, setActiveTab,
 }) => {
   const newResponses = responses.filter(r => r.status === 'new').length;
-  const totalPositions = jobs.reduce((a, j) => a + j.positionsAvailable, 0);
+  const totalPositions = jobs.reduce((a, j) => a + ((j as any).positionsAvailable || 0), 0);
 
   const stats = [
     {
