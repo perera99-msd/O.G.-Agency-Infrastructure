@@ -8,9 +8,9 @@ import { GalleryManager } from './components/GalleryManager';
 import { BlogsManager } from './components/BlogsManager';
 import { ContactResponsesManager } from './components/ContactResponsesManager';
 
-import { db, storage } from './firebase';
+import { db } from './firebase';
 import { collection, getDocs, setDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { compressImage } from './imageCompressor';
 
 import type { Destination, JobOpening, GalleryItem, BlogPost, ContactMessage, TabType } from './types';
 import {
@@ -115,54 +115,48 @@ export default function App() {
     }
   };
 
-  // Gallery
-  const addGallery = async (g: Omit<GalleryItem, 'id'> & { file?: File }) => {
-    try {
-      let finalImageUrl = g.imageUrl;
-      const id = crypto.randomUUID();
+  // Gallery — images compressed client-side and stored as base64 in Firestore
+  const addGallery = async (g: Omit<GalleryItem, 'id'> & { file?: File }): Promise<void> => {
+    const id = crypto.randomUUID();
+    let finalImageUrl = g.imageUrl; // already base64 from FileReader preview
 
-      if (g.file) {
-        const storageRef = ref(storage, `gallery/${id}_${g.file.name}`);
-        const snapshot = await uploadBytes(storageRef, g.file);
-        finalImageUrl = await getDownloadURL(snapshot.ref);
-      }
-      
-      const newItem: GalleryItem = { 
-        id,
-        title: g.title,
-        category: g.category,
-        imageUrl: finalImageUrl,
-        dateAdded: g.dateAdded,
-      };
-
-      setGallery(p => [newItem, ...p]);
-      await setDoc(doc(db, 'gallery', id), newItem);
-    } catch (err) {
-      console.error('Error adding gallery item:', err);
+    if (g.file) {
+      // Compress with Canvas API → JPEG base64 ~80-200 KB (under Firestore 1MB limit)
+      finalImageUrl = await compressImage(g.file, {
+        maxWidth: 900,
+        maxHeight: 900,
+        quality: 0.72,
+        maxSizeKB: 750,
+      });
     }
+
+    const newItem: GalleryItem = {
+      id,
+      title: g.title,
+      category: g.category,
+      imageUrl: finalImageUrl,  // base64 JPEG stored in Firestore
+      dateAdded: g.dateAdded,
+    };
+
+    setGallery(p => [newItem, ...p]);
+    await setDoc(doc(db, 'gallery', id), newItem);
   };
-  
+
   const updateGallery = async (id: string, g: Partial<GalleryItem>) => {
     setGallery(p => p.map(x => x.id === id ? { ...x, ...g } : x));
     try {
       await updateDoc(doc(db, 'gallery', id), g);
-    } catch(err) {
+    } catch (err) {
       console.error('Error updating gallery item:', err);
     }
   };
-  
+
   const deleteGallery = async (id: string) => {
-    const item = gallery.find(x => x.id === id);
     setGallery(p => p.filter(x => x.id !== id));
-    
     try {
       await deleteDoc(doc(db, 'gallery', id));
-      if (item && item.imageUrl.includes('firebasestorage.googleapis.com')) {
-        const fileRef = ref(storage, item.imageUrl);
-        await deleteObject(fileRef).catch(console.error);
-      }
     } catch (err) {
-      console.error('Error deleting gallery item:', err);
+      console.error('Error deleting gallery item from Firestore:', err);
     }
   };
 

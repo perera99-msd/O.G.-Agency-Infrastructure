@@ -217,6 +217,11 @@ img { display: block; max-width: 100%; }
   50% { opacity: 0.5; transform: scale(0.85); }
 }
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .header-notif {
   width: 38px;
   height: 38px;
