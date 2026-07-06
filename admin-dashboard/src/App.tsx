@@ -63,6 +63,16 @@ export default function App() {
         }
       })
       .catch(err => console.error('Error fetching jobs:', err));
+
+    // Fetch Blogs
+    getDocs(collection(db, 'blogs'))
+      .then(snapshot => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+        if (data.length > 0) {
+          setBlogs(data);
+        }
+      })
+      .catch(err => console.error('Error fetching blogs:', err));
   }, []);
 
   const unreadCount = responses.filter(r => r.status === 'new').length;
@@ -197,9 +207,34 @@ export default function App() {
   };
 
   // Blogs
-  const addBlog = (b: Omit<BlogPost, 'id'>) => setBlogs(p => [{ ...b, id: crypto.randomUUID() }, ...p]);
-  const updateBlog = (id: string, b: Partial<BlogPost>) => setBlogs(p => p.map(x => x.id === id ? { ...x, ...b } : x));
-  const deleteBlog = (id: string) => setBlogs(p => p.filter(x => x.id !== id));
+  const addBlog = async (b: Omit<BlogPost, 'id'>) => {
+    const id = crypto.randomUUID();
+    const newBlog = { ...b, id };
+    setBlogs(p => [newBlog, ...p]);
+    try {
+      await setDoc(doc(db, 'blogs', id), newBlog);
+    } catch (err) {
+      console.error('Error adding blog:', err);
+    }
+  };
+
+  const updateBlog = async (id: string, b: Partial<BlogPost>) => {
+    setBlogs(p => p.map(x => x.id === id ? { ...x, ...b } : x));
+    try {
+      await updateDoc(doc(db, 'blogs', id), b);
+    } catch (err) {
+      console.error('Error updating blog:', err);
+    }
+  };
+
+  const deleteBlog = async (id: string) => {
+    setBlogs(p => p.filter(x => x.id !== id));
+    try {
+      await deleteDoc(doc(db, 'blogs', id));
+    } catch (err) {
+      console.error('Error deleting blog:', err);
+    }
+  };
 
   // Responses
   const updateResponseStatus = (id: string, status: ContactMessage['status']) => setResponses(p => p.map(x => x.id === id ? { ...x, status } : x));

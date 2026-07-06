@@ -34,26 +34,7 @@ export const INITIAL_JOBS: JobOpening[] = [];
 
 export const INITIAL_GALLERY: GalleryItem[] = [];
 
-export const INITIAL_BLOGS: BlogPost[] = [
-  {
-    id: '1',
-    title: 'How to Prepare for Your Overseas Job Interview',
-    category: 'Visa & Legal',
-    readTime: '5 min read',
-    author: 'OG Admin',
-    publishDate: '2026-06-15',
-    excerpt: 'A complete guide to acing your overseas job interview and visa documentation process.',
-  },
-  {
-    id: '2',
-    title: 'Success Story: From Kathmandu to Doha',
-    category: 'Success Stories',
-    readTime: '3 min read',
-    author: 'OG Admin',
-    publishDate: '2026-06-20',
-    excerpt: 'Read how Ramesh secured a top construction role in Qatar through OG Agency.',
-  },
-];
+export const INITIAL_BLOGS: BlogPost[] = [];
 
 export const INITIAL_RESPONSES: ContactMessage[] = [
   {
