@@ -1,83 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight, Clock, Calendar, Tag, Search, Sparkles } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { collection, onSnapshot, query } from "firebase/firestore";
 
 interface BlogPost {
-  id: number;
+  id: string;
   title: string;
   excerpt: string;
   category: string;
   readTime: string;
-  date: string;
-  image: string;
+  publishDate: string;
+  image?: string;
   author: string;
   featured?: boolean;
 }
-
-const INITIAL_BLOGS: BlogPost[] = [
-  {
-    id: 1,
-    title: "How Automated Fabric Cutting Systems Are Revolutionizing Garment Factories in Poland",
-    excerpt: "Modern European apparel manufacturing relies heavily on CAD-driven pattern cutting. See how our candidates at OG Skills Academy adapt quickly to high-precision laser cutters.",
-    category: "Garment Factories",
-    readTime: "5 min read",
-    date: "June 25, 2026",
-    image: "/gallery/computerized-cutting.jpg",
-    author: "Technical Training Division"
-  },
-  {
-    id: 2,
-    title: "Step-by-Step Document Preparation for Romanian Industrial Work Visas",
-    excerpt: "Navigating medical certifications, police clearance records, and skill test attestations. Avoid common pitfalls that delay European Union work authorization.",
-    category: "Visa & Legal",
-    readTime: "8 min read",
-    date: "June 20, 2026",
-    image: "/gallery/garment-team-pink.jpg",
-    author: "Legal Compliance Team"
-  },
-  {
-    id: 3,
-    title: "Why High-Speed Juki & Brother Lockstitch Specialists Are in Record Demand",
-    excerpt: "An inside look at salary benchmarks, overtime structures, and accommodation benefits for Sri Lankan sewing machine operators across Southeastern Europe.",
-    category: "Market Trends",
-    readTime: "6 min read",
-    date: "June 14, 2026",
-    image: "/gallery/sewing-stations.jpg",
-    author: "Global Placement Advisory"
-  },
-  {
-    id: 4,
-    title: "Inside Our Factory Management Pathway: From Line Supervisor to Quality Manager",
-    excerpt: "Career progression stories of O.G. Agency candidates who transitioned from floor operators to supervisory roles in high-volume apparel manufacturing plants.",
-    category: "Candidate Stories",
-    readTime: "7 min read",
-    date: "June 08, 2026",
-    image: "/gallery/factory-runway.jpg",
-    author: "Alumni Relations"
-  },
-  {
-    id: 5,
-    title: "Blockchain & AI in Recruitment: Eliminating Middlemen and Verifying Credentials",
-    excerpt: "How our digital ecosystem ensures transparent contract signing, immutable skill records, and direct verified communication between foreign employers and workers.",
-    category: "Automation & Tech",
-    readTime: "5 min read",
-    date: "May 30, 2026",
-    image: "/gallery/garment-factory-floor.jpg",
-    author: "Digital Infrastructure Lab"
-  },
-  {
-    id: 6,
-    title: "Active Apparel & Sportswear Assembly: Precision Quality Standards in Lithuania",
-    excerpt: "Detailed inspection methodologies and seam strength testing required by top European activewear brands manufacturing in the Baltic region.",
-    category: "Garment Factories",
-    readTime: "6 min read",
-    date: "May 22, 2026",
-    image: "/gallery/sewing-room-active.jpg",
-    author: "Quality Assurance Unit"
-  }
-];
 
 const CATEGORIES = [
   "All Articles",
@@ -91,8 +30,22 @@ const CATEGORIES = [
 export default function BlogGrid() {
   const [activeCategory, setActiveCategory] = useState("All Articles");
   const [searchQuery, setSearchQuery] = useState("");
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
 
-  const filteredPosts = INITIAL_BLOGS.filter(post => {
+  useEffect(() => {
+    const q = query(collection(db, "blogs"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const blogsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as BlogPost[];
+      blogsData.sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
+      setBlogs(blogsData);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const filteredPosts = blogs.filter(post => {
     const matchesCategory = activeCategory === "All Articles" || post.category === activeCategory;
     const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
@@ -165,7 +118,7 @@ export default function BlogGrid() {
                   {/* Image Container */}
                   <div className="relative w-full h-64 overflow-hidden bg-main-900/5">
                     <img
-                      src={post.image}
+                      src={post.image || "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=800"}
                       alt={post.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
@@ -181,7 +134,7 @@ export default function BlogGrid() {
                     <div className="flex items-center gap-4 text-xs text-main-900/60 font-medium mb-4">
                       <span className="flex items-center gap-1.5">
                         <Calendar size={14} className="text-main-500" />
-                        {post.date}
+                        {post.publishDate}
                       </span>
                       <span>•</span>
                       <span className="flex items-center gap-1.5">
