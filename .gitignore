@@ -81,6 +81,7 @@ Pods/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.download
 *.pem
 *.key
 *.cert
