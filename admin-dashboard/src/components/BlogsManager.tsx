@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { BlogPost } from '../types';
-import { Plus, Edit3, Trash2, FileText, Clock, User, X } from 'lucide-react';
+import { Plus, Edit3, Trash2, FileText, Clock, User, X, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface BlogsManagerProps {
   blogs: BlogPost[];
-  onAdd: (blog: Omit<BlogPost, 'id'>) => void;
-  onUpdate: (id: string, blog: Partial<BlogPost>) => void;
+  onAdd: (blog: Omit<BlogPost, 'id'> & { file?: File }) => void;
+  onUpdate: (id: string, blog: Partial<BlogPost> & { file?: File }) => void;
   onDelete: (id: string) => void;
 }
 
@@ -22,12 +22,13 @@ const categoryColor = (c: string) => {
 
 const emptyForm: {
   title: string; category: BlogPost['category']; readTime: string;
-  author: string; publishDate: string; excerpt: string;
+  author: string; publishDate: string; excerpt: string; image: string; file?: File;
 } = {
   title: '', category: 'Visa & Legal', readTime: '5 min read',
   author: 'Legal Compliance Desk',
   publishDate: new Date().toISOString().split('T')[0],
   excerpt: '',
+  image: '',
 };
 
 export const BlogsManager: React.FC<BlogsManagerProps> = ({
@@ -36,6 +37,32 @@ export const BlogsManager: React.FC<BlogsManagerProps> = ({
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...emptyForm });
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDragEnter = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
+      setIsDragging(false);
+    }
+  };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation(); setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      if (file.type.startsWith('image/')) setForm(p => ({ ...p, file, image: URL.createObjectURL(file) }));
+    }
+  };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      if (file.type.startsWith('image/')) setForm(p => ({ ...p, file, image: URL.createObjectURL(file) }));
+    }
+    e.target.value = '';
+  };
 
   const openCreate = () => {
     setEditId(null);
@@ -45,7 +72,7 @@ export const BlogsManager: React.FC<BlogsManagerProps> = ({
 
   const openEdit = (b: BlogPost) => {
     setEditId(b.id);
-    setForm({ title: b.title, category: b.category, readTime: b.readTime, author: b.author, publishDate: b.publishDate, excerpt: b.excerpt });
+    setForm({ title: b.title, category: b.category, readTime: b.readTime, author: b.author, publishDate: b.publishDate, excerpt: b.excerpt, image: b.image || '' });
     setOpen(true);
   };
 
@@ -95,6 +122,11 @@ export const BlogsManager: React.FC<BlogsManagerProps> = ({
                 </div>
               </div>
 
+              {blog.image && (
+                <div style={{ width: '100%', height: 140, borderRadius: 8, overflow: 'hidden', marginBottom: 12 }}>
+                  <img src={blog.image} alt={blog.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              )}
               <div>
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4, letterSpacing: '-0.2px' }}>
                   {blog.title}
@@ -214,6 +246,34 @@ export const BlogsManager: React.FC<BlogsManagerProps> = ({
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                       <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Publication Date</label>
                       <input className="field-input" type="date" value={form.publishDate} onChange={e => setForm({ ...form, publishDate: e.target.value })} style={{ background: '#f8fafc', borderColor: 'transparent', padding: '12px 16px', fontSize: 14, borderRadius: 12, fontWeight: 500, color: '#0f172a', transition: 'all 0.2s', boxShadow: 'inset 0 0 0 1px #e2e8f0' }} onFocus={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #4f46e5'} onBlur={e => e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #e2e8f0'} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Cover Image</label>
+                    <div
+                      onDragEnter={handleDragEnter} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        border: `2.5px dashed ${isDragging ? '#4f46e5' : '#cbd5e1'}`, borderRadius: 16, padding: '24px', textAlign: 'center', cursor: 'pointer',
+                        background: form.image ? `url(${form.image}) center/cover no-repeat` : (isDragging ? 'rgba(79,70,229,0.06)' : '#f8fafc'),
+                        transition: 'all 0.2s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, userSelect: 'none', position: 'relative', overflow: 'hidden'
+                      }}
+                    >
+                      {form.image && <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} />}
+                      <div style={{
+                        width: 48, height: 48, borderRadius: '50%', background: isDragging ? '#4f46e5' : '#ffffff',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: isDragging ? '0 8px 24px rgba(79,70,229,0.35)' : '0 4px 12px rgba(0,0,0,0.07)',
+                        zIndex: 1
+                      }}>
+                        <Upload size={20} style={{ color: isDragging ? '#ffffff' : '#64748b' }} />
+                      </div>
+                      <div style={{ zIndex: 1 }}>
+                        <p style={{ fontSize: 14, color: form.image ? '#fff' : (isDragging ? '#4f46e5' : '#0f172a'), margin: 0, fontWeight: 700 }}>
+                          {isDragging ? 'Drop image here!' : (form.image ? 'Click or drop to replace image' : 'Drag & drop cover image')}
+                        </p>
+                      </div>
+                      <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
                     </div>
                   </div>
 

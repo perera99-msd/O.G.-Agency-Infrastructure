@@ -78,9 +78,29 @@ export default function App() {
   const unreadCount = responses.filter(r => r.status === 'new').length;
 
   // Destinations
-  const addDest = async (d: Omit<Destination, 'id'>) => {
+  const addDest = async (d: Omit<Destination, 'id'> & { file?: File }) => {
     const id = crypto.randomUUID();
-    const newDest = { ...d, id };
+    let finalImageUrl = d.heroImage || '';
+
+    if (d.file) {
+      finalImageUrl = await compressImage(d.file, {
+        maxWidth: 1200,
+        maxHeight: 800,
+        quality: 0.75,
+        maxSizeKB: 500,
+      });
+    }
+
+    const newDest: Destination = {
+      id,
+      country: d.country,
+      region: d.region,
+      activeJobs: d.activeJobs,
+      visaProcessingDays: d.visaProcessingDays,
+      featured: d.featured,
+      heroImage: finalImageUrl,
+    };
+
     setDestinations(p => [newDest, ...p]);
     try {
       await setDoc(doc(db, 'destinations', id), newDest);
@@ -89,10 +109,27 @@ export default function App() {
     }
   };
 
-  const updateDest = async (id: string, d: Partial<Destination>) => {
-    setDestinations(p => p.map(x => x.id === id ? { ...x, ...d } : x));
+  const updateDest = async (id: string, d: Partial<Destination> & { file?: File }) => {
+    let finalImageUrl = d.heroImage;
+
+    if (d.file) {
+      finalImageUrl = await compressImage(d.file, {
+        maxWidth: 1200,
+        maxHeight: 800,
+        quality: 0.75,
+        maxSizeKB: 500,
+      });
+    }
+
+    const updatedData = { ...d };
+    delete updatedData.file;
+    if (finalImageUrl !== undefined) {
+      updatedData.heroImage = finalImageUrl;
+    }
+
+    setDestinations(p => p.map(x => x.id === id ? { ...x, ...updatedData } : x));
     try {
-      await updateDoc(doc(db, 'destinations', id), d);
+      await updateDoc(doc(db, 'destinations', id), updatedData);
     } catch (err) {
       console.error('Error updating destination:', err);
     }
@@ -207,9 +244,30 @@ export default function App() {
   };
 
   // Blogs
-  const addBlog = async (b: Omit<BlogPost, 'id'>) => {
+  const addBlog = async (b: Omit<BlogPost, 'id'> & { file?: File }) => {
     const id = crypto.randomUUID();
-    const newBlog = { ...b, id };
+    let finalImageUrl = b.image || '';
+
+    if (b.file) {
+      finalImageUrl = await compressImage(b.file, {
+        maxWidth: 1200,
+        maxHeight: 800,
+        quality: 0.75,
+        maxSizeKB: 500,
+      });
+    }
+
+    const newBlog: BlogPost = {
+      id,
+      title: b.title,
+      category: b.category,
+      readTime: b.readTime,
+      author: b.author,
+      publishDate: b.publishDate,
+      excerpt: b.excerpt,
+      image: finalImageUrl,
+    };
+
     setBlogs(p => [newBlog, ...p]);
     try {
       await setDoc(doc(db, 'blogs', id), newBlog);
@@ -218,10 +276,27 @@ export default function App() {
     }
   };
 
-  const updateBlog = async (id: string, b: Partial<BlogPost>) => {
-    setBlogs(p => p.map(x => x.id === id ? { ...x, ...b } : x));
+  const updateBlog = async (id: string, b: Partial<BlogPost> & { file?: File }) => {
+    let finalImageUrl = b.image;
+
+    if (b.file) {
+      finalImageUrl = await compressImage(b.file, {
+        maxWidth: 1200,
+        maxHeight: 800,
+        quality: 0.75,
+        maxSizeKB: 500,
+      });
+    }
+
+    const updatedData = { ...b };
+    delete updatedData.file;
+    if (finalImageUrl !== undefined) {
+      updatedData.image = finalImageUrl;
+    }
+
+    setBlogs(p => p.map(x => x.id === id ? { ...x, ...updatedData } : x));
     try {
-      await updateDoc(doc(db, 'blogs', id), b);
+      await updateDoc(doc(db, 'blogs', id), updatedData);
     } catch (err) {
       console.error('Error updating blog:', err);
     }

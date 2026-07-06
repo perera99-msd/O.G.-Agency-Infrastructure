@@ -43,6 +43,7 @@ export interface BlogPost {
   author: string;
   publishDate: string;
   excerpt: string;
+  image?: string;
 }
 
 export interface ContactMessage {
