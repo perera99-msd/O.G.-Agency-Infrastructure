@@ -4,16 +4,16 @@ import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 const GALLERY_IMAGES = [
-  { src: "/gallery/garment-sewing-rows.jpg", title: "Garment Sewing Line", location: "Romania" },
-  { src: "/gallery/garment-factory-floor.jpg", title: "Industrial Factory Floor", location: "Poland" },
-  { src: "/gallery/computerized-cutting.jpg", title: "Automated Fabric Cutting", location: "Academy" },
-  { src: "/gallery/sewing-stations.jpg", title: "Sewing Stations Assessment", location: "Training Center" },
-  { src: "/gallery/embroidery-production.jpg", title: "Embroidery Division", location: "Innovation Lab" },
-  { src: "/gallery/garment-team-pink.jpg", title: "Computerized Machinists", location: "Romania" },
-  { src: "/gallery/factory-runway.jpg", title: "Production Management", location: "Poland" },
-  { src: "/gallery/sewing-room-active.jpg", title: "Active Apparel Assembly", location: "Lithuania" },
-  { src: "/gallery/long-assembly-line.jpg", title: "Double Assembly Line", location: "Germany" },
-  { src: "/gallery/modern-sewing-line.jpg", title: "Modern Sewing Workshop", location: "EU Hub" },
+  { src: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800", title: "Garment Sewing Line", location: "Romania" },
+  { src: "https://images.unsplash.com/photo-1617791160505-6f00b046a874?auto=format&fit=crop&q=80&w=800", title: "Industrial Factory Floor", location: "Poland" },
+  { src: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=800", title: "Automated Fabric Cutting", location: "Academy" },
+  { src: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800", title: "Sewing Stations Assessment", location: "Training Center" },
+  { src: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=800", title: "Embroidery Division", location: "Innovation Lab" },
+  { src: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=800", title: "Computerized Machinists", location: "Romania" },
+  { src: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&q=80&w=800", title: "Production Management", location: "Poland" },
+  { src: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=800", title: "Active Apparel Assembly", location: "Lithuania" },
+  { src: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&q=80&w=800", title: "Double Assembly Line", location: "Germany" },
+  { src: "https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?auto=format&fit=crop&q=80&w=800", title: "Modern Sewing Workshop", location: "EU Hub" },
 ];
 
 export default function GalleryMarquee() {
