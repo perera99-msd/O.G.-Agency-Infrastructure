@@ -1,18 +1,20 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { Destination } from '../types';
 import { Plus, Edit3, Trash2, Globe2, Star, Upload } from 'lucide-react';
 
 interface DestinationsManagerProps {
   destinations: Destination[];
-  onAdd: (dest: Omit<Destination, 'id'>) => void;
-  onUpdate: (id: string, dest: Partial<Destination>) => void;
+  onAdd: (dest: Omit<Destination, 'id'> & { file?: File }) => void;
+  onUpdate: (id: string, dest: Partial<Destination> & { file?: File }) => void;
   onDelete: (id: string) => void;
 }
 
-const emptyForm = {
+const emptyForm: {
+  country: string; region: string; heroImage: string; activeJobs: number; visaProcessingDays: number; featured: boolean; file?: File;
+} = {
   country: '',
   region: '',
-  heroImage: 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&q=80&w=800',
+  heroImage: '',
   activeJobs: 10,
   visaProcessingDays: 30,
   featured: false,
@@ -24,6 +26,32 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...emptyForm });
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDragEnter = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
+      setIsDragging(false);
+    }
+  };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation(); setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      if (file.type.startsWith('image/')) setForm(p => ({ ...p, file, heroImage: URL.createObjectURL(file) }));
+    }
+  };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      if (file.type.startsWith('image/')) setForm(p => ({ ...p, file, heroImage: URL.createObjectURL(file) }));
+    }
+    e.target.value = '';
+  };
 
   const openCreate = () => {
     setEditId(null);
@@ -34,7 +62,7 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
   const openEdit = (d: Destination) => {
     setEditId(d.id);
     setForm({
-      country: d.country, region: d.region, heroImage: d.heroImage,
+      country: d.country, region: d.region, heroImage: d.heroImage || '',
       activeJobs: d.activeJobs, visaProcessingDays: d.visaProcessingDays, featured: d.featured,
     });
     setOpen(true);
@@ -51,91 +79,91 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
   return (
     <>
       <div className="animate-in">
-      {/* Page Header */}
-      <div className="page-header">
-        <div>
-          <h2 className="page-title">Destinations</h2>
-          <p className="page-subtitle">Manage international employment corridors and visa timelines.</p>
-        </div>
-        <div className="page-actions">
-          <button className="btn btn-primary" onClick={openCreate}>
-            <Plus size={14} strokeWidth={2.5} /> Add Destination
-          </button>
-        </div>
-      </div>
-
-      {/* Grid */}
-      {destinations.length === 0 ? (
-        <div className="card">
-          <div className="empty-state">
-            <div className="empty-state-icon"><Globe2 size={20} strokeWidth={1.5} /></div>
-            <p className="empty-state-title">No destinations yet</p>
-            <p className="empty-state-desc">Add your first employment corridor to get started.</p>
-            <button className="btn btn-primary" style={{ marginTop: 4 }} onClick={openCreate}>
-              <Plus size={14} /> Add Destination
+        {/* Page Header */}
+        <div className="page-header">
+          <div>
+            <h2 className="page-title">Destinations</h2>
+            <p className="page-subtitle">Manage international employment corridors and visa timelines.</p>
+          </div>
+          <div className="page-actions">
+            <button className="btn btn-primary" onClick={openCreate}>
+              <Plus size={14} strokeWidth={2.5} /> Add Destination
             </button>
           </div>
         </div>
-      ) : (
-        <div className="grid-3">
-          {destinations.map(d => (
-            <div key={d.id} className="card" style={{ overflow: 'hidden' }}>
-              {/* Image */}
-              <div className="img-card-wrap" style={{ height: 160 }}>
-                <img src={d.heroImage} alt={d.country} />
-                <div className="img-overlay" />
-                <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', gap: 6 }}>
-                  <span className="tag tag-indigo" style={{ fontSize: 11, background: 'rgba(255,255,255,0.9)', color: 'var(--accent)', border: 'none', backdropFilter: 'blur(4px)' }}>
-                    {d.region}
-                  </span>
-                  {d.featured && (
-                    <span className="tag" style={{ fontSize: 11, background: 'rgba(255,255,255,0.9)', color: 'var(--amber)', border: 'none', backdropFilter: 'blur(4px)', gap: 4 }}>
-                      <Star size={10} fill="currentColor" /> Featured
-                    </span>
-                  )}
-                </div>
-                {/* Action buttons */}
-                <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }}>
-                  <button
-                    className="btn btn-icon"
-                    onClick={() => openEdit(d)}
-                    style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', color: 'var(--text-secondary)', border: 'none', width: 28, height: 28 }}
-                    title="Edit"
-                  >
-                    <Edit3 size={12} strokeWidth={2} />
-                  </button>
-                  <button
-                    className="btn btn-icon"
-                    onClick={() => onDelete(d.id)}
-                    style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', color: 'var(--red)', border: 'none', width: 28, height: 28 }}
-                    title="Delete"
-                  >
-                    <Trash2 size={12} strokeWidth={2} />
-                  </button>
-                </div>
-              </div>
 
-              {/* Content */}
-              <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Globe2 size={15} strokeWidth={1.8} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-                  <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.2px' }}>{d.country}</p>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                  <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 11px' }}>
-                    <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', marginBottom: 2 }}>Active Jobs</p>
-                    <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent)', lineHeight: 1 }}>{d.activeJobs}</p>
+        {/* Grid */}
+        {destinations.length === 0 ? (
+          <div className="card">
+            <div className="empty-state">
+              <div className="empty-state-icon"><Globe2 size={20} strokeWidth={1.5} /></div>
+              <p className="empty-state-title">No destinations yet</p>
+              <p className="empty-state-desc">Add your first employment corridor to get started.</p>
+              <button className="btn btn-primary" style={{ marginTop: 4 }} onClick={openCreate}>
+                <Plus size={14} /> Add Destination
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="grid-3">
+            {destinations.map(d => (
+              <div key={d.id} className="card" style={{ overflow: 'hidden' }}>
+                {/* Image */}
+                <div className="img-card-wrap" style={{ height: 160 }}>
+                  <img src={d.heroImage} alt={d.country} />
+                  <div className="img-overlay" />
+                  <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', gap: 6 }}>
+                    <span className="tag tag-indigo" style={{ fontSize: 11, background: 'rgba(255,255,255,0.9)', color: 'var(--accent)', border: 'none', backdropFilter: 'blur(4px)' }}>
+                      {d.region}
+                    </span>
+                    {d.featured && (
+                      <span className="tag" style={{ fontSize: 11, background: 'rgba(255,255,255,0.9)', color: 'var(--amber)', border: 'none', backdropFilter: 'blur(4px)', gap: 4 }}>
+                        <Star size={10} fill="currentColor" /> Featured
+                      </span>
+                    )}
                   </div>
-                  <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 11px' }}>
-                    <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', marginBottom: 2 }}>Visa Days</p>
-                    <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--green)', lineHeight: 1 }}>{d.visaProcessingDays}</p>
+                  {/* Action buttons */}
+                  <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }}>
+                    <button
+                      className="btn btn-icon"
+                      onClick={() => openEdit(d)}
+                      style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', color: 'var(--text-secondary)', border: 'none', width: 28, height: 28 }}
+                      title="Edit"
+                    >
+                      <Edit3 size={12} strokeWidth={2} />
+                    </button>
+                    <button
+                      className="btn btn-icon"
+                      onClick={() => onDelete(d.id)}
+                      style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', color: 'var(--red)', border: 'none', width: 28, height: 28 }}
+                      title="Delete"
+                    >
+                      <Trash2 size={12} strokeWidth={2} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Globe2 size={15} strokeWidth={1.8} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+                    <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.2px' }}>{d.country}</p>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                    <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 11px' }}>
+                      <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', marginBottom: 2 }}>Active Jobs</p>
+                      <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent)', lineHeight: 1 }}>{d.activeJobs}</p>
+                    </div>
+                    <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 11px' }}>
+                      <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', marginBottom: 2 }}>Visa Days</p>
+                      <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--green)', lineHeight: 1 }}>{d.visaProcessingDays}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Modal */}
@@ -151,7 +179,7 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
               </div>
               <button className="modal-close" onClick={() => setOpen(false)} style={{ borderRadius: '50%', background: 'var(--bg)', border: 'none', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
             </div>
-            
+
             <form onSubmit={handleSubmit}>
               <div className="modal-body" style={{ gap: 20 }}>
                 <div className="field-row">
@@ -165,9 +193,32 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
                   </div>
                 </div>
 
-                <div>
-                  <label className="field-label">Hero Image URL</label>
-                  <input className="field-input" type="url" placeholder="https://images.unsplash.com/..." value={form.heroImage} onChange={e => setForm({ ...form, heroImage: e.target.value })} style={{ borderRadius: 12 }} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label className="field-label">Hero Image</label>
+                  <div
+                    onDragEnter={handleDragEnter} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      border: `2.5px dashed ${isDragging ? '#4f46e5' : '#cbd5e1'}`, borderRadius: 16, padding: '24px', textAlign: 'center', cursor: 'pointer',
+                      background: form.heroImage ? `url(${form.heroImage}) center/cover no-repeat` : (isDragging ? 'rgba(79,70,229,0.06)' : '#f8fafc'),
+                      transition: 'all 0.2s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, userSelect: 'none', position: 'relative', overflow: 'hidden'
+                    }}
+                  >
+                    {form.heroImage && <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} />}
+                    <div style={{
+                      width: 48, height: 48, borderRadius: '50%', background: isDragging ? '#4f46e5' : '#ffffff',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: isDragging ? '0 8px 24px rgba(79,70,229,0.35)' : '0 4px 12px rgba(0,0,0,0.07)',
+                      zIndex: 1
+                    }}>
+                      <Upload size={20} style={{ color: isDragging ? '#ffffff' : '#64748b' }} />
+                    </div>
+                    <div style={{ zIndex: 1 }}>
+                      <p style={{ fontSize: 14, color: form.heroImage ? '#fff' : (isDragging ? '#4f46e5' : '#0f172a'), margin: 0, fontWeight: 700 }}>
+                        {isDragging ? 'Drop image here!' : (form.heroImage ? 'Click or drop to replace image' : 'Drag & drop hero image')}
+                      </p>
+                    </div>
+                    <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
+                  </div>
                 </div>
 
                 <div className="field-row">

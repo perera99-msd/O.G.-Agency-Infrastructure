@@ -65,7 +65,7 @@ export default function BlogHero() {
           <div className="lg:col-span-5">
             <div className="relative group rounded-3xl overflow-hidden border border-main-50/20 bg-main-700/20 shadow-2xl aspect-[4/3]">
               <img
-                src="/gallery/garment-sewing-rows.jpg"
+                src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800"
                 alt="European Union Garment Factory Placement"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />

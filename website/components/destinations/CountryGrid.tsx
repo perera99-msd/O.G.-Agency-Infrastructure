@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { db } from "@/lib/firebase";
+import { collection, onSnapshot, query } from "firebase/firestore";
 
-type Region = "all" | "europe" | "middle-east" | "asia" | "eurasia";
+type Region = string;
 
 interface Country {
   slug: string;
@@ -17,135 +19,7 @@ interface Country {
   accommodationIncluded?: boolean;
   featured?: boolean;
 }
-
-const COUNTRIES: Country[] = [
-  {
-    slug: "bosnia",
-    name: "Bosnia",
-    flag: "/home/hero2/ba.svg",
-    region: "europe",
-    jobCount: "120+",
-    salaryRange: "€900 – €1,800",
-    tags: ["Construction", "Manufacturing", "Services"],
-    image: "/images/countryGrid/bosnia-cg.jpg",
-    accommodationIncluded: true,
-  },
-  {
-    slug: "cyprus",
-    name: "Cyprus",
-    flag: "/home/hero2/cy.svg",
-    region: "europe",
-    jobCount: "90+",
-    salaryRange: "€1,000 – €1,600",
-    tags: ["Tourism", "Hospitality"],
-    image: "/images/countryGrid/cyprus-cg.jpg",
-  },
-  {
-    slug: "dubai",
-    name: "United Arab Emirates",
-    flag: "/home/hero2/ae.svg",
-    region: "middle-east",
-    jobCount: "250+",
-    salaryRange: "Tax-free salary",
-    tags: ["Construction", "Retail", "Healthcare"],
-    image: "/images/countryGrid/dubai-cg.jpg",
-    accommodationIncluded: true,
-  },
-  {
-    slug: "germany",
-    name: "Germany",
-    flag: "/home/hero2/de.svg",
-    region: "europe",
-    jobCount: "300+",
-    salaryRange: "€1,800 – €3,500",
-    tags: ["Engineering", "Healthcare"],
-    image: "/images/countryGrid/germany-cg.jpg",
-  },
-  {
-    slug: "israel",
-    name: "Israel",
-    flag: "/home/hero2/il.svg",
-    region: "middle-east",
-    jobCount: "150+",
-    salaryRange: "$2,000 – $3,500",
-    tags: ["Caregiving", "Construction"],
-    image: "/images/countryGrid/israel-cg.jpg",
-    accommodationIncluded: true,
-  },
-  {
-    slug: "jordan",
-    name: "Jordan",
-    flag: "/home/hero2/jo.svg",
-    region: "middle-east",
-    jobCount: "80+",
-    salaryRange: "Tax-free salary",
-    tags: ["Garment", "Manufacturing"],
-    image: "/images/countryGrid/jordan-cg.jpg",
-  },
-  {
-    slug: "malaysia",
-    name: "Malaysia",
-    flag: "/home/hero2/my.svg",
-    region: "asia",
-    jobCount: "200+",
-    salaryRange: "RM1,500 – RM2,500",
-    tags: ["Manufacturing", "Plantation"],
-    image: "/images/countryGrid/malaysia-cg.jpg",
-    accommodationIncluded: true,
-  },
-  {
-    slug: "romania",
-    name: "Romania",
-    flag: "/home/hero2/ro.svg",
-    region: "europe",
-    jobCount: "150+",
-    salaryRange: "€700 – €1,400",
-    tags: ["Agriculture", "Logistics"],
-    image: "/images/countryGrid/romania-cg.jpg",
-  },
-  {
-    slug: "russia",
-    name: "Russia",
-    flag: "/home/hero2/ru.svg",
-    region: "eurasia",
-    jobCount: "200+",
-    salaryRange: "₽60k – ₽120k/mo",
-    tags: ["Mining", "Transport"],
-    image: "/images/countryGrid/rissia-cg.jpg",
-  },
-  {
-    slug: "oman",
-    name: "Oman",
-    flag: "/home/hero2/om.svg",
-    region: "middle-east",
-    jobCount: "200+",
-    salaryRange: "200 - 300 OMR",
-    tags: ["Mining", "Transport"],
-    image: "/images/countryGrid/oman-cg.jpg",
-  },
-  {
-    slug: "qatar",
-    name: "Qatar",
-    flag: "/home/hero2/qa.svg",
-    region: "middle-east",
-    jobCount: "200+",
-    salaryRange: "200 - 400 QAR",
-    tags: ["Mining", "Transport"],
-    image: "/images/countryGrid/qatar-cg.jpg",
-  },
-  {
-    slug: "saudi-arabia",
-    name: "Saudi Arabia",
-    flag: "/home/hero2/sa.svg",
-    region: "middle-east",
-    jobCount: "200+",
-    salaryRange: "1500 - 2500 SAR",
-    tags: ["Mining", "Transport"],
-    image: "/images/countryGrid/saudiArabia-cg.jpg",
-  },
-];
-
-const FILTERS: { label: string; value: Region }[] = [
+const FILTERS: { label: string; value: string }[] = [
   { label: "All", value: "all" },
   { label: "Europe", value: "europe" },
   { label: "Middle East", value: "middle-east" },
@@ -154,10 +28,33 @@ const FILTERS: { label: string; value: Region }[] = [
 ];
 
 export default function CountryGrid() {
-  const [activeRegion, setActiveRegion] = useState<Region>("all");
+  const [activeRegion, setActiveRegion] = useState<string>("all");
+  const [countries, setCountries] = useState<Country[]>([]);
 
-  const filtered = COUNTRIES.filter(
-    (c) => activeRegion === "all" || c.region === activeRegion
+  useEffect(() => {
+    const q = query(collection(db, "destinations"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => {
+        const d = doc.data();
+        return {
+          slug: doc.id,
+          name: d.country || "Unknown",
+          flag: d.flag || "📍", // Fallback emoji if no flag image provided
+          region: (d.region || "").toLowerCase(),
+          jobCount: `${d.activeJobs || 0}+`,
+          salaryRange: d.salaryRange || "Depends on Job",
+          tags: d.tags || ["Opportunities"],
+          image: d.heroImage || "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&q=80&w=800",
+          featured: d.featured || false,
+        } as Country;
+      });
+      setCountries(data);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const filtered = countries.filter(
+    (c) => activeRegion === "all" || c.region.includes(activeRegion.replace("-", " ")) || c.region === activeRegion
   );
 
   // First card in filtered list gets featured (span-2) treatment
