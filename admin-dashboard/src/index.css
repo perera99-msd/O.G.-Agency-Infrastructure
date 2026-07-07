@@ -1046,3 +1046,356 @@ img { display: block; max-width: 100%; }
 @media (max-width: 1100px) {
   .content-split { grid-template-columns: 1fr; }
 }
+
+/* ==========================================================================
+   BTR / O.G. RETRO-CYBER LOGIN PAGE (Admin Dashboard Theme Integrated)
+   Non-scrollable (100vw x 100vh, position: fixed, overflow: hidden)
+   ========================================================================== */
+
+.btr-login-wrapper {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 20px;
+  background-color: var(--text-primary);
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  z-index: 99999;
+  user-select: none;
+}
+
+/* Custom Pinterest Background Image Layer */
+.btr-bg-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://i.pinimg.com/736x/43/d4/e4/43d4e494f01c6bc41b56cfc4305007b7.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.8) contrast(1.05) saturate(1.15);
+  transform: scale(1.02);
+  transition: transform 15s ease-out;
+}
+
+.btr-login-wrapper:hover .btr-bg-image {
+  transform: scale(1.06);
+}
+
+.btr-bg-gradient {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 75% 55%, rgba(99, 102, 241, 0.15) 0%, rgba(15, 23, 42, 0.3) 35%, rgba(15, 23, 42, 0.5) 75%, rgba(15, 23, 42, 0.75) 100%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.1) 0%, rgba(15, 23, 42, 0.6) 100%);
+  pointer-events: none;
+}
+
+/* Dark Silhouettes of Trees & Hills on the Sides/Bottom */
+.btr-bg-silhouette {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(0deg, #090709 0%, rgba(9, 7, 9, 0.7) 40%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Master Modal Card — Transparent so site bg shows through right panel! */
+.btr-login-card {
+  position: relative;
+  z-index: 10;
+  width: 900px;
+  max-width: 96vw;
+  height: 520px;
+  max-height: 92vh;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  background: transparent;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 
+    0 40px 100px -15px rgba(0, 0, 0, 0.85),
+    0 0 0 1px rgba(255, 255, 255, 0.18);
+  animation: modalPopIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ==========================================================================
+   LEFT PANEL: Solid Dark Form Panel (Do not change left side of card)
+   ========================================================================== */
+.btr-form-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 44px 48px;
+  background: #111113;
+  color: #ffffff;
+  z-index: 2;
+}
+
+@media (max-width: 850px) {
+  .btr-login-card {
+    grid-template-columns: 1fr;
+    width: 440px;
+    height: 540px;
+    background: #111113;
+  }
+  .btr-visual-panel {
+    display: none !important;
+  }
+}
+
+@media (max-height: 620px) {
+  .btr-login-card {
+    height: 94vh;
+  }
+  .btr-form-panel {
+    padding: 28px 36px;
+  }
+}
+
+.btr-logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btr-logo {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  color: #ffffff;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.btr-logo-dot {
+  color: var(--accent, #6366f1);
+}
+
+.btr-mode-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #a1a1aa;
+  background: #18181b;
+  border: 1px solid #27272a;
+  padding: 5px 12px;
+  border-radius: 100px;
+  text-transform: uppercase;
+}
+
+/* Form Header */
+.btr-form-header {
+  margin-top: 14px;
+}
+
+.btr-form-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.02em;
+}
+
+.btr-form-subtitle {
+  font-size: 13.5px;
+  color: #a1a1aa;
+  margin: 0;
+  line-height: 1.55;
+  font-weight: 500;
+}
+
+/* Form Fields */
+.btr-form-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.btr-input-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.btr-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #ffffff;
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.btr-input::placeholder {
+  color: #52525b;
+}
+
+.btr-input:focus {
+  background: #1c1c20;
+  border-color: var(--accent, #6366f1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+}
+
+.btr-input-password {
+  padding-right: 44px;
+}
+
+.btr-eye-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #71717a;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.btr-eye-btn:hover {
+  color: #ffffff;
+}
+
+/* Checkbox */
+.btr-checkbox-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.btr-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #a1a1aa;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.btr-checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  accent-color: var(--accent, #6366f1);
+  cursor: pointer;
+  background: #18181b;
+  border: 1px solid #27272a;
+}
+
+.btr-forgot-link {
+  font-size: 12.5px;
+  color: #71717a;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.btr-forgot-link:hover {
+  color: var(--accent, #6366f1);
+}
+
+/* Submit Button */
+.btr-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #ffffff;
+  background: var(--accent, #6366f1);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.btr-submit-btn:hover:not(:disabled) {
+  background: var(--accent-hover, #4f46e5);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(99, 102, 241, 0.45);
+}
+
+.btr-submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btr-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Security Note Footer */
+.btr-security-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #52525b;
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+/* ==========================================================================
+   RIGHT PANEL: Transparent Glass so site background shows through!
+   ========================================================================== */
+.btr-visual-panel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  padding: 36px;
+}
+
+/* Center Image with Drop Shadow and Subtle Hover Scale */
+.btr-visual-img {
+  max-width: 88%;
+  max-height: 88%;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 35px rgba(0, 0, 0, 0.65));
+  transform: scale(1);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btr-visual-panel:hover .btr-visual-img {
+  transform: scale(1.05);
+}
+
+

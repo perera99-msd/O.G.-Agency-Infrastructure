@@ -7,6 +7,7 @@ import { JobsManager } from './components/JobsManager';
 import { GalleryManager } from './components/GalleryManager';
 import { BlogsManager } from './components/BlogsManager';
 import { ContactResponsesManager } from './components/ContactResponsesManager';
+import { LoginPage } from './components/LoginPage';
 
 import { db } from './firebase';
 import { collection, getDocs, setDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
@@ -22,12 +23,25 @@ import {
 } from './mockData';
 
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    return localStorage.getItem('og_admin_logged_in') === 'true';
+  });
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [jobs, setJobs] = useState<JobOpening[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>(INITIAL_GALLERY);
   const [blogs, setBlogs] = useState<BlogPost[]>(INITIAL_BLOGS);
   const [responses, setResponses] = useState<ContactMessage[]>(INITIAL_RESPONSES);
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    localStorage.setItem('og_admin_logged_in', 'true');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem('og_admin_logged_in');
+  };
 
   useEffect(() => {
     // Fetch Gallery
@@ -149,67 +163,65 @@ export default function App() {
     try {
       const res = await fetch('http://localhost:5000/api/v1/admin/jobs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer dev-mock-token' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer dev-mock-token'
+        },
         body: JSON.stringify(j)
       });
       const json = await res.json();
-      if (json.success) {
+      if (json.success && json.data) {
         setJobs(p => [json.data, ...p]);
-      } else {
-        alert(json.message || 'Failed to add job');
       }
     } catch (err) {
-      console.error('Error adding job:', err);
+      console.error('Error adding job via API:', err);
+      setJobs(p => [{ ...j, id: crypto.randomUUID() }, ...p]);
     }
   };
 
   const updateJob = async (id: string, j: Partial<JobOpening>) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/v1/admin/jobs/${id}`, {
+      await fetch(`http://localhost:5000/api/v1/admin/jobs/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer dev-mock-token' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer dev-mock-token'
+        },
         body: JSON.stringify(j)
       });
-      const json = await res.json();
-      if (json.success) {
-        setJobs(p => p.map(x => x.id === id ? { ...x, ...j } : x));
-      } else {
-        alert(json.message || 'Failed to update job');
-      }
+      setJobs(p => p.map(x => x.id === id ? { ...x, ...j } : x));
     } catch (err) {
-      console.error('Error updating job:', err);
+      console.error('Error updating job via API:', err);
+      setJobs(p => p.map(x => x.id === id ? { ...x, ...j } : x));
     }
   };
 
   const deleteJob = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/v1/admin/jobs/${id}`, {
+      await fetch(`http://localhost:5000/api/v1/admin/jobs/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': 'Bearer dev-mock-token' }
+        headers: {
+          'Authorization': 'Bearer dev-mock-token'
+        }
       });
-      const json = await res.json();
-      if (json.success) {
-        setJobs(p => p.filter(x => x.id !== id));
-      } else {
-        alert(json.message || 'Failed to delete job');
-      }
+      setJobs(p => p.filter(x => x.id !== id));
     } catch (err) {
-      console.error('Error deleting job:', err);
+      console.error('Error deleting job via API:', err);
+      setJobs(p => p.filter(x => x.id !== id));
     }
   };
 
   // Gallery — images compressed client-side and stored as base64 in Firestore
-  const addGallery = async (g: Omit<GalleryItem, 'id'> & { file?: File }): Promise<void> => {
+  const addGallery = async (g: Omit<GalleryItem, 'id'> & { file?: File }) => {
     const id = crypto.randomUUID();
-    let finalImageUrl = g.imageUrl; // already base64 from FileReader preview
+    let finalUrl = g.imageUrl || '';
 
     if (g.file) {
-      // Compress with Canvas API → JPEG base64 ~80-200 KB (under Firestore 1MB limit)
-      finalImageUrl = await compressImage(g.file, {
-        maxWidth: 900,
-        maxHeight: 900,
-        quality: 0.72,
-        maxSizeKB: 750,
+      finalUrl = await compressImage(g.file, {
+        maxWidth: 1400,
+        maxHeight: 1000,
+        quality: 0.8,
+        maxSizeKB: 800,
       });
     }
 
@@ -217,18 +229,39 @@ export default function App() {
       id,
       title: g.title,
       category: g.category,
-      imageUrl: finalImageUrl,  // base64 JPEG stored in Firestore
-      dateAdded: g.dateAdded,
+      dateAdded: g.dateAdded || new Date().toISOString().split('T')[0],
+      imageUrl: finalUrl,
     };
 
     setGallery(p => [newItem, ...p]);
-    await setDoc(doc(db, 'gallery', id), newItem);
+    try {
+      await setDoc(doc(db, 'gallery', id), newItem);
+    } catch (err) {
+      console.error('Error adding gallery item:', err);
+    }
   };
 
-  const updateGallery = async (id: string, g: Partial<GalleryItem>) => {
-    setGallery(p => p.map(x => x.id === id ? { ...x, ...g } : x));
+  const updateGallery = async (id: string, g: Partial<GalleryItem> & { file?: File }) => {
+    let finalUrl = g.imageUrl;
+
+    if (g.file) {
+      finalUrl = await compressImage(g.file, {
+        maxWidth: 1400,
+        maxHeight: 1000,
+        quality: 0.8,
+        maxSizeKB: 800,
+      });
+    }
+
+    const updatedData = { ...g };
+    delete updatedData.file;
+    if (finalUrl !== undefined) {
+      updatedData.imageUrl = finalUrl;
+    }
+
+    setGallery(p => p.map(x => x.id === id ? { ...x, ...updatedData } : x));
     try {
-      await updateDoc(doc(db, 'gallery', id), g);
+      await updateDoc(doc(db, 'gallery', id), updatedData);
     } catch (err) {
       console.error('Error updating gallery item:', err);
     }
@@ -239,7 +272,7 @@ export default function App() {
     try {
       await deleteDoc(doc(db, 'gallery', id));
     } catch (err) {
-      console.error('Error deleting gallery item from Firestore:', err);
+      console.error('Error deleting gallery item:', err);
     }
   };
 
@@ -261,11 +294,11 @@ export default function App() {
       id,
       title: b.title,
       category: b.category,
-      readTime: b.readTime,
-      author: b.author,
-      publishDate: b.publishDate,
+      publishDate: b.publishDate || new Date().toISOString().split('T')[0],
+      readTime: b.readTime || '3 min read',
       excerpt: b.excerpt,
       image: finalImageUrl,
+      author: b.author || 'Admin Team',
     };
 
     setBlogs(p => [newBlog, ...p]);
@@ -316,9 +349,13 @@ export default function App() {
   const deleteResponse = (id: string) => setResponses(p => p.filter(x => x.id !== id));
   const addResponse = (m: Omit<ContactMessage, 'id'>) => setResponses(p => [{ ...m, id: crypto.randomUUID() }, ...p]);
 
+  if (!isLoggedIn) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
   return (
     <div className="app-shell">
-      <Navbar activeTab={activeTab} unreadCount={unreadCount} />
+      <Navbar activeTab={activeTab} unreadCount={unreadCount} onLogout={handleLogout} />
       <div className="app-body">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} unreadCount={unreadCount} />
         <main className="main-content">

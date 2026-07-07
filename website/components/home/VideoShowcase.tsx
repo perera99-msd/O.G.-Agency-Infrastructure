@@ -9,7 +9,7 @@ const VIDEOS = [
     country: "ROMANIA",
     label: "Europe",
     title: "Romania",
-    videoUrl: "/home/Video/Romanian.mp4",
+    videoUrl: "/home/Video/romania-opt.mp4",
     posterImage: "/images/destinations/sky.png",
     credits: "",
     duration: 15,
@@ -19,7 +19,7 @@ const VIDEOS = [
     country: "BOSNIA",
     label: "Europe",
     title: "Bosnia",
-    videoUrl: "/home/Video/Bosnian.mp4",
+    videoUrl: "/home/Video/bosnia-opt.mp4",
     posterImage: "/images/destinations/sky.png",
     credits: "",
     duration: 15,
@@ -29,7 +29,7 @@ const VIDEOS = [
     country: "RUSSIA",
     label: "Eurasia",
     title: "Russia",
-    videoUrl: "/home/Video/Russian.mp4",
+    videoUrl: "/home/Video/russia-opt.mp4",
     posterImage: "/images/destinations/sky.png",
     credits: "",
     duration: 16,
@@ -105,6 +105,10 @@ export default function VideoShowcase() {
                 muted
                 loop
                 playsInline
+                preload="auto"
+                onCanPlay={(e) => {
+                  e.currentTarget.play().catch(() => {});
+                }}
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none"
               />
             )}

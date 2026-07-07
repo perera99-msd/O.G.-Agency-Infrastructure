@@ -1,8 +1,9 @@
-import { Bell } from 'lucide-react';
+import { Bell, LogOut } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: string;
   unreadCount: number;
+  onLogout?: () => void;
 }
 
 const tabLabels: Record<string, string> = {
@@ -14,7 +15,7 @@ const tabLabels: Record<string, string> = {
   responses: 'Inquiries',
 };
 
-export const Navbar: React.FC<NavbarProps> = ({ activeTab, unreadCount }) => {
+export const Navbar: React.FC<NavbarProps> = ({ activeTab, unreadCount, onLogout }) => {
   return (
     <header className="header">
       <div className="header-brand">
@@ -41,6 +42,17 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, unreadCount }) => {
         <div className="header-avatar" title="Senior Administrator">
           AD
         </div>
+
+        {onLogout && (
+          <button 
+            onClick={onLogout}
+            className="header-notif" 
+            style={{ marginLeft: '4px', color: '#ef4444' }} 
+            title="Log Out of Executive Portal"
+          >
+            <LogOut size={16} strokeWidth={2} />
+          </button>
+        )}
       </div>
     </header>
   );
