@@ -25,6 +25,7 @@ export interface JobOpening {
   companyLogo?: string | null;
   active: boolean;
   postedAt?: string;
+  positionsAvailable?: number;
 }
 
 export interface GalleryItem {
@@ -58,3 +59,11 @@ export interface ContactMessage {
 }
 
 export type TabType = 'overview' | 'destinations' | 'jobs' | 'gallery' | 'blogs' | 'responses';
+
+export type AdminRole = 'super_user' | 'normal_user';
+
+export interface AdminUser {
+  uid: string;
+  email: string;
+  role: AdminRole;
+}

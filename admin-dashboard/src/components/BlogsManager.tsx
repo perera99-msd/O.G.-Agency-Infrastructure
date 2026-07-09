@@ -9,6 +9,7 @@ interface BlogsManagerProps {
   onAdd: (blog: Omit<BlogPost, 'id'> & { file?: File }) => void;
   onUpdate: (id: string, blog: Partial<BlogPost> & { file?: File }) => void;
   onDelete: (id: string) => void;
+  role?: 'super_user' | 'normal_user';
 }
 
 const categoryColor = (c: string) => {
@@ -32,7 +33,7 @@ const emptyForm: {
 };
 
 export const BlogsManager: React.FC<BlogsManagerProps> = ({
-  blogs, onAdd, onUpdate, onDelete,
+  blogs, onAdd, onUpdate, onDelete, role = 'super_user'
 }) => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -92,9 +93,11 @@ export const BlogsManager: React.FC<BlogsManagerProps> = ({
           <p className="page-subtitle">Publish visa guidelines, industry news, and success stories.</p>
         </div>
         <div className="page-actions">
-          <button className="btn btn-primary" onClick={openCreate}>
-            <Plus size={14} strokeWidth={2.5} /> Publish Article
-          </button>
+          {role === 'super_user' && (
+            <button className="btn btn-primary" onClick={openCreate}>
+              <Plus size={14} strokeWidth={2.5} /> Publish Article
+            </button>
+          )}
         </div>
       </div>
 
@@ -113,12 +116,16 @@ export const BlogsManager: React.FC<BlogsManagerProps> = ({
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
                 <span className={`tag ${categoryColor(blog.category)}`}>{blog.category}</span>
                 <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                  <button className="btn btn-ghost btn-icon" onClick={() => openEdit(blog)} title="Edit">
-                    <Edit3 size={14} strokeWidth={2} />
-                  </button>
-                  <button className="btn btn-danger btn-icon" onClick={() => onDelete(blog.id)} title="Delete">
-                    <Trash2 size={14} strokeWidth={2} />
-                  </button>
+                  {role === 'super_user' && (
+                    <>
+                      <button className="btn btn-ghost btn-icon" onClick={() => openEdit(blog)} title="Edit">
+                        <Edit3 size={14} strokeWidth={2} />
+                      </button>
+                      <button className="btn btn-danger btn-icon" onClick={() => onDelete(blog.id)} title="Delete">
+                        <Trash2 size={14} strokeWidth={2} />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
 

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import type { Destination } from '../types';
+import type { Destination, AdminRole } from '../types';
 import { Plus, Edit3, Trash2, Globe2, Star, Upload } from 'lucide-react';
 
 interface DestinationsManagerProps {
@@ -7,6 +7,7 @@ interface DestinationsManagerProps {
   onAdd: (dest: Omit<Destination, 'id'> & { file?: File }) => void;
   onUpdate: (id: string, dest: Partial<Destination> & { file?: File }) => void;
   onDelete: (id: string) => void;
+  role?: AdminRole;
 }
 
 const emptyForm: {
@@ -21,7 +22,7 @@ const emptyForm: {
 };
 
 export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
-  destinations, onAdd, onUpdate, onDelete,
+  destinations, onAdd, onUpdate, onDelete, role = 'super_user'
 }) => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -85,11 +86,13 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
             <h2 className="page-title">Destinations</h2>
             <p className="page-subtitle">Manage international employment corridors and visa timelines.</p>
           </div>
-          <div className="page-actions">
-            <button className="btn btn-primary" onClick={openCreate}>
-              <Plus size={14} strokeWidth={2.5} /> Add Destination
-            </button>
-          </div>
+          {role === 'super_user' && (
+            <div className="page-actions">
+              <button className="btn btn-primary" onClick={openCreate}>
+                <Plus size={14} strokeWidth={2.5} /> Add Destination
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Grid */}
@@ -123,24 +126,26 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
                     )}
                   </div>
                   {/* Action buttons */}
-                  <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }}>
-                    <button
-                      className="btn btn-icon"
-                      onClick={() => openEdit(d)}
-                      style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', color: 'var(--text-secondary)', border: 'none', width: 28, height: 28 }}
-                      title="Edit"
-                    >
-                      <Edit3 size={12} strokeWidth={2} />
-                    </button>
-                    <button
-                      className="btn btn-icon"
-                      onClick={() => onDelete(d.id)}
-                      style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', color: 'var(--red)', border: 'none', width: 28, height: 28 }}
-                      title="Delete"
-                    >
-                      <Trash2 size={12} strokeWidth={2} />
-                    </button>
-                  </div>
+                  {role === 'super_user' && (
+                    <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }}>
+                      <button
+                        className="btn btn-icon"
+                        onClick={() => openEdit(d)}
+                        style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', color: 'var(--text-secondary)', border: 'none', width: 28, height: 28 }}
+                        title="Edit"
+                      >
+                        <Edit3 size={12} strokeWidth={2} />
+                      </button>
+                      <button
+                        className="btn btn-icon"
+                        onClick={() => onDelete(d.id)}
+                        style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', color: 'var(--red)', border: 'none', width: 28, height: 28 }}
+                        title="Delete"
+                      >
+                        <Trash2 size={12} strokeWidth={2} />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}
