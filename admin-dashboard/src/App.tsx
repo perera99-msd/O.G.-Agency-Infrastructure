@@ -50,14 +50,21 @@ export default function App() {
     const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
       if (user) {
         try {
-          // Fetch user role from Firestore admin_users collection
-          const userDocRef = doc(db, 'admin_users', user.uid);
+          // Fetch user role from Firestore Admin_Users collection
+          const userDocRef = doc(db, 'Admin_Users', user.uid);
           const userDoc = await getDoc(userDocRef);
           
           let role: AdminUser['role'] = 'normal_user'; // default role
           if (userDoc.exists()) {
             role = userDoc.data().role as AdminUser['role'];
           }
+
+          console.log("Firebase UID:", user.uid);
+          console.log("Document Exists:", userDoc.exists());
+          if (userDoc.exists()) {
+            console.log("Document Data:", userDoc.data());
+          }
+          console.log("Assigned Role:", role);
 
           setCurrentUser({
             uid: user.uid,
