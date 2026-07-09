@@ -64,6 +64,7 @@ interface JobsManagerProps {
   onAdd:    (job: Omit<JobOpening, 'id'>) => void;
   onUpdate: (id: string, job: Partial<JobOpening>) => void;
   onDelete: (id: string) => void;
+  role?: 'super_user' | 'normal_user';
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -391,7 +392,7 @@ function ExtendModal({ job, onConfirm, onClose }: {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export const JobsManager: React.FC<JobsManagerProps> = ({
-  jobs, onAdd, onUpdate, onDelete,
+  jobs, onAdd, onUpdate, onDelete, role = 'super_user'
 }) => {
 
   // ── Modal state
@@ -575,9 +576,11 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
             <RefreshCw size={14} />
             Refresh
           </button>
-          <button className="btn btn-primary" onClick={openCreate}>
-            <Plus size={14} strokeWidth={2.5} /> Post Vacancy
-          </button>
+          {role === 'super_user' && (
+            <button className="btn btn-primary" onClick={openCreate}>
+              <Plus size={14} strokeWidth={2.5} /> Post Vacancy
+            </button>
+          )}
         </div>
       </div>
 
@@ -801,45 +804,47 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
                 </div>
 
                 {/* Actions */}
-                <div className="data-row-actions">
-                  {/* Pin / Unpin urgent */}
-                  <button
-                    className={`btn btn-ghost btn-icon jm-pin-btn ${job.isUrgent ? 'jm-pin-active' : 'jm-pin-inactive'}`}
-                    title={job.isUrgent ? 'Remove urgent' : 'Mark as urgent'}
-                    onClick={() => onUpdate(job.id, { isUrgent: !job.isUrgent })}
-                    style={{ color: job.isUrgent ? 'var(--blue)' : 'var(--text-faint)' }}
-                  >
-                    {job.isUrgent ? <PinOff size={14} /> : <Pin size={14} />}
-                  </button>
+                {role === 'super_user' && (
+                  <div className="data-row-actions">
+                    {/* Pin / Unpin urgent */}
+                    <button
+                      className={`btn btn-ghost btn-icon jm-pin-btn ${job.isUrgent ? 'jm-pin-active' : 'jm-pin-inactive'}`}
+                      title={job.isUrgent ? 'Remove urgent' : 'Mark as urgent'}
+                      onClick={() => onUpdate(job.id, { isUrgent: !job.isUrgent })}
+                      style={{ color: job.isUrgent ? 'var(--blue)' : 'var(--text-faint)' }}
+                    >
+                      {job.isUrgent ? <PinOff size={14} /> : <Pin size={14} />}
+                    </button>
 
-                  {/* Extend deadline */}
-                  <button
-                    className="btn btn-ghost btn-icon"
-                    title="Extend deadline"
-                    onClick={() => setExtendJob(job)}
-                    style={{ color: 'var(--amber)' }}
-                  >
-                    <Calendar size={14} />
-                  </button>
+                    {/* Extend deadline */}
+                    <button
+                      className="btn btn-ghost btn-icon"
+                      title="Extend deadline"
+                      onClick={() => setExtendJob(job)}
+                      style={{ color: 'var(--amber)' }}
+                    >
+                      <Calendar size={14} />
+                    </button>
 
-                  {/* Edit */}
-                  <button
-                    className="btn btn-ghost btn-icon"
-                    title="Edit"
-                    onClick={() => openEdit(job)}
-                  >
-                    <Edit3 size={14} strokeWidth={2} />
-                  </button>
+                    {/* Edit */}
+                    <button
+                      className="btn btn-ghost btn-icon"
+                      title="Edit"
+                      onClick={() => openEdit(job)}
+                    >
+                      <Edit3 size={14} strokeWidth={2} />
+                    </button>
 
-                  {/* Delete */}
-                  <button
-                    className="btn btn-danger btn-icon"
-                    title="Delete"
-                    onClick={() => setDeleteId(job.id)}
-                  >
-                    <Trash2 size={14} strokeWidth={2} />
-                  </button>
-                </div>
+                    {/* Delete */}
+                    <button
+                      className="btn btn-danger btn-icon"
+                      title="Delete"
+                      onClick={() => setDeleteId(job.id)}
+                    >
+                      <Trash2 size={14} strokeWidth={2} />
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })

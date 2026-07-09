@@ -9,13 +9,14 @@ interface ContactResponsesManagerProps {
   onUpdateStatus: (id: string, status: ContactMessage['status']) => void;
   onDelete: (id: string) => void;
   onAddReplySim: (msg: Omit<ContactMessage, 'id'>) => void;
+  role?: 'super_user' | 'normal_user';
 }
 
 const statusColor = (s: string) =>
   s === 'new' ? 'tag-red' : s === 'replied' ? 'tag-green' : 'tag-neutral';
 
 export const ContactResponsesManager: React.FC<ContactResponsesManagerProps> = ({
-  responses, onUpdateStatus, onDelete, onAddReplySim,
+  responses, onUpdateStatus, onDelete, onAddReplySim, role = 'super_user'
 }) => {
   const [filter, setFilter] = useState<'all' | 'new' | 'replied' | 'archived'>('all');
   const [selected, setSelected] = useState<ContactMessage | null>(null);
@@ -61,7 +62,9 @@ export const ContactResponsesManager: React.FC<ContactResponsesManagerProps> = (
               </button>
             ))}
           </div>
-          <button className="btn btn-secondary" onClick={simulateInquiry}>+ Simulate</button>
+          {role === 'super_user' && (
+            <button className="btn btn-secondary" onClick={simulateInquiry}>+ Simulate</button>
+          )}
         </div>
       </div>
 
@@ -112,21 +115,23 @@ export const ContactResponsesManager: React.FC<ContactResponsesManagerProps> = (
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
                     <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>{r.submittedAt}</span>
-                    <div style={{ display: 'flex', gap: 5 }} onClick={e => e.stopPropagation()}>
-                      {r.status === 'new' && (
-                        <button className="btn btn-ghost btn-icon" onClick={() => onUpdateStatus(r.id, 'replied')} title="Mark replied" style={{ color: 'var(--green)' }}>
-                          <CheckCircle2 size={14} strokeWidth={2} />
+                    {role === 'super_user' && (
+                      <div style={{ display: 'flex', gap: 5 }} onClick={e => e.stopPropagation()}>
+                        {r.status === 'new' && (
+                          <button className="btn btn-ghost btn-icon" onClick={() => onUpdateStatus(r.id, 'replied')} title="Mark replied" style={{ color: 'var(--green)' }}>
+                            <CheckCircle2 size={14} strokeWidth={2} />
+                          </button>
+                        )}
+                        {r.status !== 'archived' && (
+                          <button className="btn btn-ghost btn-icon" onClick={() => onUpdateStatus(r.id, 'archived')} title="Archive">
+                            <Archive size={14} strokeWidth={2} />
+                          </button>
+                        )}
+                        <button className="btn btn-danger btn-icon" onClick={() => { onDelete(r.id); if (selected?.id === r.id) setSelected(null); }} title="Delete">
+                          <Trash2 size={14} strokeWidth={2} />
                         </button>
-                      )}
-                      {r.status !== 'archived' && (
-                        <button className="btn btn-ghost btn-icon" onClick={() => onUpdateStatus(r.id, 'archived')} title="Archive">
-                          <Archive size={14} strokeWidth={2} />
-                        </button>
-                      )}
-                      <button className="btn btn-danger btn-icon" onClick={() => { onDelete(r.id); if (selected?.id === r.id) setSelected(null); }} title="Delete">
-                        <Trash2 size={14} strokeWidth={2} />
-                      </button>
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -182,23 +187,25 @@ export const ContactResponsesManager: React.FC<ContactResponsesManagerProps> = (
             </div>
 
             {/* Quick reply */}
-            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 10 }}>Quick Reply</p>
-              <form onSubmit={handleSendReply} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <textarea
-                  className="field-input"
-                  rows={3}
-                  required
-                  placeholder={`Hi ${selected.senderName}, regarding your inquiry…`}
-                  value={reply}
-                  onChange={e => setReply(e.target.value)}
-                  style={{ resize: 'none' }}
-                />
-                <button type="submit" className="btn btn-primary" style={{ justifyContent: 'center' }}>
-                  <Send size={13} strokeWidth={2} /> Send Reply
-                </button>
-              </form>
-            </div>
+            {role === 'super_user' && (
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 10 }}>Quick Reply</p>
+                <form onSubmit={handleSendReply} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <textarea
+                    className="field-input"
+                    rows={3}
+                    required
+                    placeholder={`Hi ${selected.senderName}, regarding your inquiry…`}
+                    value={reply}
+                    onChange={e => setReply(e.target.value)}
+                    style={{ resize: 'none' }}
+                  />
+                  <button type="submit" className="btn btn-primary" style={{ justifyContent: 'center' }}>
+                    <Send size={13} strokeWidth={2} /> Send Reply
+                  </button>
+                </form>
+              </div>
+            )}
           </div>
         ) : (
           <div className="detail-panel" style={{ border: '1.5px dashed var(--border)' }}>

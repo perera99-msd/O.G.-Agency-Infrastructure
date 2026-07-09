@@ -9,6 +9,7 @@ interface GalleryManagerProps {
   onAdd: (item: Omit<GalleryItem, 'id'> & { file?: File }) => Promise<void>;
   onUpdate: (id: string, item: Partial<GalleryItem>) => void;
   onDelete: (id: string) => void;
+  role?: 'super_user' | 'normal_user';
 }
 
 type BatchItem = { id: string; title: string; imageUrl: string; file?: File };
@@ -22,7 +23,7 @@ const emptyForm: { category: GalleryItem['category']; dateAdded: string; items: 
 type ToastType = { id: string; type: 'success' | 'error'; message: string };
 
 export const GalleryManager: React.FC<GalleryManagerProps> = ({
-  gallery, onAdd, onUpdate, onDelete,
+  gallery, onAdd, onUpdate, onDelete, role = 'super_user'
 }) => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -250,14 +251,16 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
               </motion.button>
             ))}
           </div>
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="btn btn-primary"
-            onClick={openCreate}
-          >
-            <Plus size={14} strokeWidth={2.5} /> Upload Asset
-          </motion.button>
+          {role === 'super_user' && (
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="btn btn-primary"
+              onClick={openCreate}
+            >
+              <Plus size={14} strokeWidth={2.5} /> Upload Asset
+            </motion.button>
+          )}
         </div>
       </div>
 
@@ -325,27 +328,29 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
                   }}>
                     {item.category}
                   </span>
-                  <motion.div
-                    variants={{ initial: { opacity: 0, x: 10 }, hover: { opacity: 1, x: 0 } }}
-                    style={{ display: 'flex', gap: '8px' }}
-                  >
-                    <button
-                      onClick={e => { e.stopPropagation(); openEdit(item); }}
-                      style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.95)', color: '#0f172a', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.transform = 'scale(1.1)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.95)'; e.currentTarget.style.transform = 'scale(1)'; }}
+                  {role === 'super_user' && (
+                    <motion.div
+                      variants={{ initial: { opacity: 0, x: 10 }, hover: { opacity: 1, x: 0 } }}
+                      style={{ display: 'flex', gap: '8px' }}
                     >
-                      <Edit3 size={15} strokeWidth={2.5} />
-                    </button>
-                    <button
-                      onClick={e => { e.stopPropagation(); onDelete(item.id); }}
-                      style={{ width: 34, height: 34, borderRadius: '50%', background: '#fee2e2', color: '#ef4444', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = '#fecaca'; e.currentTarget.style.transform = 'scale(1.1)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.transform = 'scale(1)'; }}
-                    >
-                      <Trash2 size={15} strokeWidth={2.5} />
-                    </button>
-                  </motion.div>
+                      <button
+                        onClick={e => { e.stopPropagation(); openEdit(item); }}
+                        style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.95)', color: '#0f172a', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.transform = 'scale(1.1)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.95)'; e.currentTarget.style.transform = 'scale(1)'; }}
+                      >
+                        <Edit3 size={15} strokeWidth={2.5} />
+                      </button>
+                      <button
+                        onClick={e => { e.stopPropagation(); onDelete(item.id); }}
+                        style={{ width: 34, height: 34, borderRadius: '50%', background: '#fee2e2', color: '#ef4444', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#fecaca'; e.currentTarget.style.transform = 'scale(1.1)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.transform = 'scale(1)'; }}
+                      >
+                        <Trash2 size={15} strokeWidth={2.5} />
+                      </button>
+                    </motion.div>
+                  )}
                 </div>
 
                 {/* Bottom Section */}

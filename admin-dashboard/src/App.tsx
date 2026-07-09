@@ -9,23 +9,23 @@ import { BlogsManager } from './components/BlogsManager';
 import { ContactResponsesManager } from './components/ContactResponsesManager';
 import { LoginPage } from './components/LoginPage';
 
-import { db } from './firebase';
-import { collection, getDocs, setDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { db, auth } from './firebase';
+import { collection, getDocs, setDoc, doc, deleteDoc, updateDoc, getDoc } from 'firebase/firestore';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { compressImage } from './imageCompressor';
 
-import type { Destination, JobOpening, GalleryItem, BlogPost, ContactMessage, TabType } from './types';
+import type { Destination, JobOpening, GalleryItem, BlogPost, ContactMessage, TabType, AdminUser } from './types';
 import {
-  INITIAL_DESTINATIONS,
-  INITIAL_JOBS,
   INITIAL_GALLERY,
   INITIAL_BLOGS,
   INITIAL_RESPONSES,
 } from './mockData';
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-    return localStorage.getItem('og_admin_logged_in') === 'true';
-  });
+  const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [jobs, setJobs] = useState<JobOpening[]>([]);
@@ -34,14 +34,51 @@ export default function App() {
   const [responses, setResponses] = useState<ContactMessage[]>(INITIAL_RESPONSES);
 
   const handleLogin = () => {
-    setIsLoggedIn(true);
-    localStorage.setItem('og_admin_logged_in', 'true');
+    // This is called by LoginPage after successful signInWithEmailAndPassword.
+    // The actual state update will happen in onAuthStateChanged below.
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    localStorage.removeItem('og_admin_logged_in');
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.error('Error logging out:', err);
+    }
   };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
+      if (user) {
+        try {
+          // Fetch user role from Firestore admin_users collection
+          const userDocRef = doc(db, 'admin_users', user.uid);
+          const userDoc = await getDoc(userDocRef);
+          
+          let role: AdminUser['role'] = 'normal_user'; // default role
+          if (userDoc.exists()) {
+            role = userDoc.data().role as AdminUser['role'];
+          }
+
+          setCurrentUser({
+            uid: user.uid,
+            email: user.email || '',
+            role: role
+          });
+          setIsLoggedIn(true);
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          setIsLoggedIn(false);
+          setCurrentUser(null);
+        }
+      } else {
+        setIsLoggedIn(false);
+        setCurrentUser(null);
+      }
+      setAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     // Fetch Gallery
@@ -349,7 +386,15 @@ export default function App() {
   const deleteResponse = (id: string) => setResponses(p => p.filter(x => x.id !== id));
   const addResponse = (m: Omit<ContactMessage, 'id'>) => setResponses(p => [{ ...m, id: crypto.randomUUID() }, ...p]);
 
-  if (!isLoggedIn) {
+  if (authLoading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#0a0a0a', color: 'white' }}>
+        <h2>Loading...</h2>
+      </div>
+    );
+  }
+
+  if (!isLoggedIn || !currentUser) {
     return <LoginPage onLogin={handleLogin} />;
   }
 
@@ -357,7 +402,7 @@ export default function App() {
     <div className="app-shell">
       <Navbar activeTab={activeTab} unreadCount={unreadCount} onLogout={handleLogout} />
       <div className="app-body">
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} unreadCount={unreadCount} />
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} unreadCount={unreadCount} role={currentUser.role} />
         <main className="main-content">
           {activeTab === 'overview' && (
             <BentoOverview
@@ -366,21 +411,21 @@ export default function App() {
             />
           )}
           {activeTab === 'destinations' && (
-            <DestinationsManager destinations={destinations} onAdd={addDest} onUpdate={updateDest} onDelete={deleteDest} />
+            <DestinationsManager destinations={destinations} onAdd={addDest} onUpdate={updateDest} onDelete={deleteDest} role={currentUser.role} />
           )}
           {activeTab === 'jobs' && (
-            <JobsManager jobs={jobs} onAdd={addJob} onUpdate={updateJob} onDelete={deleteJob} />
+            <JobsManager jobs={jobs} onAdd={addJob} onUpdate={updateJob} onDelete={deleteJob} role={currentUser.role} />
           )}
           {activeTab === 'gallery' && (
-            <GalleryManager gallery={gallery} onAdd={addGallery} onUpdate={updateGallery} onDelete={deleteGallery} />
+            <GalleryManager gallery={gallery} onAdd={addGallery} onUpdate={updateGallery} onDelete={deleteGallery} role={currentUser.role} />
           )}
           {activeTab === 'blogs' && (
-            <BlogsManager blogs={blogs} onAdd={addBlog} onUpdate={updateBlog} onDelete={deleteBlog} />
+            <BlogsManager blogs={blogs} onAdd={addBlog} onUpdate={updateBlog} onDelete={deleteBlog} role={currentUser.role} />
           )}
           {activeTab === 'responses' && (
             <ContactResponsesManager
               responses={responses} onUpdateStatus={updateResponseStatus}
-              onDelete={deleteResponse} onAddReplySim={addResponse}
+              onDelete={deleteResponse} onAddReplySim={addResponse} role={currentUser.role}
             />
           )}
         </main>

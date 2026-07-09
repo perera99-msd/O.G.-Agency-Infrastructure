@@ -1,4 +1,4 @@
-import type { TabType } from '../types';
+import type { TabType, AdminRole } from '../types';
 import {
   LayoutDashboard,
   Globe2,
@@ -12,6 +12,7 @@ interface SidebarProps {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
   unreadCount: number;
+  role: AdminRole;
 }
 
 const navItems: { id: TabType; label: string; Icon: React.FC<{ size?: number; strokeWidth?: number }> }[] = [
@@ -23,7 +24,7 @@ const navItems: { id: TabType; label: string; Icon: React.FC<{ size?: number; st
   { id: 'responses', label: 'Inquiries', Icon: MessageSquare },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount, role }) => {
   return (
     <aside className="sidebar">
       <p className="sidebar-section-label">Navigation</p>

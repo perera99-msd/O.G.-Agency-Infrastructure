@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 
 interface LoginPageProps {
   onLogin: () => void;
@@ -13,7 +15,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -23,10 +25,23 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // Let App.tsx's onAuthStateChanged handle the actual login state transition
+      // We don't necessarily need to call onLogin() here if App.tsx listens to auth state,
+      // but to preserve the prop signature and immediate UI feedback:
       onLogin();
-    }, 800);
+    } catch (err: any) {
+      console.error("Login error:", err);
+      // Simple error mapping
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setError('Invalid email or password.');
+      } else {
+        setError(err.message || 'Failed to sign in.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
