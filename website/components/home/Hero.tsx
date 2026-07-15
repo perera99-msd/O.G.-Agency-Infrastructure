@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight, Globe, Star, Users } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const premiumEasing: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -10,20 +12,20 @@ const slides = [
   {
     id: 0,
     type: "minimal",
-    title: <>Sri Lanka&apos;s Premier <br /><span className="text-main-700">Manpower Experts.</span></>,
-    description: "OG Agency (License No. 2751) is a leading recruitment consultant in Sri Lanka, supplying skilled professionals to the world since 2012.",
+    title: <>Your Foreign Employment <br /><span className="text-main-700">Dreams Made Reality.</span></>,
+    description: "Sri Lanka's leading agency connecting skilled workers with top global opportunities. High success rates, trusted placements—you are in the right place.",
     image: "/home/Hero Floating Image 01.png",
     bgImage: "/home/Hero Slide 1 BG.jpg",
     floatingCards: [
-      { id: "global", icon: Globe, title: "Global Reach", desc: "Placements in Dubai, Romania & beyond.", position: "top-[12%] lg:right-[0%]" },
-      { id: "talent", icon: Users, title: "Diverse Talent", desc: "Skilled professionals across 20+ industries.", position: "top-[50%] lg:-left-[22%]" }
+      { id: "global", icon: Globe, title: "Global Reach", desc: "Placements in 20+ countries.", position: "top-[12%] lg:right-[0%]" },
+      { id: "talent", icon: Users, title: "Proven Success", desc: "Highest success rate in Sri Lanka.", position: "top-[50%] lg:-left-[22%]" }
     ]
   },
   {
     id: 1,
     type: "split",
-    title: <>Bridging Talent With<br />Global Opportunities</>,
-    description: <>With a 91.2% literacy rate, our hardworking and well-trained <br className="hidden xl:block" /> Sri Lankan workforce is ready to adapt to any environment.</>,
+    title: <>End-To-End Job <br /><span className="text-main-700">Placement Services</span></>,
+    description: "From start to finish—including job matching, visa processing, and departure—for Garments, Delivery, Culinary, Welding, Nursing, Electricians, Plumbing, and more.",
     image: "/home/Hero_2-removebg-preview.png",
     bgBottomImage: "/home/Hero Slide 2 Image (Bottom Background).jpg",
     floatingCards: []
@@ -31,8 +33,8 @@ const slides = [
   {
     id: 2,
     type: "gallery-bottom",
-    title: <>Your Trusted Partner in <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-main-900 to-main-500">Global Placements</span></>,
-    description: "We supply a skilled workforce for Garment Manufacturing, Construction, Engineering, Healthcare, and Hospitality industries across the globe.",
+    title: <>Global Job Placements Across <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-main-900 to-main-500">Dozens of Countries</span></>,
+    description: "We open doors to high-paying opportunities across Europe, Asia, and the Middle East—with our Top 3 primary destinations being Romania, Russia, and Bosnia.",
     image: "",
     bgImage: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=2948&auto=format&fit=crop",
     bgBottomImage: "",
@@ -41,18 +43,23 @@ const slides = [
   {
     id: 3,
     type: "three-column",
-    title: "Trusted by Top Global Employers",
-    description: "We maintain the highest standards of professionalism and ethics. Our devoted teamwork ensures assignments are completed with speed and accuracy.",
-    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2940&auto=format&fit=crop",
-    bgImage: "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2800&auto=format&fit=crop",
+    title: <>Garment Sector & <br /><span className="text-main-700">Skilled Opportunities</span></>,
+    description: "Discover vast overseas opportunities in the Garment & Apparel sector, backed by thousands of proven success stories across all kinds of specialized roles.",
+    image: "https://i.pinimg.com/1200x/e5/25/20/e5252081dc0a5364fe3def3745c446c8.jpg",
+    bgImage: "https://i.pinimg.com/1200x/aa/ea/6d/aaea6d70809b8faf1a537b0a3861c643.jpg",
     bgBottomImage: "",
-    floatingCards: []
+    floatingCards: [],
+    miniImages: [
+      "https://i.pinimg.com/1200x/25/d4/cf/25d4cfa4910106e366949dd777402468.jpg",
+      "https://i.pinimg.com/736x/39/f9/3e/39f93e8c2dd3efee7a9fac9552860262.jpg"
+    ]
   }
 ];
 
 const countriesList = [
-  { name: "Romania", flag: "/home/hero2/ro.svg", desc: "Europe" },
-  { name: "Russia", flag: "/home/hero2/ru.svg", desc: "Eurasia" },
+  { name: "Romania", flag: "/home/hero2/ro.svg", desc: "Top Destination" },
+  { name: "Russia", flag: "/home/hero2/ru.svg", desc: "Top Destination" },
+  { name: "Bosnia", flag: "/home/hero2/ba.svg", desc: "Top Destination" },
   { name: "Qatar", flag: "/home/hero2/qa.svg", desc: "Middle East" },
   { name: "Dubai", flag: "/home/hero2/ae.svg", desc: "UAE" },
   { name: "Poland", flag: "/home/hero2/pl.svg", desc: "Europe" },
@@ -68,6 +75,7 @@ const countriesList = [
 ];
 
 export default function Hero() {
+  const router = useRouter();
   const [current, setCurrent] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
@@ -180,9 +188,9 @@ export default function Hero() {
                     {slides[current].description}
                   </motion.p>
                   <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.6, ease: premiumEasing }}>
-                    <button className="bg-main-900 text-white px-8 py-3.5 lg:px-10 lg:py-4 rounded-full text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-main-700 shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_15px_30px_rgba(0,0,0,0.2)] hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-3 w-fit">
+                    <Link href="/jobs" className="bg-main-900 text-white px-8 py-3.5 lg:px-10 lg:py-4 rounded-full text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-main-700 shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_15px_30px_rgba(0,0,0,0.2)] hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-3 w-fit inline-flex">
                       Find Placement <ArrowRight size={14} />
-                    </button>
+                    </Link>
                   </motion.div>
                 </div>
 
@@ -221,7 +229,7 @@ export default function Hero() {
                       className={`absolute ${card.position} z-30 hidden md:block`}
                     >
                       <div className="relative">
-                        <div className="bg-white/40 backdrop-blur-xl p-5 rounded-3xl shadow-[0_8px_32px_rgba(31,38,135,0.07)] border border-white/60 max-w-[260px] hover:-translate-y-1 transition-transform duration-500 cursor-pointer">
+                        <div onClick={() => router.push('/destinations')} className="bg-white/40 backdrop-blur-xl p-5 rounded-3xl shadow-[0_8px_32px_rgba(31,38,135,0.07)] border border-white/60 max-w-[260px] hover:-translate-y-1 transition-transform duration-500 cursor-pointer">
                           <h4 className="font-semibold text-main-900 text-sm tracking-tight mb-1.5">{card.title}</h4>
                           <p className="text-[11px] text-secondary-700 font-medium leading-relaxed opacity-90">{card.desc}</p>
                         </div>
@@ -258,42 +266,43 @@ export default function Hero() {
             {slides[current].type === "split" && (
               <div className="w-full h-full relative z-20">
                 {/* Top Half Content */}
-                <div className="absolute top-0 left-0 w-full h-[50%] flex items-center justify-between pointer-events-none">
+                {/* Top Half Content */}
+                <div className="absolute top-0 left-0 w-full h-[38%] flex items-start justify-between pt-1 lg:pt-3 pointer-events-none z-30">
 
                   {/* Left Column */}
-                  <div className="w-full lg:w-[40%] pl-0 lg:pl-10 pr-4 lg:pr-0 pt-0 lg:pt-8 pointer-events-auto">
-                    <h1 className="text-main-900 font-heading font-black text-4xl sm:text-5xl lg:text-6xl xl:text-[4rem] leading-[1.05] tracking-tighter mb-4 lg:mb-6 mt-10">
+                  <div className="w-full lg:w-[46%] pl-0 lg:pl-10 pr-4 lg:pr-0 pt-0 pointer-events-auto relative z-30">
+                    <h1 className="text-main-900 font-heading font-black text-4xl sm:text-5xl lg:text-6xl xl:text-[3.65rem] leading-[1.05] tracking-tighter mb-2 lg:mb-3 mt-0">
                       {slides[current].title}
                     </h1>
-                    <p className="text-secondary-600 text-sm max-w-[90%] font-medium leading-relaxed mb-6 lg:mb-8">
+                    <p className="text-secondary-700 text-sm sm:text-base max-w-[96%] font-medium leading-relaxed mb-4 lg:mb-5">
                       {slides[current].description}
                     </p>
                     <div className="flex flex-wrap items-center gap-3">
-                      <button className="bg-main-900 text-white px-6 py-3 rounded-full text-xs font-bold hover:bg-main-700 transition-colors shadow-lg hover:shadow-xl">Get Appointment</button>
-                      <button className="bg-white border border-main-900/20 text-main-900 px-6 py-3 rounded-full text-xs font-bold hover:bg-main-50 transition-colors shadow-sm">View Success Stories</button>
-                      <button className="w-10 h-10 rounded-full border border-main-900/20 bg-white flex items-center justify-center text-main-900 hover:bg-main-50 transition-colors shadow-sm">
-                        <ArrowRight size={16} className="-rotate-45" />
-                      </button>
+                      <Link href="/contact" className="bg-main-900 text-white px-6 py-2.5 rounded-full text-xs font-bold hover:bg-main-700 transition-colors shadow-lg hover:shadow-xl inline-block">Get Appointment</Link>
+                      <Link href="/gallery" className="bg-white border border-main-900/20 text-main-900 px-6 py-2.5 rounded-full text-xs font-bold hover:bg-main-50 transition-colors shadow-sm inline-block">View Success Stories</Link>
+                      <Link href="/gallery" aria-label="View Gallery" className="w-9 h-9 rounded-full border border-main-900/20 bg-white flex items-center justify-center text-main-900 hover:bg-main-50 transition-colors shadow-sm inline-flex">
+                        <ArrowRight size={15} className="-rotate-45" />
+                      </Link>
                     </div>
                   </div>
 
                   {/* Right Column (Floating Card) */}
-                  <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4, ease: premiumEasing }} className="hidden lg:block w-[30%] pr-10 pointer-events-auto z-40 mt-10">
-                    <div className="bg-white p-7 rounded-[1.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.06)] ml-auto w-[280px] border border-secondary-100">
-                      <div className="flex items-center justify-between mb-6">
-                        <span className="text-secondary-800 text-sm font-semibold tracking-wide">Total Placements</span>
+                  <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4, ease: premiumEasing }} className="hidden lg:block w-[28%] pr-8 pointer-events-auto z-40 mt-0">
+                    <div className="bg-white p-5 rounded-[1.25rem] shadow-[0_30px_60px_rgba(0,0,0,0.06)] ml-auto w-[245px] border border-secondary-100">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-secondary-800 text-xs font-semibold tracking-wide">Total Placements</span>
                         <div className="flex gap-1">
                           <div className="w-1 h-1 rounded-full bg-secondary-300" />
                           <div className="w-1 h-1 rounded-full bg-secondary-300" />
                           <div className="w-1 h-1 rounded-full bg-secondary-300" />
                         </div>
                       </div>
-                      <div className="text-main-900 font-heading font-black text-[2.5rem] leading-none tracking-tight mb-8">2,751<span className="text-main-500">+</span></div>
-                      <div className="flex items-end justify-between gap-2 h-24">
-                        <div className="w-full bg-secondary-100/30 h-[45%] rounded-t-lg transition-all hover:bg-main-300/30" />
-                        <div className="w-full bg-secondary-100/60 h-[30%] rounded-t-lg transition-all hover:bg-main-300/60" />
-                        <div className="w-full bg-secondary-100 h-[65%] rounded-t-lg transition-all hover:bg-main-300" />
-                        <div className="w-full bg-main-500 h-[100%] rounded-t-lg shadow-[0_4px_15px_rgba(var(--main-500),0.4)]" />
+                      <div className="text-main-900 font-heading font-black text-3xl leading-none tracking-tight mb-4">2,751<span className="text-main-500">+</span></div>
+                      <div className="flex items-end justify-between gap-2 h-16">
+                        <div className="w-full bg-secondary-100/30 h-[45%] rounded-t transition-all hover:bg-main-300/30" />
+                        <div className="w-full bg-secondary-100/60 h-[30%] rounded-t transition-all hover:bg-main-300/60" />
+                        <div className="w-full bg-secondary-100 h-[65%] rounded-t transition-all hover:bg-main-300" />
+                        <div className="w-full bg-main-500 h-[100%] rounded-t shadow-[0_4px_15px_rgba(var(--main-500),0.4)]" />
                       </div>
                     </div>
                   </motion.div>
@@ -303,7 +312,7 @@ export default function Hero() {
                   initial={{ opacity: 0, y: 100 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 1, delay: 0.2, ease: premiumEasing }}
-                  className="absolute bottom-[12%] left-1/2 -translate-x-1/2 w-[100%] lg:w-[75%] xl:w-[65%] h-[85%] z-20 pointer-events-none flex items-end justify-center"
+                  className="absolute bottom-[9%] left-1/2 -translate-x-1/2 w-[100%] lg:w-[86%] xl:w-[78%] h-[74%] z-20 pointer-events-none flex items-end justify-center"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -315,14 +324,14 @@ export default function Hero() {
                 </motion.div>
 
                 {/* Bottom Half Content */}
-                <div className="absolute bottom-0 left-0 w-full h-[50%] flex flex-col justify-end items-center pb-8 lg:pb-10 pointer-events-none">
+                <div className="absolute bottom-0 left-0 w-full h-[35%] flex flex-col justify-end items-center pb-2 lg:pb-3 pointer-events-none">
                   <div className="relative z-30 text-center pointer-events-auto">
-                    <h3 className="text-white font-heading font-bold text-3xl lg:text-4xl mb-5 tracking-wide drop-shadow-lg">
+                    <h3 className="text-white font-heading font-bold text-2xl lg:text-3xl mb-3 tracking-wide drop-shadow-lg">
                       Your smart <span className="font-serif italic font-light opacity-90 text-main-50">partner</span>
                     </h3>
-                    <div className="flex items-center bg-white rounded-full p-1.5 shadow-[0_20px_40px_rgba(0,0,0,0.3)] mx-auto w-fit border border-white/20">
-                      <input type="text" placeholder="Your Email" className="bg-transparent text-secondary-900 placeholder:text-secondary-400 text-sm px-6 py-3 outline-none w-56 sm:w-72 font-semibold tracking-wide" />
-                      <button className="bg-main-900 text-white px-8 py-3.5 rounded-full text-xs font-bold tracking-wider hover:bg-black transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap">Submit</button>
+                    <div className="flex items-center bg-white rounded-full p-1 shadow-[0_20px_40px_rgba(0,0,0,0.3)] mx-auto w-fit border border-white/20">
+                      <input type="text" placeholder="Your Email" className="bg-transparent text-secondary-900 placeholder:text-secondary-400 text-xs sm:text-sm px-5 py-2.5 outline-none w-52 sm:w-64 font-semibold tracking-wide" />
+                      <button onClick={() => router.push('/contact')} className="bg-main-900 text-white px-7 py-2.5 rounded-full text-xs font-bold tracking-wider hover:bg-black transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap">Submit</button>
                     </div>
                   </div>
                 </div>
@@ -337,7 +346,7 @@ export default function Hero() {
                 <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }} className="flex-shrink-0 flex flex-col items-center text-center z-30 pt-4 lg:pt-8 pb-12 lg:pb-16">
                   <div className="mb-4 lg:mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-sm border border-main-900/5">
                     <Globe className="text-main-500" size={14} />
-                    <span className="text-[9px] lg:text-[10px] font-bold text-main-900 tracking-[0.2em] uppercase">Global Destinations</span>
+                    <span className="text-[9px] lg:text-[10px] font-bold text-main-900 tracking-[0.2em] uppercase">Top 3: Romania, Russia & Bosnia</span>
                   </div>
                   <h1 className="text-main-900 font-heading font-black text-4xl sm:text-5xl lg:text-[5rem] leading-[0.95] tracking-tighter uppercase max-w-5xl mb-4 lg:mb-6 drop-shadow-sm">
                     {slides[current].title}
@@ -345,9 +354,9 @@ export default function Hero() {
                   <p className="text-secondary-700 text-xs lg:text-sm max-w-2xl font-medium leading-relaxed mb-6 lg:mb-8 relative z-40">
                     {slides[current].description}
                   </p>
-                  <button className="bg-main-900 text-main-50 px-10 py-4 rounded-full text-[10px] lg:text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-main-700 shadow-[0_10px_30px_rgba(0,0,0,0.1)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.15)] transition-all duration-300">
+                  <Link href="/destinations" className="bg-main-900 text-main-50 px-10 py-4 rounded-full text-[10px] lg:text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-main-700 shadow-[0_10px_30px_rgba(0,0,0,0.1)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.15)] transition-all duration-300 inline-block">
                     Start Your Journey
-                  </button>
+                  </Link>
                 </motion.div>
 
                 <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.4 }} className="flex-1 w-full flex flex-col justify-end z-30 relative mt-8 lg:mt-auto">
@@ -360,7 +369,7 @@ export default function Hero() {
                       className="flex gap-4 lg:gap-5 w-max px-4"
                     >
                       {[...countriesList, ...countriesList].map((country, index) => (
-                        <div key={`r1-${index}`} className="flex items-center gap-3 lg:gap-4 w-48 lg:w-56 bg-white/70 backdrop-blur-2xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-full p-1.5 lg:p-2 pr-4 lg:pr-6 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] transition-all duration-300 cursor-pointer group flex-shrink-0">
+                        <div key={`r1-${index}`} onClick={() => router.push('/destinations')} className="flex items-center gap-3 lg:gap-4 w-48 lg:w-56 bg-white/70 backdrop-blur-2xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-full p-1.5 lg:p-2 pr-4 lg:pr-6 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] transition-all duration-300 cursor-pointer group flex-shrink-0">
                           <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full overflow-hidden shadow-inner border border-black/5 flex-shrink-0 group-hover:scale-105 transition-transform duration-500 relative bg-secondary-100">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={country.flag} alt={country.name} className="absolute inset-0 w-full h-full object-cover" />
@@ -383,7 +392,7 @@ export default function Hero() {
                       className="flex gap-4 lg:gap-5 w-max px-4 ml-12"
                     >
                       {[...countriesList.slice().reverse(), ...countriesList.slice().reverse()].map((country, index) => (
-                        <div key={`r2-${index}`} className="flex items-center gap-3 lg:gap-4 w-48 lg:w-56 bg-white/70 backdrop-blur-2xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-full p-1.5 lg:p-2 pr-4 lg:pr-6 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] transition-all duration-300 cursor-pointer group flex-shrink-0">
+                        <div key={`r2-${index}`} onClick={() => router.push('/destinations')} className="flex items-center gap-3 lg:gap-4 w-48 lg:w-56 bg-white/70 backdrop-blur-2xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-full p-1.5 lg:p-2 pr-4 lg:pr-6 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] transition-all duration-300 cursor-pointer group flex-shrink-0">
                           <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full overflow-hidden shadow-inner border border-black/5 flex-shrink-0 group-hover:scale-105 transition-transform duration-500 relative bg-secondary-100">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={country.flag} alt={country.name} className="absolute inset-0 w-full h-full object-cover" />
@@ -413,7 +422,7 @@ export default function Hero() {
 
                   <div className="relative z-10">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-main-50 text-main-900 text-[10px] font-bold tracking-widest uppercase mb-6 shadow-sm">
-                      <Globe size={14} /> Global Network
+                      <Globe size={14} /> Global Opportunities
                     </div>
                     <h1 className="text-main-900 mb-3 font-heading font-black text-3xl lg:text-4xl xl:text-5xl leading-[1.05] tracking-tight">
                       {slides[current].title}
@@ -421,18 +430,18 @@ export default function Hero() {
                     <p className="text-xs lg:text-sm text-secondary-600 mb-4 max-w-[90%] leading-relaxed font-medium">
                       {slides[current].description}
                     </p>
-                    <button className="flex items-center gap-4 bg-main-900 text-white px-8 py-4 rounded-full text-[11px] font-bold tracking-widest uppercase hover:bg-main-700 shadow-lg group-hover:shadow-xl transition-all w-fit">
+                    <Link href="/services" className="flex items-center gap-4 bg-main-900 text-white px-8 py-4 rounded-full text-[11px] font-bold tracking-widest uppercase hover:bg-main-700 shadow-lg group-hover:shadow-xl transition-all w-fit inline-flex">
                       Start Project <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                    </button>
+                    </Link>
                   </div>
 
                   <div className="mt-4 pt-4 border-t border-main-900/5 relative z-10">
-                    <div className="text-2xl font-heading font-black text-main-900 mb-1 tracking-tight">91.2%</div>
+                    <div className="text-2xl font-heading font-black text-main-900 mb-1 tracking-tight">1,500+</div>
                     <p className="text-[10px] text-secondary-500 font-bold uppercase tracking-widest mb-3">
-                      Literacy Rate
+                      Success Stories & Placements
                     </p>
                     <p className="text-[10px] text-secondary-500 font-medium mb-3 max-w-[90%]">
-                      A hardworking, efficient, and intelligent workforce from Sri Lanka.
+                      Connecting skilled Garment specialists & workers across all roles to world-class employers.
                     </p>
                     <div className="flex -space-x-3">
                       {[1, 2, 3, 4, 5].map((i) => (
@@ -452,7 +461,7 @@ export default function Hero() {
                     <img src={slides[current].image} alt="Main Placement" className="w-full h-full object-cover" />
                   </motion.div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute bottom-6 left-6 right-6 translate-y-10 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                  <div onClick={() => router.push('/about')} className="absolute bottom-6 left-6 right-6 translate-y-10 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500 cursor-pointer">
                     <div className="bg-white/20 backdrop-blur-md border border-white/30 p-4 rounded-2xl text-white flex items-center justify-between">
                       <div>
                         <div className="text-[10px] uppercase tracking-widest font-bold text-white/80 mb-1">Licensed</div>
@@ -466,7 +475,7 @@ export default function Hero() {
                 </motion.div>
 
                 {/* Top Right Card: Ratings & Awards */}
-                <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.4 }} className="col-span-12 lg:col-span-3 row-span-1 bg-main-900 rounded-[2rem] p-8 flex flex-col justify-center shadow-[0_15px_40px_rgb(0,0,0,0.15)] relative overflow-hidden group cursor-pointer min-h-[250px] lg:min-h-0">
+                <motion.div onClick={() => router.push('/about')} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.4 }} className="col-span-12 lg:col-span-3 row-span-1 bg-main-900 rounded-[2rem] p-8 flex flex-col justify-center shadow-[0_15px_40px_rgb(0,0,0,0.15)] relative overflow-hidden group cursor-pointer min-h-[250px] lg:min-h-0">
                   <div className="absolute -right-8 -top-8 w-40 h-40 bg-main-500 rounded-full blur-[50px] group-hover:bg-main-300 transition-colors duration-700 opacity-60" />
                   <div className="relative z-10">
                     <div className="flex items-center gap-1.5 mb-2">
@@ -486,15 +495,15 @@ export default function Hero() {
                 </motion.div>
 
                 {/* Bottom Right Card: Mini Gallery */}
-                <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5 }} className="col-span-12 lg:col-span-3 row-span-1 bg-white/80 backdrop-blur-xl rounded-[2rem] p-4 flex gap-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 min-h-[200px] lg:min-h-0">
+                <motion.div onClick={() => router.push('/gallery')} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5 }} className="col-span-12 lg:col-span-3 row-span-1 bg-white/80 backdrop-blur-xl rounded-[2rem] p-4 flex gap-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 min-h-[200px] lg:min-h-0 cursor-pointer">
                   <div className="w-1/2 h-full rounded-[1.5rem] overflow-hidden relative shadow-inner group cursor-pointer">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1000&auto=format&fit=crop" alt="Thumb 1" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <img src={(slides[current] as any).miniImages?.[0] || "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1000&auto=format&fit=crop"} alt="Thumb 1" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500" />
                   </div>
                   <div className="w-1/2 h-full rounded-[1.5rem] overflow-hidden relative shadow-inner group cursor-pointer">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1000&auto=format&fit=crop" alt="Thumb 2" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <img src={(slides[current] as any).miniImages?.[1] || "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1000&auto=format&fit=crop"} alt="Thumb 2" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500" />
                   </div>
                 </motion.div>
