@@ -11,10 +11,11 @@ interface DestinationsManagerProps {
 }
 
 const emptyForm: {
-  country: string; region: string; heroImage: string; activeJobs: number; visaProcessingDays: number; featured: boolean; file?: File;
+  country: string; region: string; flag: string; heroImage: string; activeJobs: number; visaProcessingDays: number; featured: boolean; file?: File;
 } = {
   country: '',
   region: '',
+  flag: '',
   heroImage: '',
   activeJobs: 10,
   visaProcessingDays: 30,
@@ -63,7 +64,7 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
   const openEdit = (d: Destination) => {
     setEditId(d.id);
     setForm({
-      country: d.country, region: d.region, heroImage: d.heroImage || '',
+      country: d.country, region: d.region, flag: d.flag || '', heroImage: d.heroImage || '',
       activeJobs: d.activeJobs, visaProcessingDays: d.visaProcessingDays, featured: d.featured,
     });
     setOpen(true);
@@ -195,6 +196,13 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
                   <div>
                     <label className="field-label">Region / Jurisdiction</label>
                     <input className="field-input" type="text" placeholder="e.g. Central Europe" value={form.region} onChange={e => setForm({ ...form, region: e.target.value })} style={{ borderRadius: 12 }} />
+                  </div>
+                </div>
+
+                <div className="field-row">
+                  <div style={{ flex: 1 }}>
+                    <label className="field-label">Flag (Emoji or URL) *</label>
+                    <input className="field-input" type="text" required placeholder="e.g. 🇵🇱 or /flags/poland.png" value={form.flag} onChange={e => setForm({ ...form, flag: e.target.value })} style={{ borderRadius: 12 }} />
                   </div>
                 </div>
 

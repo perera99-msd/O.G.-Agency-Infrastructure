@@ -2,6 +2,7 @@ export interface Destination {
   id: string;
   country: string;
   region: string;
+  flag?: string;
   heroImage: string;
   activeJobs: number;
   visaProcessingDays: number;
