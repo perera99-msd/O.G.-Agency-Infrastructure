@@ -153,6 +153,7 @@ export default function App() {
       id,
       country: d.country,
       region: d.region,
+      flag: d.flag,
       activeJobs: d.activeJobs,
       visaProcessingDays: d.visaProcessingDays,
       featured: d.featured,

@@ -5,6 +5,7 @@
 
 "use client";
 import { useState, useMemo, useCallback, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export const JOBS_PER_PAGE = 24;
 
@@ -23,7 +24,14 @@ const defaultFilters = {
 };
 
 export function useJobFilters() {
-  const [filters, setFilters] = useState(defaultFilters);
+  const searchParams = useSearchParams();
+  
+  const [filters, setFilters] = useState({
+    ...defaultFilters,
+    country: searchParams ? (searchParams.get("country") || defaultFilters.country) : defaultFilters.country,
+    category: searchParams ? (searchParams.get("category") || defaultFilters.category) : defaultFilters.category,
+    search: searchParams ? (searchParams.get("search") || defaultFilters.search) : defaultFilters.search,
+  });
   const [jobsList, setJobsList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -51,11 +59,10 @@ export function useJobFilters() {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const country = params.get("country");
-      const category = params.get("category");
-      const search = params.get("search");
+    if (searchParams) {
+      const country = searchParams.get("country");
+      const category = searchParams.get("category");
+      const search = searchParams.get("search");
 
       if (country || category || search) {
         setFilters((prev) => ({
@@ -66,7 +73,7 @@ export function useJobFilters() {
         }));
       }
     }
-  }, []);
+  }, [searchParams]);
 
   // --- FILTER UPDATERS ---
   const updateFilter = useCallback((key, value) => {
@@ -105,7 +112,8 @@ export function useJobFilters() {
 
     // 3. Country
     if (filters.country) {
-      filtered = filtered.filter((job) => job.country === filters.country);
+      const c = filters.country.toLowerCase();
+      filtered = filtered.filter((job) => job.country.toLowerCase() === c);
     }
 
     // 4. Category

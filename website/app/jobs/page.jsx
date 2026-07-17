@@ -8,7 +8,9 @@ import JobFilters from "@/components/jobs/JobFilters";
 import JobGrid from "@/components/jobs/JobGrid";
 import JobPagination from "@/components/jobs/JobPagination";
 
-export default function JobsPage() {
+import { Suspense } from "react";
+
+function JobsPageContent() {
   const {
     filters,
     results,
@@ -215,5 +217,13 @@ export default function JobsPage() {
         </>
       )}
     </main>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-secondary-500">Loading jobs...</div>}>
+      <JobsPageContent />
+    </Suspense>
   );
 }
