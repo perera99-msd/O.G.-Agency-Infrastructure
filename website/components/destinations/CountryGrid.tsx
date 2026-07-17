@@ -70,25 +70,6 @@ export default function CountryGrid() {
             Work Abroad Destinations
           </h1>
         </div>
-        <Link
-          href="/destinations"
-          className="hidden md:inline-flex items-center gap-2 text-sm font-medium rounded-full px-5 py-2.5 transition-all hover:-translate-y-0.5"
-          style={{
-            background: "linear-gradient(135deg, rgba(0,0,0,0.04), rgba(0,0,0,0.01))",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            border: "1px solid rgba(0,0,0,0.08)",
-            color: "var(--color-secondary-900)",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.6)"
-          }}
-        >
-          View All Destinations
-          <span className="w-6 h-6 rounded-full bg-gray-900 flex items-center justify-center ml-1">
-            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-              <path d="M2 9L9 2M9 2H3M9 2V8" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-        </Link>
       </div>
 
       {/* Region filters */}
