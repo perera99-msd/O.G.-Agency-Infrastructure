@@ -1,4 +1,4 @@
-const { db } = require('../config/firebase');
+const { db, auth } = require('../config/firebase');
 const { validateJobPosting } = require('../models');
 
 /**
@@ -85,6 +85,45 @@ const MOCK_JOBS = [
   }
 ];
 
+const destinationExistsAndActive = async (country) => {
+  if (!db || !country) return true;
+  const snap = await db.collection('destinations').where('country', '==', country).limit(5).get();
+  if (snap.empty) return false;
+
+  return snap.docs.some((doc) => {
+    const data = doc.data() || {};
+    if (typeof data.isActive === 'boolean') return data.isActive;
+    if (typeof data.active === 'boolean') return data.active;
+    return true;
+  });
+};
+
+const computeStats = (jobs) => {
+  const now = Date.now();
+  const isExpired = (deadline) => new Date(deadline || 0).getTime() < now;
+
+  return {
+    total: jobs.length,
+    active: jobs.filter((j) => j.active && !isExpired(j.deadline)).length,
+    inactive: jobs.filter((j) => !j.active).length,
+    expired: jobs.filter((j) => isExpired(j.deadline)).length,
+    urgent: jobs.filter((j) => !!j.isUrgent).length,
+  };
+};
+
+// The client uses this route as the authoritative authorization check after
+// Firebase signs a user in.  Role checks remain on every mutating route too.
+const getAdminSession = async (req, res) => {
+  return res.status(200).json({
+    success: true,
+    data: {
+      uid: req.user.uid,
+      email: req.user.email || '',
+      role: req.user.role || 'admin',
+    },
+  });
+};
+
 const getAllInquiries = async (req, res) => {
   try {
     if (!db) {
@@ -114,6 +153,14 @@ const createJobPosting = async (req, res) => {
 
     if (!isValid) {
       return res.status(400).json({ success: false, message: 'Invalid job data provided', errors });
+    }
+
+    const destinationIsAllowed = await destinationExistsAndActive(sanitizedData.country);
+    if (!destinationIsAllowed) {
+      return res.status(400).json({
+        success: false,
+        message: 'Destination is not available. Create and activate the destination first.',
+      });
     }
 
     if (db) {
@@ -170,6 +217,16 @@ const updateJobPosting = async (req, res) => {
     }
 
     if (db) {
+      if (req.body.country) {
+        const destinationIsAllowed = await destinationExistsAndActive(req.body.country);
+        if (!destinationIsAllowed) {
+          return res.status(400).json({
+            success: false,
+            message: 'Destination is not available. Create and activate the destination first.',
+          });
+        }
+      }
+
       const jobRef = db.collection('jobs').doc(id);
       const jobDoc = await jobRef.get();
       
@@ -192,6 +249,25 @@ const updateJobPosting = async (req, res) => {
   } catch (error) {
     console.error('❌ [Admin Controller] Error updating job:', error);
     return res.status(500).json({ success: false, message: 'Internal server error while updating job.' });
+  }
+};
+
+const getJobStats = async (req, res) => {
+  try {
+    if (!db) {
+      return res.status(200).json({
+        success: true,
+        source: 'mock',
+        data: computeStats(MOCK_JOBS),
+      });
+    }
+
+    const snapshot = await db.collection('jobs').get();
+    const jobs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return res.status(200).json({ success: true, data: computeStats(jobs) });
+  } catch (error) {
+    console.error('❌ [Admin Controller] Error computing job stats:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error while computing job stats.' });
   }
 };
 
@@ -229,10 +305,124 @@ const deleteJobPosting = async (req, res) => {
   }
 };
 
+const getAllAdmins = async (req, res) => {
+  try {
+    if (!db) {
+      return res.status(200).json({ success: true, data: [] });
+    }
+    const snapshot = await db.collection('Admin_Users').get();
+    const admins = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
+    return res.status(200).json({ success: true, data: admins });
+  } catch (error) {
+    console.error('❌ [Admin Controller] Error fetching admins:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error fetching admins.' });
+  }
+};
+
+const createAdmin = async (req, res) => {
+  try {
+    const { email, password, displayName, jobTitle, role } = req.body;
+    if (!email || !password || !displayName) {
+      return res.status(400).json({ success: false, message: 'Missing required fields.' });
+    }
+    
+    if (!auth || !db) {
+      return res.status(500).json({ success: false, message: 'Firebase Admin not configured.' });
+    }
+
+    const userRecord = await auth.createUser({
+      email,
+      password,
+      displayName
+    });
+
+    const userRole = role === 'super_user' ? 'super_user' : 'admin';
+    
+    // Set custom claims
+    await auth.setCustomUserClaims(userRecord.uid, { role: userRole });
+
+    // Save to Firestore
+    await db.collection('Admin_Users').doc(userRecord.uid).set({
+      email,
+      displayName,
+      jobTitle: jobTitle || 'Administrator',
+      role: userRole,
+      createdAt: new Date().toISOString(),
+    });
+
+    return res.status(201).json({ success: true, message: 'Admin created successfully.', uid: userRecord.uid });
+  } catch (error) {
+    console.error('❌ [Admin Controller] Error creating admin:', error);
+    return res.status(500).json({ success: false, message: error.message || 'Internal server error creating admin.' });
+  }
+};
+
+const updateAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+    if (!id || !role) {
+      return res.status(400).json({ success: false, message: 'Missing required fields.' });
+    }
+    
+    if (!auth || !db) {
+      return res.status(500).json({ success: false, message: 'Firebase Admin not configured.' });
+    }
+
+    const userRole = role === 'super_user' ? 'super_user' : 'admin';
+
+    // Update custom claims
+    await auth.setCustomUserClaims(id, { role: userRole });
+
+    // Update Firestore
+    await db.collection('Admin_Users').doc(id).update({
+      role: userRole,
+      updatedAt: new Date().toISOString(),
+    });
+
+    return res.status(200).json({ success: true, message: 'Admin updated successfully.' });
+  } catch (error) {
+    console.error('❌ [Admin Controller] Error updating admin:', error);
+    return res.status(500).json({ success: false, message: error.message || 'Internal server error updating admin.' });
+  }
+};
+
+const deleteAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'Admin ID required.' });
+    }
+
+    // Prevent self-deletion
+    if (req.user.uid === id) {
+      return res.status(400).json({ success: false, message: 'Cannot delete your own account.' });
+    }
+    
+    if (!auth || !db) {
+      return res.status(500).json({ success: false, message: 'Firebase Admin not configured.' });
+    }
+
+    await auth.deleteUser(id);
+    await db.collection('Admin_Users').doc(id).delete();
+
+    return res.status(200).json({ success: true, message: 'Admin deleted successfully.' });
+  } catch (error) {
+    console.error('❌ [Admin Controller] Error deleting admin:', error);
+    return res.status(500).json({ success: false, message: error.message || 'Internal server error deleting admin.' });
+  }
+};
+
 module.exports = {
+  getAdminSession,
   getAllInquiries,
   createJobPosting,
   getAllJobsAdmin,
+  getJobStats,
   updateJobPosting,
   deleteJobPosting,
+  getAllAdmins,
+  createAdmin,
+  updateAdmin,
+  deleteAdmin,
 };

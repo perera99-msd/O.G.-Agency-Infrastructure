@@ -18,6 +18,7 @@ interface Country {
   image: string;
   accommodationIncluded?: boolean;
   featured?: boolean;
+  isActive?: boolean;
 }
 const FILTERS: { label: string; value: string }[] = [
   { label: "All", value: "all" },
@@ -36,6 +37,7 @@ export default function CountryGrid() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => {
         const d = doc.data();
+        const isActive = typeof d.isActive === "boolean" ? d.isActive : (typeof d.active === "boolean" ? d.active : true);
         return {
           slug: doc.id,
           name: d.country || "Unknown",
@@ -46,9 +48,10 @@ export default function CountryGrid() {
           tags: d.tags || ["Opportunities"],
           image: d.heroImage || "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&q=80&w=800",
           featured: d.featured || false,
+          isActive,
         } as Country;
       });
-      setCountries(data);
+      setCountries(data.filter((country) => country.isActive));
     });
     return () => unsubscribe();
   }, []);

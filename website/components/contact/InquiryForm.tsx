@@ -2,6 +2,8 @@
 
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import {
   UploadCloud,
   FileText,
@@ -15,6 +17,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
+import { db, storage } from "@/lib/firebase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -291,11 +294,45 @@ export default function InquiryForm() {
     if (hasError || !formData.termsAccepted) return;
 
     setIsSubmitting(true);
-    await new Promise((r) => setTimeout(r, 2000));
-    setIsSubmitting(false);
-    setSubmitSuccess(true);
-    setFormData(INITIAL_FORM);
-    setCvFile(null);
+    try {
+      let cvUrl: string | null = null;
+      let cvFileName: string | null = null;
+
+      if (cvFile) {
+        const safeFileName = `${Date.now()}-${cvFile.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+        const fileRef = ref(storage, `inquiries/cv/${safeFileName}`);
+        await uploadBytes(fileRef, cvFile);
+        cvUrl = await getDownloadURL(fileRef);
+        cvFileName = cvFile.name;
+      }
+
+      await addDoc(collection(db, "inquiries"), {
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.mobile.trim(),
+        destinationOfInterest: formData.country,
+        message: formData.description.trim() || "No additional message provided.",
+        status: "new",
+        cvUrl,
+        cvFileName,
+        submittedAt: serverTimestamp(),
+      });
+
+      setSubmitSuccess(true);
+      setFormData(INITIAL_FORM);
+      setCvFile(null);
+    } catch (error) {
+      console.error("Failed to submit inquiry:", error);
+      setFields((prev) => ({
+        ...prev,
+        country: {
+          touched: true,
+          error: "We couldn't submit your inquiry right now. Please try again.",
+        },
+      }));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const isFormValid =

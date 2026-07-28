@@ -19,8 +19,12 @@ const getPublicDestinations = async (req, res) => {
       });
     }
 
-    const snapshot = await db.collection('destinations').where('active', '==', true).get();
-    const destinations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // The dashboard persists `isActive`; retain `active` as a legacy fallback.
+    // Filtering in memory avoids excluding valid records created by either version.
+    const snapshot = await db.collection('destinations').get();
+    const destinations = snapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter((destination) => destination.isActive ?? destination.active ?? true);
 
     return res.status(200).json({ success: true, count: destinations.length, data: destinations });
   } catch (error) {
@@ -148,7 +152,9 @@ const getPublicJobs = async (req, res) => {
     }
 
     const snapshot = await db.collection('jobs').where('active', '==', true).get();
-    let jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    let jobs = snapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter((job) => !job.deadline || new Date(job.deadline).getTime() >= Date.now());
     // Sort in memory to avoid requiring a Firestore composite index
     jobs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
@@ -181,7 +187,7 @@ const getJobDetails = async (req, res) => {
 
     const jobDoc = await db.collection('jobs').doc(id).get();
 
-    if (!jobDoc.exists || !jobDoc.data().active) {
+    if (!jobDoc.exists || !jobDoc.data().active || (jobDoc.data().deadline && new Date(jobDoc.data().deadline).getTime() < Date.now())) {
       return res.status(404).json({ success: false, message: 'Job not found or inactive' });
     }
 

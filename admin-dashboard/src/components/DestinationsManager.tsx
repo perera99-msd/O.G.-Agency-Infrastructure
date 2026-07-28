@@ -11,7 +11,7 @@ interface DestinationsManagerProps {
 }
 
 const emptyForm: {
-  country: string; region: string; flag: string; heroImage: string; activeJobs: number; visaProcessingDays: number; featured: boolean; file?: File;
+  country: string; region: string; flag: string; heroImage: string; activeJobs: number; visaProcessingDays: number; featured: boolean; isActive: boolean; file?: File;
 } = {
   country: '',
   region: '',
@@ -20,6 +20,7 @@ const emptyForm: {
   activeJobs: 10,
   visaProcessingDays: 30,
   featured: false,
+  isActive: true,
 };
 
 export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
@@ -65,7 +66,7 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
     setEditId(d.id);
     setForm({
       country: d.country, region: d.region, flag: d.flag || '', heroImage: d.heroImage || '',
-      activeJobs: d.activeJobs, visaProcessingDays: d.visaProcessingDays, featured: d.featured,
+      activeJobs: d.activeJobs, visaProcessingDays: d.visaProcessingDays, featured: d.featured, isActive: d.isActive,
     });
     setOpen(true);
   };
@@ -81,7 +82,6 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
   return (
     <>
       <div className="animate-in">
-        {/* Page Header */}
         <div className="page-header">
           <div>
             <h2 className="page-title">Destinations</h2>
@@ -96,7 +96,6 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
           )}
         </div>
 
-        {/* Grid */}
         {destinations.length === 0 ? (
           <div className="card">
             <div className="empty-state">
@@ -112,13 +111,15 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
           <div className="grid-3">
             {destinations.map(d => (
               <div key={d.id} className="card" style={{ overflow: 'hidden' }}>
-                {/* Image */}
-                <div className="img-card-wrap" style={{ height: 160 }}>
-                  <img src={d.heroImage} alt={d.country} />
-                  <div className="img-overlay" />
+                <div className="img-card-wrap" style={{ height: 160, position: 'relative' }}>
+                  <img src={d.heroImage} alt={d.country} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div className="img-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.2)' }} />
                   <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', gap: 6 }}>
                     <span className="tag tag-indigo" style={{ fontSize: 11, background: 'rgba(255,255,255,0.9)', color: 'var(--accent)', border: 'none', backdropFilter: 'blur(4px)' }}>
                       {d.region}
+                    </span>
+                    <span className={`tag ${d.isActive ? 'tag-green' : 'tag-neutral'}`} style={{ fontSize: 11, background: 'rgba(255,255,255,0.9)', border: 'none', backdropFilter: 'blur(4px)' }}>
+                      {d.isActive ? 'Active' : 'Inactive'}
                     </span>
                     {d.featured && (
                       <span className="tag" style={{ fontSize: 11, background: 'rgba(255,255,255,0.9)', color: 'var(--amber)', border: 'none', backdropFilter: 'blur(4px)', gap: 4 }}>
@@ -126,43 +127,40 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
                       </span>
                     )}
                   </div>
-                  {/* Action buttons */}
                   {role === 'super_user' && (
                     <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }}>
                       <button
-                        className="btn btn-icon"
+                        className="btn btn-secondary btn-icon"
                         onClick={() => openEdit(d)}
-                        style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', color: 'var(--text-secondary)', border: 'none', width: 28, height: 28 }}
                         title="Edit"
                       >
-                        <Edit3 size={12} strokeWidth={2} />
+                        <Edit3 size={14} />
                       </button>
                       <button
                         className="btn btn-icon"
                         onClick={() => onDelete(d.id)}
-                        style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', color: 'var(--red)', border: 'none', width: 28, height: 28 }}
+                        style={{ color: 'var(--red)', background: 'var(--red-bg)', border: '1px solid var(--red-border)' }}
                         title="Delete"
                       >
-                        <Trash2 size={12} strokeWidth={2} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   )}
                 </div>
 
-                {/* Content */}
-                <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Globe2 size={15} strokeWidth={1.8} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-                    <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.2px' }}>{d.country}</p>
+                    <Globe2 size={16} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+                    <p style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.2px' }}>{d.country}</p>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                    <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 11px' }}>
-                      <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', marginBottom: 2 }}>Active Jobs</p>
-                      <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent)', lineHeight: 1 }}>{d.activeJobs}</p>
+                  <div className="grid-2" style={{ gap: 8 }}>
+                    <div style={{ background: 'var(--bg)', borderRadius: 10, padding: '10px 12px' }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', marginBottom: 2 }}>Active Jobs</p>
+                      <p style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent)', lineHeight: 1 }}>{d.activeJobs}</p>
                     </div>
-                    <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 11px' }}>
-                      <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', marginBottom: 2 }}>Visa Days</p>
-                      <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--green)', lineHeight: 1 }}>{d.visaProcessingDays}</p>
+                    <div style={{ background: 'var(--bg)', borderRadius: 10, padding: '10px 12px' }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', marginBottom: 2 }}>Visa Days</p>
+                      <p style={{ fontSize: 18, fontWeight: 800, color: 'var(--green)', lineHeight: 1 }}>{d.visaProcessingDays}</p>
                     </div>
                   </div>
                 </div>
@@ -172,38 +170,35 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
         )}
       </div>
 
-      {/* Modal */}
       {open && (
-        <div className="modal-overlay">
-          <div className="modal" style={{ maxWidth: 480, background: '#ffffff' }}>
-            <div className="modal-header" style={{ borderBottom: 'none', paddingBottom: 0, alignItems: 'flex-start' }}>
+        <div className="modal-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
+          <div className="modal" style={{ maxWidth: 500 }}>
+            <div className="modal-header">
               <div>
-                <h3 className="modal-title" style={{ fontSize: 22 }}>{editId ? 'Edit Destination' : 'Add Destination'}</h3>
-                <p style={{ fontSize: 13.5, color: 'var(--accent)', marginTop: 4, fontWeight: 500 }}>
+                <h3 className="modal-title">{editId ? 'Edit Destination' : 'Add Destination'}</h3>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
                   {editId ? 'Update details for this location.' : 'Add a new employment corridor to your catalog.'}
                 </p>
               </div>
-              <button className="modal-close" onClick={() => setOpen(false)} style={{ borderRadius: '50%', background: 'var(--bg)', border: 'none', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+              <button className="modal-close" onClick={() => setOpen(false)}>×</button>
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="modal-body" style={{ gap: 20 }}>
+              <div className="modal-body">
                 <div className="field-row">
-                  <div>
+                  <div className="field-group">
                     <label className="field-label">Country Name *</label>
-                    <input className="field-input" type="text" required placeholder="e.g. Poland" value={form.country} onChange={e => setForm({ ...form, country: e.target.value })} style={{ borderRadius: 12 }} />
+                    <input className="field-input" type="text" required placeholder="e.g. Poland" value={form.country} onChange={e => setForm({ ...form, country: e.target.value })} />
                   </div>
-                  <div>
+                  <div className="field-group">
                     <label className="field-label">Region / Jurisdiction</label>
-                    <input className="field-input" type="text" placeholder="e.g. Central Europe" value={form.region} onChange={e => setForm({ ...form, region: e.target.value })} style={{ borderRadius: 12 }} />
+                    <input className="field-input" type="text" placeholder="e.g. Central Europe" value={form.region} onChange={e => setForm({ ...form, region: e.target.value })} />
                   </div>
                 </div>
 
-                <div className="field-row">
-                  <div style={{ flex: 1 }}>
-                    <label className="field-label">Flag (Emoji or URL) *</label>
-                    <input className="field-input" type="text" required placeholder="e.g. 🇵🇱 or /flags/poland.png" value={form.flag} onChange={e => setForm({ ...form, flag: e.target.value })} style={{ borderRadius: 12 }} />
-                  </div>
+                <div className="field-group">
+                  <label className="field-label">Flag (Emoji or URL)</label>
+                  <input className="field-input" type="text" placeholder="e.g. 🇵🇱 or /flags/poland.png" value={form.flag} onChange={e => setForm({ ...form, flag: e.target.value })} />
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -232,28 +227,39 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
                     </div>
                     <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
                   </div>
+                  <input
+                    className="field-input"
+                    type="url"
+                    placeholder="Or paste an image URL (https://...)"
+                    value={form.file ? '' : form.heroImage}
+                    onChange={e => setForm({ ...form, file: undefined, heroImage: e.target.value })}
+                    style={{ borderRadius: 12, marginTop: 8 }}
+                  />
                 </div>
 
                 <div className="field-row">
-                  <div>
-                    <label className="field-label">Active Jobs</label>
-                    <input className="field-input" type="number" value={form.activeJobs} onChange={e => setForm({ ...form, activeJobs: Number(e.target.value) })} style={{ borderRadius: 12 }} />
+                  <div className="field-group">
+                    <label className="field-label">Active Jobs Counter</label>
+                    <input className="field-input" type="number" min={0} value={form.activeJobs} onChange={e => setForm({ ...form, activeJobs: Number(e.target.value) })} />
                   </div>
-                  <div>
-                    <label className="field-label">Visa Timeline (days)</label>
-                    <input className="field-input" type="number" value={form.visaProcessingDays} onChange={e => setForm({ ...form, visaProcessingDays: Number(e.target.value) })} style={{ borderRadius: 12 }} />
+                  <div className="field-group">
+                    <label className="field-label">Visa Processing (Days)</label>
+                    <input className="field-input" type="number" min={1} value={form.visaProcessingDays} onChange={e => setForm({ ...form, visaProcessingDays: Number(e.target.value) })} />
                   </div>
                 </div>
 
                 <div className="checkbox-row">
-                  <input type="checkbox" id="featured" checked={form.featured} onChange={e => setForm({ ...form, featured: e.target.checked })} />
-                  <label htmlFor="featured" className="checkbox-label">Feature on the public website landing page</label>
+                  <input type="checkbox" id="dest-featured" checked={form.featured} onChange={e => setForm({ ...form, featured: e.target.checked })} />
+                  <label htmlFor="dest-featured" className="field-label" style={{ marginBottom: 0 }}>Featured on homepage</label>
+                </div>
+                <div className="checkbox-row">
+                  <input type="checkbox" id="dest-active" checked={form.isActive} onChange={e => setForm({ ...form, isActive: e.target.checked })} />
+                  <label htmlFor="dest-active" className="field-label" style={{ marginBottom: 0 }}>Active destination</label>
                 </div>
               </div>
-
-              <div className="modal-footer" style={{ borderTop: 'none', paddingTop: 8, justifyContent: 'center', gap: 16 }}>
-                <button type="button" className="btn btn-ghost" onClick={() => setOpen(false)} style={{ color: 'var(--text-secondary)', fontWeight: 600, padding: '10px 24px' }}>Cancel</button>
-                <button type="submit" className="btn" style={{ background: '#0f172a', color: 'white', padding: '10px 24px', borderRadius: 12, flex: 1, justifyContent: 'center' }}>{editId ? 'Save Changes' : 'Add Destination'}</button>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setOpen(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary">{editId ? 'Save Changes' : 'Add Destination'}</button>
               </div>
             </form>
           </div>

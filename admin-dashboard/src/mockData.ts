@@ -9,6 +9,7 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     activeJobs: 24,
     visaProcessingDays: 14,
     featured: true,
+    isActive: true,
   },
   {
     id: '2',
@@ -18,6 +19,7 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     activeJobs: 18,
     visaProcessingDays: 21,
     featured: true,
+    isActive: true,
   },
   {
     id: '3',
@@ -27,6 +29,7 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     activeJobs: 31,
     visaProcessingDays: 10,
     featured: false,
+    isActive: true,
   },
 ];
 

@@ -6,9 +6,9 @@ import {
 
 interface ContactResponsesManagerProps {
   responses: ContactMessage[];
-  onUpdateStatus: (id: string, status: ContactMessage['status']) => void;
-  onDelete: (id: string) => void;
-  onAddReplySim: (msg: Omit<ContactMessage, 'id'>) => void;
+  onUpdateStatus: (id: string, status: ContactMessage['status']) => Promise<void> | void;
+  onDelete: (id: string) => Promise<void> | void;
+  onAddReplySim: (msg: Omit<ContactMessage, 'id'>) => Promise<void> | void;
   role?: 'super_user' | 'normal_user';
 }
 
@@ -24,16 +24,16 @@ export const ContactResponsesManager: React.FC<ContactResponsesManagerProps> = (
 
   const filtered = responses.filter(r => filter === 'all' || r.status === filter);
 
-  const handleSendReply = (e: React.FormEvent) => {
+  const handleSendReply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reply || !selected) return;
-    onUpdateStatus(selected.id, 'replied');
+    await onUpdateStatus(selected.id, 'replied');
     setReply('');
     setSelected(null);
   };
 
-  const simulateInquiry = () => {
-    onAddReplySim({
+  const simulateInquiry = async () => {
+    await onAddReplySim({
       senderName: 'Suresh Fernando',
       email: 'suresh.f@gmail.com',
       phone: '+94 77 888 9900',
@@ -41,6 +41,8 @@ export const ContactResponsesManager: React.FC<ContactResponsesManagerProps> = (
       message: 'I have 5 years experience as a heavy fleet mechanic. Can I schedule a verification test at your Colombo center?',
       submittedAt: 'Just now',
       status: 'new',
+      cvUrl: null,
+      cvFileName: null,
     });
   };
 
@@ -83,14 +85,8 @@ export const ContactResponsesManager: React.FC<ContactResponsesManagerProps> = (
             filtered.map(r => (
               <div
                 key={r.id}
-                className="card"
-                style={{
-                  padding: '16px 18px',
-                  cursor: 'pointer',
-                  border: selected?.id === r.id ? '1.5px solid var(--accent)' : undefined,
-                  background: selected?.id === r.id ? 'rgba(99,102,241,0.03)' : undefined,
-                  transition: 'all 0.15s',
-                }}
+                className={`card card-clickable ${selected?.id === r.id ? 'active' : ''}`}
+                style={{ padding: '16px 18px' }}
                 onClick={() => setSelected(r)}
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
@@ -183,6 +179,22 @@ export const ContactResponsesManager: React.FC<ContactResponsesManagerProps> = (
               <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 13px' }}>
                 <p style={{ fontSize: 10.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 6 }}>Message</p>
                 <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.65 }}>"{selected.message}"</p>
+              </div>
+
+              <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 13px' }}>
+                <p style={{ fontSize: 10.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 6 }}>CV Attachment</p>
+                {selected.cvUrl ? (
+                  <a
+                    href={selected.cvUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600, textDecoration: 'underline' }}
+                  >
+                    {selected.cvFileName || 'Open attached CV'}
+                  </a>
+                ) : (
+                  <p style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>No CV attached.</p>
+                )}
               </div>
             </div>
 

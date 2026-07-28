@@ -7,6 +7,7 @@ export interface Destination {
   activeJobs: number;
   visaProcessingDays: number;
   featured: boolean;
+  isActive: boolean;
 }
 
 export interface JobOpening {
@@ -40,12 +41,13 @@ export interface GalleryItem {
 export interface BlogPost {
   id: string;
   title: string;
-  category: 'Visa & Legal' | 'Success Stories' | 'Industry News';
+  category: 'Visa & Legal' | 'Success Stories' | 'Industry News' | 'AI Generated';
   readTime: string;
   author: string;
   publishDate: string;
   excerpt: string;
   image?: string;
+  sourceType?: 'manual' | 'ai';
 }
 
 export interface ContactMessage {
@@ -57,9 +59,11 @@ export interface ContactMessage {
   message: string;
   submittedAt: string;
   status: 'new' | 'replied' | 'archived';
+  cvUrl?: string | null;
+  cvFileName?: string | null;
 }
 
-export type TabType = 'overview' | 'destinations' | 'jobs' | 'gallery' | 'blogs' | 'responses';
+export type TabType = 'overview' | 'destinations' | 'jobs' | 'gallery' | 'blogs' | 'responses' | 'profile';
 
 export type AdminRole = 'super_user' | 'normal_user';
 

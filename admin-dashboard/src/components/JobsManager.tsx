@@ -15,10 +15,6 @@ import {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const COUNTRIES = [
-  "Bosnia","Cyprus","Germany","Israel","Jordan","Kuwait",
-  "Malaysia","Oman","Qatar","Romania","Russia","Saudi Arabia","UAE",
-];
 const CATEGORIES = [
   "Construction","Garment","Healthcare","Hospitality",
   "Manufacturing","Engineering","Retail","Admin","Accounts","Other",
@@ -34,7 +30,7 @@ const DATE_RANGE_OPTIONS = [
 
 const emptyForm: Omit<JobOpening, 'id'> = {
   title: '',
-  country: COUNTRIES[0],
+  country: '',
   category: CATEGORIES[0],
   salary: { min: 1000, max: 2000, currency: 'USD' },
   deadline: new Date(new Date().setMonth(new Date().getMonth() + 1))
@@ -65,6 +61,7 @@ interface JobsManagerProps {
   onUpdate: (id: string, job: Partial<JobOpening>) => void;
   onDelete: (id: string) => void;
   role?: 'super_user' | 'normal_user';
+  availableDestinations: string[];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -84,201 +81,7 @@ function daysUntil(dateStr: string) {
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
-// ─── Scoped local styles (kept inside this file only) ─────────────────────────
-// Fixes: double-scroll modals, flat/hardcoded footer background, unclipped
-// rounded corners, hard-locked 4-col KPI grid, filter bar wrap behaviour,
-// and gives the "urgent" pin button a proper active/tinted state.
-// Class names are prefixed `jm-` so they can never collide with or affect
-// index.css rules used elsewhere in the dashboard.
 
-function JobsManagerStyles() {
-  return (
-    <style>{`
-      /* ---- Modal shell: single scroll region, clipped corners ---- */
-      .jm-overlay {
-        position: fixed;
-        inset: 0;
-        background:
-          radial-gradient(at 50% 0%, rgba(30, 41, 59, 0.55) 0%, rgba(15, 23, 42, 0.72) 100%);
-        backdrop-filter: blur(10px) saturate(120%);
-        -webkit-backdrop-filter: blur(10px) saturate(120%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 500;
-        padding: 24px;
-        animation: jm-fadeIn 0.2s ease;
-      }
-
-      .jm-modal {
-        background: rgba(255, 255, 255, 0.97);
-        backdrop-filter: blur(30px) saturate(180%);
-        -webkit-backdrop-filter: blur(30px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.9);
-        border-radius: var(--radius-xl, 24px);
-        width: 100%;
-        max-width: 540px;
-        max-height: 88vh;
-        box-shadow: 0 40px 80px -16px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.06);
-        animation: jm-slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-      }
-
-      .jm-modal > form {
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-        overflow: hidden;
-      }
-
-      .jm-modal-header {
-        padding: 22px 28px 18px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-shrink: 0;
-        border-bottom: 1px solid var(--border);
-        gap: 12px;
-      }
-
-      .jm-modal-title {
-        font-size: 18px;
-        font-weight: 800;
-        color: var(--text-primary);
-        letter-spacing: -0.4px;
-      }
-
-      .jm-modal-close {
-        width: 32px;
-        height: 32px;
-        border-radius: 10px;
-        background: rgba(15, 23, 42, 0.05);
-        border: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--text-muted);
-        cursor: pointer;
-        font-size: 18px;
-        line-height: 1;
-        transition: all 0.15s;
-        flex-shrink: 0;
-      }
-      .jm-modal-close:hover {
-        background: var(--red-bg);
-        color: var(--red);
-        border-color: var(--red-border);
-      }
-
-      .jm-modal-body {
-        padding: 24px 28px;
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-        overflow-y: auto;
-        flex: 1;
-        min-height: 0;
-      }
-
-      .jm-modal-footer {
-        padding: 18px 28px;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 12px;
-        border-top: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(20px);
-        flex-shrink: 0;
-      }
-
-      @keyframes jm-fadeIn { from { opacity: 0; } to { opacity: 1; } }
-      @keyframes jm-slideUp {
-        from { opacity: 0; transform: translateY(20px) scale(0.98); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
-      }
-
-      /* ---- KPI grid: responsive instead of a hard 4-col lock ---- */
-      .jm-kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 20px;
-        margin-bottom: 28px;
-      }
-
-      /* ---- Filter/search bar: clean wrap on narrow widths ---- */
-      .jm-filters-row {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-      .jm-search-wrap {
-        position: relative;
-        flex: 1 1 240px;
-        min-width: 200px;
-      }
-
-      @media (max-width: 860px) {
-        .jm-search-wrap { flex-basis: 100%; }
-      }
-
-      .jm-adv-filters {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
-        margin-top: 16px;
-        padding-top: 16px;
-        border-top: 1px solid var(--border);
-      }
-      @media (max-width: 900px) {
-        .jm-adv-filters { grid-template-columns: repeat(2, 1fr); }
-      }
-      @media (max-width: 520px) {
-        .jm-adv-filters { grid-template-columns: 1fr; }
-      }
-
-      /* ---- Form section grids inside the modal ---- */
-      .jm-grid-3 {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 14px;
-      }
-      @media (max-width: 640px) {
-        .jm-grid-3 { grid-template-columns: 1fr 1fr; }
-      }
-
-      .jm-benefit-grid {
-        flex: 1;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-      @media (max-width: 560px) {
-        .jm-benefit-grid { grid-template-columns: 1fr; }
-      }
-
-      /* ---- Urgent pin button: filled state instead of just a color swap ---- */
-      .jm-pin-btn {
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-      .jm-pin-btn.jm-pin-active {
-        background: var(--blue-bg);
-        border: 1px solid var(--blue-border);
-        color: var(--blue) !important;
-      }
-      .jm-pin-btn.jm-pin-inactive {
-        background: transparent;
-        border: 1px solid transparent;
-      }
-      .jm-pin-btn:hover {
-        transform: translateY(-1px);
-      }
-    `}</style>
-  );
-}
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -322,7 +125,7 @@ function KpiCard({ icon, label, value, sub, color }: {
   icon: React.ReactNode; label: string; value: number | string; sub?: string; color: string;
 }) {
   return (
-    <div className="card stat-card" style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+    <div className="card stat-card card-clickable" style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
       <div className="stat-icon-wrap" style={{ background: color + '18', border: `1px solid ${color}30` }}>
         <span style={{ color }}>{icon}</span>
       </div>
@@ -342,9 +145,9 @@ function ExtendModal({ job, onConfirm, onClose }: {
     new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   );
   return (
-    <div className="jm-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="jm-modal" style={{ maxWidth: 420 }}>
-        <div className="jm-modal-header">
+    <div className="modal-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal" style={{ maxWidth: 420 }}>
+        <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 10, background: 'var(--blue-bg)',
@@ -353,11 +156,11 @@ function ExtendModal({ job, onConfirm, onClose }: {
             }}>
               <Calendar size={16} style={{ color: 'var(--blue)' }} />
             </div>
-            <h3 className="jm-modal-title">Extend Deadline</h3>
+            <h3 className="modal-title">Extend Deadline</h3>
           </div>
-          <button className="jm-modal-close" onClick={onClose}>×</button>
+          <button className="modal-close" onClick={onClose}>×</button>
         </div>
-        <div className="jm-modal-body">
+        <div className="modal-body">
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>
             Current deadline: <strong style={{ color: 'var(--text-primary)' }}>{formatDate(job.deadline)}</strong>
           </p>
@@ -375,7 +178,7 @@ function ExtendModal({ job, onConfirm, onClose }: {
             />
           </div>
         </div>
-        <div className="jm-modal-footer">
+        <div className="modal-footer">
           <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
           <button
             className="btn btn-primary"
@@ -392,7 +195,7 @@ function ExtendModal({ job, onConfirm, onClose }: {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export const JobsManager: React.FC<JobsManagerProps> = ({
-  jobs, onAdd, onUpdate, onDelete, role = 'super_user'
+  jobs, onAdd, onUpdate, onDelete, role = 'super_user', availableDestinations
 }) => {
 
   // ── Modal state
@@ -414,6 +217,11 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
   const [filterUrgency, setFilterUrgency]   = useState<'all' | 'urgent' | 'normal'>('all');
   const [filterDateRange, setFilterDateRange] = useState(0); // days, 0 = all time
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const countryOptions = useMemo(() => {
+    const fromJobs = jobs.map((job) => job.country).filter(Boolean);
+    return Array.from(new Set([...availableDestinations, ...fromJobs])).sort((a, b) => a.localeCompare(b));
+  }, [availableDestinations, jobs]);
 
   // ── Fetch stats from dedicated endpoint
   const fetchStats = () => {
@@ -506,7 +314,12 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
   };
 
   // ── Form handlers
-  const openCreate = () => { setEditId(null); setForm({ ...emptyForm }); setOpen(true); };
+  const openCreate = () => {
+    if (!availableDestinations.length) return;
+    setEditId(null);
+    setForm({ ...emptyForm, country: availableDestinations[0] });
+    setOpen(true);
+  };
   const openEdit   = (j: JobOpening) => {
     setEditId(j.id);
     const { id, ...rest } = j;
@@ -522,7 +335,7 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title) return;
+    if (!form.title || !form.country) return;
     const submission = {
       ...form,
       requirements: form.requirements?.filter(r => r.trim() !== '') || [],
@@ -559,7 +372,6 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
 
   return (
     <div className="animate-in">
-      <JobsManagerStyles />
 
       {/* ── Page header ── */}
       <div className="page-header">
@@ -577,15 +389,23 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
             Refresh
           </button>
           {role === 'super_user' && (
-            <button className="btn btn-primary" onClick={openCreate}>
+            <button className="btn btn-primary" onClick={openCreate} disabled={!availableDestinations.length}>
               <Plus size={14} strokeWidth={2.5} /> Post Vacancy
             </button>
           )}
         </div>
       </div>
 
+      {!availableDestinations.length && (
+        <div className="card" style={{ padding: '12px 14px', marginBottom: 16, borderColor: 'var(--amber-border)', background: 'var(--amber-bg)' }}>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            No active destinations found. Create and activate a destination first, then you can post jobs.
+          </p>
+        </div>
+      )}
+
       {/* ── KPI Cards ── */}
-      <div className="jm-kpi-grid">
+      <div className="grid-4" style={{ marginBottom: 28 }}>
         <KpiCard
           icon={<Briefcase size={18} />}
           label="Total Listings"
@@ -618,10 +438,10 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
 
       {/* ── Search & Filters bar ── */}
       <div className="card" style={{ padding: '16px 20px', marginBottom: 20 }}>
-        <div className="jm-filters-row">
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
 
           {/* Search */}
-          <div className="jm-search-wrap">
+          <div style={{ position: 'relative', flex: '1 1 240px', minWidth: 200 }}>
             <Search size={14} style={{
               position: 'absolute', left: 12, top: '50%',
               transform: 'translateY(-50%)', color: 'var(--text-faint)',
@@ -678,7 +498,7 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
 
         {/* Advanced filter row */}
         {filtersOpen && (
-          <div className="jm-adv-filters">
+          <div className="grid-4" style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
             <div>
               <label className="field-label">Category</label>
               <select
@@ -698,7 +518,7 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
                 onChange={e => setFilterCountry(e.target.value)}
               >
                 <option value="">All countries</option>
-                {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                {countryOptions.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
@@ -808,7 +628,7 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
                   <div className="data-row-actions">
                     {/* Pin / Unpin urgent */}
                     <button
-                      className={`btn btn-ghost btn-icon jm-pin-btn ${job.isUrgent ? 'jm-pin-active' : 'jm-pin-inactive'}`}
+                      className="btn btn-ghost btn-icon"
                       title={job.isUrgent ? 'Remove urgent' : 'Mark as urgent'}
                       onClick={() => onUpdate(job.id, { isUrgent: !job.isUrgent })}
                       style={{ color: job.isUrgent ? 'var(--blue)' : 'var(--text-faint)' }}
@@ -865,9 +685,9 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
 
       {/* ── Delete Confirmation Modal ── */}
       {deleteId && (
-        <div className="jm-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setDeleteId(null); }}>
-          <div className="jm-modal" style={{ maxWidth: 420 }}>
-            <div className="jm-modal-header">
+        <div className="modal-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setDeleteId(null); }}>
+          <div className="modal" style={{ maxWidth: 420 }}>
+            <div className="modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{
                   width: 36, height: 36, borderRadius: 10, background: 'var(--red-bg)',
@@ -876,16 +696,16 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
                 }}>
                   <AlertCircle size={16} style={{ color: 'var(--red)' }} />
                 </div>
-                <h3 className="jm-modal-title">Delete Vacancy?</h3>
+                <h3 className="modal-title">Delete Vacancy?</h3>
               </div>
-              <button className="jm-modal-close" onClick={() => setDeleteId(null)}>×</button>
+              <button className="modal-close" onClick={() => setDeleteId(null)}>×</button>
             </div>
-            <div className="jm-modal-body">
+            <div className="modal-body">
               <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6 }}>
                 This action cannot be undone. The listing will be removed from the public portal immediately.
               </p>
             </div>
-            <div className="jm-modal-footer">
+            <div className="modal-footer">
               <button className="btn btn-secondary" onClick={() => setDeleteId(null)}>Cancel</button>
               <button
                 className="btn btn-danger"
@@ -901,20 +721,20 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
 
       {/* ── Create / Edit Modal ── */}
       {open && (
-        <div className="jm-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
-          <div className="jm-modal" style={{ maxWidth: 800, width: '90%' }}>
-            <div className="jm-modal-header">
-              <h3 className="jm-modal-title">{editId ? 'Edit Job Posting' : 'Post New Vacancy'}</h3>
-              <button className="jm-modal-close" onClick={() => setOpen(false)}>×</button>
+        <div className="modal-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
+          <div className="modal" style={{ maxWidth: 800, width: '90%' }}>
+            <div className="modal-header">
+              <h3 className="modal-title">{editId ? 'Edit Job Posting' : 'Post New Vacancy'}</h3>
+              <button className="modal-close" onClick={() => setOpen(false)}>×</button>
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="jm-modal-body">
+              <div className="modal-body">
 
                 {/* 1 · Basic Info */}
                 <section>
                   <SectionDivider>Basic Information</SectionDivider>
-                  <div className="jm-grid-3" style={{ marginBottom: 16 }}>
+                  <div className="grid-3" style={{ marginBottom: 16 }}>
                     <div style={{ gridColumn: '1 / -1' }}>
                       <label className="field-label">Job Title *</label>
                       <input className="field-input" type="text" required
@@ -927,7 +747,7 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
                       <label className="field-label">Destination Country *</label>
                       <select className="field-input" value={form.country}
                         onChange={e => setForm({ ...form, country: e.target.value })}>
-                        {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                        {Array.from(new Set([form.country, ...availableDestinations].filter(Boolean))).map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                     <div>
@@ -955,7 +775,7 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
                 {/* 2 · Salary & Demographics */}
                 <section>
                   <SectionDivider>Salary & Demographics</SectionDivider>
-                  <div className="jm-grid-3">
+                  <div className="grid-3">
                     <div>
                       <label className="field-label">Min Salary *</label>
                       <input className="field-input" type="number" required value={form.salary.min}
@@ -1061,7 +881,7 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {form.benefits?.map((ben, i) => (
                       <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                        <div className="jm-benefit-grid">
+                        <div className="grid-2" style={{ flex: 1, gap: 8 }}>
                           <input className="field-input" type="text"
                             placeholder="Benefit title (e.g. Free Housing)"
                             value={ben.title} onChange={e => updateBen(i, 'title', e.target.value)} />
@@ -1084,7 +904,7 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
               </div>
 
               {/* Modal footer */}
-              <div className="jm-modal-footer">
+              <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setOpen(false)}>
                   Cancel
                 </button>

@@ -1,175 +1,218 @@
-import React, { useState } from 'react';
-import { Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
+import React, { useEffect, useState } from "react";
+import { Eye, EyeOff, ArrowRight, ShieldCheck } from "lucide-react";
+import {
+  browserLocalPersistence,
+  browserSessionPersistence,
+  sendPasswordResetEmail,
+  setPersistence,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { auth } from "../firebase";
 
 interface LoginPageProps {
   onLogin: () => void;
+  initialError?: string;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, initialError = "" }) => {
+  const [email, setEmail] = useState(() => localStorage.getItem("og_remembered_admin_email") || "");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState(() => {
+    const stored = localStorage.getItem("og_remember_device");
+    return stored !== null ? stored === "true" : true;
+  });
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(initialError);
+
+  useEffect(() => {
+    if (initialError) setError(initialError);
+  }, [initialError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!email.trim() || !password.trim()) {
-      setError('Please enter both email/username and password.');
+      setError("Please enter both email/username and password.");
       return;
     }
 
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // Let App.tsx's onAuthStateChanged handle the actual login state transition
-      // We don't necessarily need to call onLogin() here if App.tsx listens to auth state,
-      // but to preserve the prop signature and immediate UI feedback:
+      const persistenceType = rememberMe ? browserLocalPersistence : browserSessionPersistence;
+      await setPersistence(auth, persistenceType);
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+
+      if (rememberMe) {
+        localStorage.setItem("og_remembered_admin_email", email.trim());
+        localStorage.setItem("og_remember_device", "true");
+      } else {
+        localStorage.removeItem("og_remembered_admin_email");
+        localStorage.setItem("og_remember_device", "false");
+      }
+
       onLogin();
     } catch (err: any) {
       console.error("Login error:", err);
-      // Simple error mapping
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        setError('Invalid email or password.');
+      if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
+        setError("Invalid email or password.");
       } else {
-        setError(err.message || 'Failed to sign in.');
+        setError(err.message || "Failed to sign in.");
       }
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      setError("Enter your email first, then click Forgot? to receive a reset link.");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      setError("If an account exists for this address, a password reset link has been sent.");
+    } catch (err: any) {
+      if (err.code === "auth/user-not-found") {
+        setError("If an account exists for this address, a password reset link has been sent.");
+        return;
+      }
+      setError("Unable to send a reset link right now. Please try again later.");
+    }
+  };
+
   return (
-    <div className="btr-login-wrapper">
-      {/* Background Layers */}
-      <div className="btr-bg-image" />
-      <div className="btr-bg-gradient" />
-      <div className="btr-bg-silhouette" />
+    <div style={{
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "url(https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80) center/cover no-repeat",
+      padding: 24,
+      position: "relative"
+    }}>
+      {/* Overlay */}
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        background: "linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.6) 100%)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)"
+      }} />
 
-      {/* Center Modal Card */}
-      <div className="btr-login-card">
-        {/* LEFT PANEL: Solid Dark Form Panel (Login Only) */}
-        <div className="btr-form-panel">
-          <div>
-            <div className="btr-logo-row">
-              <div className="btr-logo">
-                O.G.<span className="btr-logo-dot">.</span>
-              </div>
-              <span className="btr-mode-badge">
-                PORTAL ACCESS
-              </span>
-            </div>
-
-            <div className="btr-form-header">
-              <h1 className="btr-form-title">Sign in</h1>
-              <p className="btr-form-subtitle">
-                Enter your credentials to access the O.G. Command Center & Manpower Reserves.
-              </p>
-            </div>
-
-            {error && (
-              <div style={{
-                background: 'rgba(239, 68, 68, 0.15)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
-                color: '#fca5a5',
-                padding: '10px 14px',
-                borderRadius: '10px',
-                fontSize: '12.5px',
-                fontWeight: 600,
-                marginTop: '14px'
-              }}>
-                ⚠️ {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="btr-form-body">
-              <div className="btr-input-box">
-                <input
-                  type="text"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email or Username"
-                  className="btr-input"
-                  disabled={isLoading}
-                  autoFocus
-                />
-              </div>
-
-              <div className="btr-input-box">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  className="btr-input btr-input-password"
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="btr-eye-btn"
-                  title="Toggle password visibility"
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-
-              <div className="btr-checkbox-row">
-                <label className="btr-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="btr-checkbox"
-                  />
-                  <span>Remember this device</span>
-                </label>
-                <a
-                  href="#forgot"
-                  onClick={(e) => { e.preventDefault(); alert('Please contact the O.G. IT Administrator to reset your password.'); }}
-                  className="btr-forgot-link"
-                >
-                  Forgot?
-                </a>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="btr-submit-btn"
-              >
-                {isLoading ? (
-                  <span>Authenticating...</span>
-                ) : (
-                  <>
-                    <span>Sign In to Dashboard</span>
-                    <ArrowRight size={16} />
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-
-          <div className="btr-security-footer">
-            <ShieldCheck size={15} color="#10b981" />
-            <span>SLBFE #2751 • 256-Bit Secure Command Center</span>
-          </div>
+      <div className="card" style={{
+        position: "relative",
+        zIndex: 10,
+        width: "100%",
+        maxWidth: 420,
+        padding: "40px",
+        background: "rgba(255, 255, 255, 0.9)",
+        boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.2)",
+        display: "flex",
+        flexDirection: "column",
+        gap: 24
+      }}>
+        {/* Header */}
+        <div style={{ textAlign: "center" }}>
+          <img
+            src="/Logo-removebg-preview.png"
+            alt="O.G. Agency Logo"
+            style={{
+              width: 80, height: 80,
+              objectFit: "contain",
+              margin: "0 auto 16px",
+              display: "block",
+            }}
+          />
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.5px", marginBottom: 6 }}>
+            Command Center
+          </h1>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 500 }}>
+            Secure portal for O.G. Agency admins.
+          </p>
         </div>
 
-        {/* RIGHT PANEL: Translucent Glass Window with Admin Login PNG */}
-        <div className="btr-visual-panel">
-          <img
-            src="/Admin login.png"
-            alt="O.G. Command Center"
-            className="btr-visual-img"
-          />
+        {error && (
+          <div style={{
+            background: "rgba(239, 68, 68, 0.1)",
+            border: "1px solid rgba(239, 68, 68, 0.2)",
+            color: "#ef4444", padding: "12px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600,
+            display: "flex", alignItems: "center", gap: 8
+          }}>
+            <span style={{ fontSize: 16 }}>⚠️</span> {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="field-group" style={{ gap: 6 }}>
+            <label className="field-label">Email Address</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@ogagency.com"
+              className="field-input"
+              disabled={isLoading}
+              autoFocus
+              autoComplete="username"
+            />
+          </div>
+
+          <div className="field-group" style={{ gap: 6 }}>
+            <label className="field-label" style={{ display: "flex", justifyContent: "space-between" }}>
+              Password
+              <button type="button" onClick={handleForgotPassword} style={{ fontSize: 12, color: "var(--accent)", fontWeight: 700 }}>Forgot?</button>
+            </label>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="field-input"
+                disabled={isLoading}
+                autoComplete="current-password"
+                style={{ paddingRight: 40 }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-faint)", padding: 4 }}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              style={{ width: 16, height: 16, accentColor: "var(--accent)" }}
+            />
+            <span style={{ fontSize: 13, color: "var(--text-secondary)", fontWeight: 600 }}>Remember this device</span>
+          </label>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="btn btn-primary"
+            style={{ width: "100%", justifyContent: "center", padding: "12px", fontSize: 15, marginTop: 4 }}
+          >
+            {isLoading ? "Authenticating..." : (
+              <>Sign In <ArrowRight size={16} /></>
+            )}
+          </button>
+        </form>
+
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 12, color: "var(--text-faint)", fontSize: 11, fontWeight: 600 }}>
+          <ShieldCheck size={14} color="#10b981" /> SLBFE #2751 • 256-Bit Secure Access
         </div>
       </div>
     </div>
   );
 };
+

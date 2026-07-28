@@ -1,9 +1,10 @@
-import { Bell, LogOut } from 'lucide-react';
+import { Bell } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: string;
   unreadCount: number;
-  onLogout?: () => void;
+  onProfile?: () => void;
+  userInitials?: string;
 }
 
 const tabLabels: Record<string, string> = {
@@ -13,22 +14,20 @@ const tabLabels: Record<string, string> = {
   gallery: 'Gallery',
   blogs: 'Blogs & News',
   responses: 'Inquiries',
+  profile: 'My Profile',
 };
 
-export const Navbar: React.FC<NavbarProps> = ({ activeTab, unreadCount, onLogout }) => {
+export const Navbar: React.FC<NavbarProps> = ({ activeTab, unreadCount, onProfile, userInitials = 'AD' }) => {
   return (
     <header className="header">
-      <div className="header-brand">
-        <div className="header-logo">OG</div>
+      <div className="header-left">
         <div>
-          <p className="header-name">O.G. Agency</p>
-          <p className="header-sub">Admin Dashboard</p>
+          <h1 className="header-page-title">{tabLabels[activeTab] ?? activeTab}</h1>
+          <p className="header-breadcrumb">Dashboard / {tabLabels[activeTab] ?? activeTab}</p>
         </div>
       </div>
 
       <div className="header-right">
-        <span className="header-module">{tabLabels[activeTab] ?? activeTab}</span>
-
         <div className="header-status">
           <span className="dot-pulse" />
           Live Sync
@@ -39,20 +38,9 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, unreadCount, onLogout
           {unreadCount > 0 && <span className="notif-badge" />}
         </button>
 
-        <div className="header-avatar" title="Senior Administrator">
-          AD
-        </div>
-
-        {onLogout && (
-          <button 
-            onClick={onLogout}
-            className="header-notif" 
-            style={{ marginLeft: '4px', color: '#ef4444' }} 
-            title="Log Out of Executive Portal"
-          >
-            <LogOut size={16} strokeWidth={2} />
-          </button>
-        )}
+        <button className="header-avatar" title="Open my profile" onClick={onProfile}>
+          {userInitials}
+        </button>
       </div>
     </header>
   );
