@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -17,5 +18,4 @@ const app = initializeApp(firebaseConfig);
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-// Note: Firebase Storage requires Blaze plan.
-// Images are handled by Cloudinary (free) — see src/cloudinary.ts
+export const storage = getStorage(app);

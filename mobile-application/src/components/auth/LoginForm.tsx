@@ -20,7 +20,15 @@ export function LoginForm() {
     e.preventDefault();
     clearError();
     const ok = await login(email, password);
-    if (ok) router.push("/dashboard");
+    if (ok) {
+      // Check if PIN setup is needed
+      const { isPinSet } = require("@/lib/localAuth");
+      if (!isPinSet()) {
+        router.push("/pin-setup");
+      } else {
+        router.push("/dashboard");
+      }
+    }
   }
 
   async function handleGoogle() {

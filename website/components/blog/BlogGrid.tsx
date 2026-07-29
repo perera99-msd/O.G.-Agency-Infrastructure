@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpRight, Clock, Calendar, Tag, Search, Sparkles } from "lucide-react";
+import { Clock, Calendar, Sparkles, Search, ArrowUpRight } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, query } from "firebase/firestore";
 
@@ -10,6 +11,7 @@ interface BlogPost {
   id: string;
   title: string;
   excerpt: string;
+  content?: string;
   category: string;
   readTime: string;
   publishDate: string;
@@ -106,14 +108,14 @@ export default function BlogGrid() {
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             >
               {filteredPosts.map((post) => (
+                <Link href={`/blog/${post.id}`} key={post.id} className="block">
                 <motion.article
                   layout
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.4 }}
-                  key={post.id}
-                  className="group flex flex-col bg-white rounded-3xl overflow-hidden border border-main-900/10 shadow-md hover:shadow-2xl transition-all duration-500"
+                  className="group flex flex-col bg-white rounded-3xl overflow-hidden border border-main-900/10 shadow-md hover:shadow-2xl transition-all duration-500 h-full"
                 >
                   {/* Image Container */}
                   <div className="relative w-full h-64 overflow-hidden bg-main-900/5">
@@ -162,6 +164,7 @@ export default function BlogGrid() {
                     </div>
                   </div>
                 </motion.article>
+              </Link>
               ))}
             </motion.div>
           ) : (

@@ -9,6 +9,7 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     activeJobs: 24,
     visaProcessingDays: 14,
     featured: true,
+    isActive: true,
   },
   {
     id: '2',
@@ -18,6 +19,7 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     activeJobs: 18,
     visaProcessingDays: 21,
     featured: true,
+    isActive: true,
   },
   {
     id: '3',
@@ -27,6 +29,7 @@ export const INITIAL_DESTINATIONS: Destination[] = [
     activeJobs: 31,
     visaProcessingDays: 10,
     featured: false,
+    isActive: true,
   },
 ];
 
@@ -42,6 +45,8 @@ export const INITIAL_RESPONSES: ContactMessage[] = [
     senderName: 'Arun Thapa',
     email: 'arun.thapa@email.com',
     phone: '+977-9841234567',
+    idType: 'Passport',
+    idNumber: 'P1234567',
     destinationOfInterest: 'Qatar',
     message: 'I am interested in construction jobs in Qatar. Please provide more details.',
     submittedAt: '2026-07-01T08:30:00Z',
@@ -52,6 +57,8 @@ export const INITIAL_RESPONSES: ContactMessage[] = [
     senderName: 'Sunita Rai',
     email: 'sunita.rai@email.com',
     phone: '+977-9857654321',
+    idType: 'NIC',
+    idNumber: '985765432V',
     destinationOfInterest: 'UAE',
     message: 'Looking for housekeeping opportunities in UAE. What documents are needed?',
     submittedAt: '2026-07-03T14:15:00Z',
