@@ -32,6 +32,10 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Confirmation modal states
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [saveConfirmData, setSaveConfirmData] = useState<{ id: string; form: typeof emptyForm } | null>(null);
+
   const handleDragEnter = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
   const handleDragLeave = (e: React.DragEvent) => {
@@ -74,9 +78,22 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.country) return;
-    if (editId) onUpdate(editId, form);
-    else onAdd(form);
-    setOpen(false);
+    if (editId) {
+      // Prompt confirmation overlay for editing existing corridors
+      setSaveConfirmData({ id: editId, form: { ...form } });
+    } else {
+      // Proceed immediately for adding new corridors
+      onAdd(form);
+      setOpen(false);
+    }
+  };
+
+  const handleConfirmSave = () => {
+    if (saveConfirmData) {
+      onUpdate(saveConfirmData.id, saveConfirmData.form);
+      setSaveConfirmData(null);
+      setOpen(false);
+    }
   };
 
   return (
@@ -138,7 +155,7 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
                       </button>
                       <button
                         className="btn btn-icon"
-                        onClick={() => onDelete(d.id)}
+                        onClick={() => setDeleteConfirmId(d.id)}
                         style={{ color: 'var(--red)', background: 'var(--red-bg)', border: '1px solid var(--red-border)' }}
                         title="Delete"
                       >
@@ -262,6 +279,67 @@ export const DestinationsManager: React.FC<DestinationsManagerProps> = ({
                 <button type="submit" className="btn btn-primary">{editId ? 'Save Changes' : 'Add Destination'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Confirmation Modal ── */}
+      {deleteConfirmId && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" style={{ zIndex: 100000 }}>
+          <div className="modal logout-confirmation" style={{ maxWidth: 420 }}>
+            <div className="modal-header">
+              <div>
+                <h3 className="modal-title">Delete Destination?</h3>
+                <p className="logout-confirmation-copy" style={{ marginTop: 8 }}>
+                  Are you sure you want to permanently delete <strong>{destinations.find(d => d.id === deleteConfirmId)?.country}</strong>? This will remove all associated job counter metadata and clear any files. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setDeleteConfirmId(null)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => {
+                  if (deleteConfirmId) {
+                    onDelete(deleteConfirmId);
+                    setDeleteConfirmId(null);
+                  }
+                }}
+              >
+                Delete Destination
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Save Edits Confirmation Modal ── */}
+      {saveConfirmData && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" style={{ zIndex: 100000 }}>
+          <div className="modal logout-confirmation" style={{ maxWidth: 420 }}>
+            <div className="modal-header">
+              <div>
+                <h3 className="modal-title">Save Destination Changes?</h3>
+                <p className="logout-confirmation-copy" style={{ marginTop: 8 }}>
+                  Are you sure you want to save your updates for <strong>{saveConfirmData.form.country}</strong>? These changes will go live instantly on the O.G. Agency website.
+                </p>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setSaveConfirmData(null)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleConfirmSave}
+              >
+                Confirm Save
+              </button>
+            </div>
           </div>
         </div>
       )}

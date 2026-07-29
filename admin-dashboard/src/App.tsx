@@ -7,10 +7,11 @@ import { JobsManager } from './components/JobsManager';
 import { GalleryManager } from './components/GalleryManager';
 import { BlogsManager } from './components/BlogsManager';
 import { ContactResponsesManager } from './components/ContactResponsesManager';
+import { NotificationsCenter } from './components/NotificationsCenter';
 import { LoginPage } from './components/LoginPage';
 import { ProfileManager } from './components/ProfileManager';
 
-import { db, auth } from './firebase';
+import { db, auth, storage } from './firebase';
 import {
   collection,
   deleteDoc,
@@ -21,6 +22,7 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore';
+import { ref, deleteObject } from 'firebase/storage';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { compressImage } from './imageCompressor';
@@ -136,8 +138,6 @@ export default function App() {
             await signOut(auth);
             return;
           }
-          // Firebase proves identity; the backend proves administrator access.
-          // Do not grant dashboard access from a client-readable Firestore role.
           const session = await verifyAdminSession(user);
           setCurrentUser({ uid: session.uid, email: session.email || user.email || '', role: 'super_user' });
           setIsLoggedIn(true);
@@ -158,6 +158,24 @@ export default function App() {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!currentUser?.uid) return;
+    const unsubProfile = onSnapshot(doc(db, 'Admin_Users', currentUser.uid), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setCurrentUser((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            displayName: data.displayName || prev.displayName,
+            photoUrl: data.photoUrl || prev.photoUrl,
+          };
+        });
+      }
+    });
+    return () => unsubProfile();
+  }, [currentUser?.uid]);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -203,6 +221,9 @@ export default function App() {
           message: payload.message || '',
           submittedAt: formatSubmittedAt(payload.submittedAt),
           status: payload.status || 'new',
+          isBookmarked: !!payload.isBookmarked,
+          idType: payload.idType || 'NIC',
+          idNumber: payload.idNumber || 'N/A',
           cvUrl: payload.cvUrl || null,
           cvFileName: payload.cvFileName || null,
         } as ContactMessage;
@@ -268,6 +289,19 @@ export default function App() {
     activeJobs: jobs.filter((job) => job.country === destination.country && job.active && new Date(job.deadline) >= new Date()).length,
   })), [destinations, jobs]);
 
+  // Universal Storage Asset Cleanup
+  const deleteStorageAsset = async (fileUrl?: string | null) => {
+    if (!fileUrl || typeof fileUrl !== 'string') return;
+    if (fileUrl.includes('firebasestorage.googleapis.com') || fileUrl.startsWith('gs://')) {
+      try {
+        const fileRef = ref(storage, fileUrl);
+        await deleteObject(fileRef);
+      } catch (err) {
+        console.warn('Storage asset cleanup skipped or already removed:', err);
+      }
+    }
+  };
+
   // Destinations
   const addDest = async (d: Omit<Destination, 'id'> & { file?: File }) => {
     const id = crypto.randomUUID();
@@ -328,6 +362,10 @@ export default function App() {
 
   const deleteDest = async (id: string) => {
     try {
+      const dest = destinations.find((item) => item.id === id);
+      if (dest?.heroImage) {
+        await deleteStorageAsset(dest.heroImage);
+      }
       await deleteDoc(doc(db, 'destinations', id));
     } catch (err) {
       console.error('Error deleting destination:', err);
@@ -386,7 +424,7 @@ export default function App() {
     }
   };
 
-  // Gallery — images compressed client-side and stored as base64 in Firestore
+  // Gallery
   const addGallery = async (g: Omit<GalleryItem, 'id'> & { file?: File }) => {
     const id = crypto.randomUUID();
     let finalUrl = g.imageUrl || '';
@@ -442,6 +480,10 @@ export default function App() {
 
   const deleteGallery = async (id: string) => {
     try {
+      const item = gallery.find((g) => g.id === id);
+      if (item?.imageUrl) {
+        await deleteStorageAsset(item.imageUrl);
+      }
       await deleteDoc(doc(db, 'gallery', id));
     } catch (err) {
       console.error('Error deleting gallery item:', err);
@@ -508,6 +550,10 @@ export default function App() {
 
   const deleteBlog = async (id: string) => {
     try {
+      const blog = blogs.find((b) => b.id === id);
+      if (blog?.image) {
+        await deleteStorageAsset(blog.image);
+      }
       await deleteDoc(doc(db, 'blogs', id));
     } catch (err) {
       console.error('Error deleting blog:', err);
@@ -523,11 +569,34 @@ export default function App() {
     }
   };
 
+  const toggleResponseBookmark = async (id: string, currentBookmarked?: boolean) => {
+    try {
+      await updateDoc(doc(db, 'inquiries', id), { isBookmarked: !currentBookmarked });
+    } catch (error) {
+      console.error('Error toggling inquiry bookmark:', error);
+    }
+  };
+
   const deleteResponse = async (id: string) => {
     try {
+      const resp = responses.find((r) => r.id === id);
+      if (resp?.cvUrl) {
+        await deleteStorageAsset(resp.cvUrl);
+      }
       await deleteDoc(doc(db, 'inquiries', id));
     } catch (error) {
       console.error('Error deleting inquiry:', error);
+    }
+  };
+
+  const markAllResponsesAsRead = async () => {
+    const unreadList = responses.filter((r) => r.status === 'new');
+    for (const item of unreadList) {
+      try {
+        await updateDoc(doc(db, 'inquiries', item.id), { status: 'replied' });
+      } catch (err) {
+        console.error('Error marking response as read:', err);
+      }
     }
   };
 
@@ -542,15 +611,15 @@ export default function App() {
         message: m.message,
         submittedAt: new Date().toISOString(),
         status: m.status,
+        isBookmarked: !!m.isBookmarked,
         cvUrl: m.cvUrl || null,
         cvFileName: m.cvFileName || null,
       });
       await fetchJobs();
     } catch (err) {
-      console.error('Error adding job via API:', err);
+      console.error('Error adding response:', err);
     }
   };
-
 
   if (authLoading) {
     return (
@@ -569,7 +638,18 @@ export default function App() {
       <div className="app-shell premium-shell">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} unreadCount={unreadCount} role={currentUser.role} onLogout={requestLogout} />
         <div className="app-main-wrapper">
-          <Navbar activeTab={activeTab} unreadCount={unreadCount} onProfile={() => setActiveTab('profile')} userInitials={(currentUser.email || 'AD').slice(0, 2).toUpperCase()} />
+          <Navbar
+            activeTab={activeTab}
+            unreadCount={unreadCount}
+            responses={responses}
+            onUpdateStatus={updateResponseStatus}
+            onMarkAllAsRead={markAllResponsesAsRead}
+            onDeleteResponse={deleteResponse}
+            onNavigate={setActiveTab}
+            onProfile={() => setActiveTab('profile')}
+            userInitials={(currentUser.displayName || currentUser.email || 'AD').slice(0, 2).toUpperCase()}
+            userPhotoUrl={currentUser.photoUrl}
+          />
           <main className="main-content">
             {activeTab === 'overview' && (
               <BentoOverview
@@ -598,8 +678,21 @@ export default function App() {
             )}
             {activeTab === 'responses' && (
               <ContactResponsesManager
-                responses={responses} onUpdateStatus={updateResponseStatus}
-                onDelete={deleteResponse} onAddReplySim={addResponse} role={currentUser.role}
+                responses={responses}
+                onUpdateStatus={updateResponseStatus}
+                onToggleBookmark={toggleResponseBookmark}
+                onDelete={deleteResponse}
+                onAddReplySim={addResponse}
+                role={currentUser.role}
+              />
+            )}
+            {activeTab === 'notifications' && (
+              <NotificationsCenter
+                responses={responses}
+                onUpdateStatus={updateResponseStatus}
+                onMarkAllAsRead={markAllResponsesAsRead}
+                onDelete={deleteResponse}
+                role={currentUser.role}
               />
             )}
             {activeTab === 'profile' && <ProfileManager user={currentUser} />}

@@ -8,6 +8,7 @@ import {
   LogOut,
   MessageSquare,
   UserRound,
+  Bell,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -28,6 +29,7 @@ const mainNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: number
 ];
 
 const accountNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: number; strokeWidth?: number }> }[] = [
+  { id: 'notifications', label: 'Notifications', Icon: Bell },
   { id: 'profile', label: 'My Profile', Icon: UserRound },
 ];
 
@@ -71,6 +73,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unrea
             <Icon size={15} strokeWidth={2} />
           </span>
           {label}
+          {id === 'notifications' && unreadCount > 0 && (
+            <span className="nav-badge">{unreadCount}</span>
+          )}
         </button>
       ))}
 

@@ -7,6 +7,8 @@ const validateContactSubmission = (data) => {
   const errors = [];
   if (!data.name || typeof data.name !== 'string') errors.push('Name is required and must be a valid string.');
   if (!data.email || !/^\S+@\S+\.\S+$/.test(data.email)) errors.push('Valid email address is required.');
+  if (!data.phone || typeof data.phone !== 'string') errors.push('Phone number is required.');
+  if (!data.idNumber || typeof data.idNumber !== 'string') errors.push('ID number (Passport/NIC) is required.');
   if (!data.message || typeof data.message !== 'string') errors.push('Message content is required.');
   
   return {
@@ -15,11 +17,16 @@ const validateContactSubmission = (data) => {
     sanitizedData: {
       name: data.name?.trim(),
       email: data.email?.trim().toLowerCase(),
-      phone: data.phone?.trim() || null,
+      phone: data.phone?.trim(),
+      idNumber: data.idNumber?.trim(),
+      idType: data.idType?.trim() || 'NIC',
       destinationOfInterest: data.destinationOfInterest || 'General Inquiry',
       message: data.message?.trim(),
       submittedAt: new Date().toISOString(),
       status: 'new',
+      isBookmarked: typeof data.isBookmarked === 'boolean' ? data.isBookmarked : false,
+      cvUrl: data.cvUrl || null,
+      cvFileName: data.cvFileName || null,
     },
   };
 };

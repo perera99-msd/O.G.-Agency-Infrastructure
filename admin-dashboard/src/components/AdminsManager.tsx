@@ -160,83 +160,85 @@ export const AdminsManager: React.FC<{ currentUserUid: string }> = ({ currentUse
   };
 
   return (
-    <div className="card" style={{ marginTop: 24, overflow: 'hidden' }}>
-      {/* Header */}
-      <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="section-header-left">
-          <div className="section-header-icon" style={{ background: 'var(--blue-bg)', color: 'var(--blue)' }}>
-            <ShieldCheck size={18} />
+    <>
+      <div className="card" style={{ marginTop: 24 }}>
+        {/* Header */}
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="section-header-left">
+            <div className="section-header-icon" style={{ background: 'var(--blue-bg)', color: 'var(--blue)' }}>
+              <ShieldCheck size={18} />
+            </div>
+            <div>
+              <h3 className="section-header-title">Administrator Management</h3>
+              <p className="section-header-desc">Manage access, roles, and password resets for team members.</p>
+            </div>
           </div>
-          <div>
-            <h3 className="section-header-title">Administrator Management</h3>
-            <p className="section-header-desc">Manage access, roles, and password resets for team members.</p>
-          </div>
+          <button className="btn btn-primary" onClick={openAddModal}>
+            <Plus size={14} /> Add Admin
+          </button>
         </div>
-        <button className="btn btn-primary" onClick={openAddModal}>
-          <Plus size={14} /> Add Admin
-        </button>
+
+        {error && <div className="profile-error-alert" style={{ margin: '16px 24px 0' }}>{error}</div>}
+
+        {/* Content */}
+        {loading ? (
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
+            <Loader2 size={22} className="animate-spin" style={{ margin: '0 auto 10px', display: 'block' }} />
+            <p style={{ fontSize: 13 }}>Loading administrators...</p>
+          </div>
+        ) : admins.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon"><ShieldCheck size={20} /></div>
+            <p className="empty-state-title">No administrators found</p>
+            <p className="empty-state-desc">Add your first admin team member.</p>
+          </div>
+        ) : (
+          <div>
+            {admins.map(a => (
+              <div key={a.uid} className="data-row" style={{ padding: '14px 24px' }}>
+                <div className="avatar avatar-md avatar-subtle">
+                  {getInitials(a.displayName, a.email)}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--text-primary)' }}>{a.displayName || 'Unknown'}</span>
+                    {a.role === 'super_user' && (
+                      <span className="tag tag-indigo" style={{ fontSize: 10, padding: '1px 6px' }}>
+                        <Shield size={9} /> Super
+                      </span>
+                    )}
+                    {a.uid === currentUserUid && (
+                      <span className="tag tag-green" style={{ fontSize: 10, padding: '1px 6px' }}>You</span>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 3 }}>
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Mail size={11} /> {a.email || '—'}
+                    </span>
+                    <span style={{ fontSize: 12, color: 'var(--text-faint)' }}>• {a.jobTitle || 'Administrator'}</span>
+                  </div>
+                </div>
+                
+                <div className="data-row-actions">
+                  <button className="btn btn-secondary btn-icon" title="Send Password Reset" onClick={() => handleResetPassword(a.email)}>
+                    <KeyRound size={14} />
+                  </button>
+                  <button className="btn btn-secondary btn-icon" title="Edit Role" onClick={() => openEditModal(a)}>
+                    <Edit2 size={14} />
+                  </button>
+                  {a.uid !== currentUserUid && (
+                    <button className="btn btn-icon" style={{ color: 'var(--red)', background: 'var(--red-bg)', border: '1px solid var(--red-border)' }} title="Delete Admin" onClick={() => handleDelete(a.uid)} disabled={actionLoading}>
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {error && <div className="profile-error-alert" style={{ margin: '16px 24px 0' }}>{error}</div>}
-
-      {/* Content */}
-      {loading ? (
-        <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
-          <Loader2 size={22} className="animate-spin" style={{ margin: '0 auto 10px', display: 'block' }} />
-          <p style={{ fontSize: 13 }}>Loading administrators...</p>
-        </div>
-      ) : admins.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state-icon"><ShieldCheck size={20} /></div>
-          <p className="empty-state-title">No administrators found</p>
-          <p className="empty-state-desc">Add your first admin team member.</p>
-        </div>
-      ) : (
-        <div>
-          {admins.map(a => (
-            <div key={a.uid} className="data-row" style={{ padding: '14px 24px' }}>
-              <div className="avatar avatar-md avatar-subtle">
-                {getInitials(a.displayName, a.email)}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--text-primary)' }}>{a.displayName || 'Unknown'}</span>
-                  {a.role === 'super_user' && (
-                    <span className="tag tag-indigo" style={{ fontSize: 10, padding: '1px 6px' }}>
-                      <Shield size={9} /> Super
-                    </span>
-                  )}
-                  {a.uid === currentUserUid && (
-                    <span className="tag tag-green" style={{ fontSize: 10, padding: '1px 6px' }}>You</span>
-                  )}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 3 }}>
-                  <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <Mail size={11} /> {a.email || '—'}
-                  </span>
-                  <span style={{ fontSize: 12, color: 'var(--text-faint)' }}>• {a.jobTitle || 'Administrator'}</span>
-                </div>
-              </div>
-              
-              <div className="data-row-actions">
-                <button className="btn btn-secondary btn-icon" title="Send Password Reset" onClick={() => handleResetPassword(a.email)}>
-                  <KeyRound size={14} />
-                </button>
-                <button className="btn btn-secondary btn-icon" title="Edit Role" onClick={() => openEditModal(a)}>
-                  <Edit2 size={14} />
-                </button>
-                {a.uid !== currentUserUid && (
-                  <button className="btn btn-icon" style={{ color: 'var(--red)', background: 'var(--red-bg)', border: '1px solid var(--red-border)' }} title="Delete Admin" onClick={() => handleDelete(a.uid)} disabled={actionLoading}>
-                    <Trash2 size={14} />
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Modal */}
+      {/* Modal - Rendered outside card container */}
       {showModal && (
         <div className="modal-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}>
           <div className="modal">
@@ -293,6 +295,6 @@ export const AdminsManager: React.FC<{ currentUserUid: string }> = ({ currentUse
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };

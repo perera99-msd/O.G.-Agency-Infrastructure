@@ -1,22 +1,43 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { collection, onSnapshot, query } from "firebase/firestore";
 
-const GALLERY_IMAGES = [
-  { src: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800", title: "Garment Sewing Line", location: "Romania" },
-  { src: "https://images.unsplash.com/photo-1617791160505-6f00b046a874?auto=format&fit=crop&q=80&w=800", title: "Industrial Factory Floor", location: "Poland" },
-  { src: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=800", title: "Automated Fabric Cutting", location: "Academy" },
-  { src: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800", title: "Sewing Stations Assessment", location: "Training Center" },
-  { src: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=800", title: "Embroidery Division", location: "Innovation Lab" },
-  { src: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=800", title: "Computerized Machinists", location: "Romania" },
-  { src: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&q=80&w=800", title: "Production Management", location: "Poland" },
-  { src: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=800", title: "Active Apparel Assembly", location: "Lithuania" },
-  { src: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&q=80&w=800", title: "Double Assembly Line", location: "Germany" },
-  { src: "https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?auto=format&fit=crop&q=80&w=800", title: "Modern Sewing Workshop", location: "EU Hub" },
-];
+interface GalleryImage {
+  id: string;
+  title: string;
+  category: string;
+  imageUrl: string;
+  dateAdded: string;
+}
 
 export default function GalleryMarquee() {
+  const [images, setImages] = useState<GalleryImage[]>([]);
+
+  useEffect(() => {
+    const q = query(collection(db, "gallery"));
+    const unsub = onSnapshot(q, (snap) => {
+      const items = snap.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as GalleryImage[];
+      // Sort by dateAdded descending — newest first
+      items.sort(
+        (a, b) =>
+          new Date(b.dateAdded || 0).getTime() -
+          new Date(a.dateAdded || 0).getTime()
+      );
+      setImages(items);
+    });
+    return () => unsub();
+  }, []);
+
+  // Duplicate for seamless infinite loop — need at least a few to look good
+  const marqueeItems = images.length > 0 ? [...images, ...images] : [];
+
   return (
     <section className="relative w-full py-24 bg-main-50 overflow-hidden border-b border-main-900/10">
       <style dangerouslySetInnerHTML={{
@@ -62,29 +83,40 @@ export default function GalleryMarquee() {
         <div className="absolute left-0 top-0 bottom-0 w-24 md:w-36 bg-gradient-to-r from-main-50 to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-24 md:w-36 bg-gradient-to-l from-main-50 to-transparent z-10 pointer-events-none" />
 
-        <div className="animate-infinite-marquee gap-6 px-3">
-          {/* Duplicate list twice for seamless infinite loop */}
-          {[...GALLERY_IMAGES, ...GALLERY_IMAGES].map((item, idx) => (
-            <div
-              key={idx}
-              className="relative group w-[320px] sm:w-[380px] md:w-[440px] h-[280px] sm:h-[320px] md:h-[350px] rounded-3xl overflow-hidden bg-main-700/10 border border-main-900/10 shadow-md shrink-0 transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl cursor-pointer"
-            >
-              <img
-                src={item.src}
-                alt={item.title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-main-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
-                <span className="text-main-300 text-[10px] font-bold tracking-wider uppercase">
-                  {item.location}
-                </span>
-                <span className="text-main-50 font-heading font-semibold text-base truncate">
-                  {item.title}
-                </span>
+        {marqueeItems.length > 0 ? (
+          <div className="animate-infinite-marquee gap-6 px-3">
+            {marqueeItems.map((item, idx) => (
+              <div
+                key={`${item.id}-${idx}`}
+                className="relative group w-[320px] sm:w-[380px] md:w-[440px] h-[280px] sm:h-[320px] md:h-[350px] rounded-3xl overflow-hidden bg-main-700/10 border border-main-900/10 shadow-md shrink-0 transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl cursor-pointer"
+              >
+                <img
+                  src={item.imageUrl}
+                  alt={item.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-main-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
+                  <span className="text-main-300 text-[10px] font-bold tracking-wider uppercase">
+                    {item.category}
+                  </span>
+                  <span className="text-main-50 font-heading font-semibold text-base truncate">
+                    {item.title}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          /* Loading skeleton while Firestore data arrives */
+          <div className="flex gap-6 px-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="w-[320px] sm:w-[380px] md:w-[440px] h-[280px] sm:h-[320px] md:h-[350px] rounded-3xl bg-main-200/40 animate-pulse shrink-0"
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

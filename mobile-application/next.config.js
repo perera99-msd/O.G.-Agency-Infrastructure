@@ -5,12 +5,27 @@ const withPWA = require("next-pwa")({
   register: true,
   runtimeCaching: [
     {
-      headers: { "Cache-Control": "public, max-age=31536000, immutable" },
-      matcher: /\/icons\/.*\/icons-.*\.png$/,
+      urlPattern: /\/icons\/.*\/icons-.*\.png$/,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "icon-cache",
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 31536000,
+        },
+      },
     },
     {
-      headers: { "Cache-Control": "public, max-age=0, must-revalidate" },
-      matcher: "/:path*",
+      urlPattern: /\/api\/.*/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "api-cache",
+        networkTimeoutSeconds: 10,
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 86400,
+        },
+      },
     },
   ],
 });

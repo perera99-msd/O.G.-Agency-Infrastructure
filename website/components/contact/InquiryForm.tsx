@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import {
   UploadCloud,
@@ -25,6 +25,8 @@ interface FormData {
   name: string;
   mobile: string;
   email: string;
+  idType: string;
+  idNumber: string;
   country: string;
   description: string;
   termsAccepted: boolean;
@@ -37,12 +39,20 @@ interface FieldState {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const COUNTRIES = ["Jordan", "Dubai", "Malaysia", "Romania", "Russia"];
+const COUNTRIES = [
+  "Sri Lanka", "India", "Pakistan", "Bangladesh", "Nepal",
+  "Romania", "Bosnia", "Russia", "Germany", "Cyprus",
+  "Qatar", "UAE", "Saudi Arabia", "Kuwait", "Oman",
+  "Malaysia", "Jordan", "Israel",
+];
+const ID_TYPES = ["Passport", "NIC", "Other"];
 
 const INITIAL_FORM: FormData = {
   name: "",
   mobile: "",
   email: "",
+  idType: "NIC",
+  idNumber: "",
   country: "",
   description: "",
   termsAccepted: false,
@@ -62,6 +72,9 @@ function validate(field: keyof FormData, value: string | boolean): string {
   if (field === "email" && String(value).trim()) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value)))
       return "Enter a valid email address.";
+  }
+  if (field === "idNumber") {
+    if (!String(value).trim()) return "Please enter your ID number.";
   }
   if (field === "country") {
     if (!String(value)) return "Please choose a destination country.";
@@ -206,6 +219,7 @@ export default function InquiryForm() {
     name: { touched: false, error: "" },
     mobile: { touched: false, error: "" },
     email: { touched: false, error: "" },
+    idNumber: { touched: false, error: "" },
     country: { touched: false, error: "" },
   });
 
@@ -261,11 +275,29 @@ export default function InquiryForm() {
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
     const ext = file.name.split(".").pop()?.toLowerCase();
-    if (ext && ["pdf", "doc", "docx"].includes(ext)) setCvFile(file);
+    if (ext === "pdf") {
+      setCvFile(file);
+    } else {
+      setFields((prev) => ({
+        ...prev,
+        country: { touched: true, error: "Only PDF files are accepted." },
+      }));
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) setCvFile(e.target.files[0]);
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    if (ext === "pdf") {
+      setCvFile(file);
+    } else {
+      setFields((prev) => ({
+        ...prev,
+        country: { touched: true, error: "Only PDF files are accepted. Please convert your CV to PDF." },
+      }));
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const removeFile = () => {
@@ -281,6 +313,7 @@ export default function InquiryForm() {
       "name",
       "mobile",
       "email",
+      "idNumber",
       "country",
     ];
     const newFields = { ...fields };
@@ -295,28 +328,60 @@ export default function InquiryForm() {
 
     setIsSubmitting(true);
     try {
-      let cvUrl: string | null = null;
-      let cvFileName: string | null = null;
+      // Helper for Base64 PDF conversion
+      const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = (err) => reject(err);
+        });
+      };
 
+      // Step 1: Encode CV as Base64 data URL first (fast & CORS-proof)
+      let initialCvUrl: string | null = null;
       if (cvFile) {
-        const safeFileName = `${Date.now()}-${cvFile.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-        const fileRef = ref(storage, `inquiries/cv/${safeFileName}`);
-        await uploadBytes(fileRef, cvFile);
-        cvUrl = await getDownloadURL(fileRef);
-        cvFileName = cvFile.name;
+        try {
+          initialCvUrl = await fileToBase64(cvFile);
+        } catch (b64Err) {
+          console.warn("Base64 conversion error:", b64Err);
+        }
       }
 
-      await addDoc(collection(db, "inquiries"), {
+      // Step 2: Submit to Firestore with Base64 CV URL included immediately
+      const docRef = await addDoc(collection(db, "inquiries"), {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         phone: formData.mobile.trim(),
+        idType: formData.idType,
+        idNumber: formData.idNumber.trim(),
         destinationOfInterest: formData.country,
         message: formData.description.trim() || "No additional message provided.",
         status: "new",
-        cvUrl,
-        cvFileName,
+        isBookmarked: false,
+        cvUrl: initialCvUrl,
+        cvFileName: cvFile?.name || null,
         submittedAt: serverTimestamp(),
       });
+
+      // Step 3: Attempt Firebase Storage upload in background (production mode)
+      if (cvFile && storage && typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+        (async () => {
+          try {
+            const safeFileName = `${Date.now()}-${cvFile.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+            const fileRef = ref(storage, `inquiries/cv/${safeFileName}`);
+            await uploadBytes(fileRef, cvFile);
+            const downloadUrl = await getDownloadURL(fileRef);
+
+            // Replace Base64 URL with Storage download URL if successful
+            await updateDoc(doc(db, "inquiries", docRef.id), {
+              cvUrl: downloadUrl,
+            });
+          } catch (cvError) {
+            // Silently fall back to Base64 URL already saved in Firestore
+          }
+        })();
+      }
 
       setSubmitSuccess(true);
       setFormData(INITIAL_FORM);
@@ -338,6 +403,7 @@ export default function InquiryForm() {
   const isFormValid =
     formData.name.trim() !== "" &&
     formData.mobile.trim() !== "" &&
+    formData.idNumber.trim() !== "" &&
     formData.country !== "" &&
     formData.termsAccepted;
 
@@ -424,8 +490,65 @@ export default function InquiryForm() {
                       fieldState={fields.email}
                     />
 
-                    {/* Country Select */}
+                    {/* ID Type Select */}
                     <div>
+                      <label
+                        htmlFor="idType"
+                        className="block text-sm font-semibold text-main-700 mb-1.5 font-heading"
+                      >
+                        ID Type <span className="text-main-300 ml-1">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-secondary-300">
+                            <rect x="3" y="4" width="18" height="16" rx="2" />
+                            <path d="M3 10h18" />
+                          </svg>
+                        </div>
+                        <select
+                          id="idType"
+                          name="idType"
+                          value={formData.idType}
+                          onChange={handleInputChange}
+                          className="w-full pl-10 pr-8 py-3.5 rounded-xl border-2 bg-white text-sm font-sans appearance-none cursor-pointer outline-none transition-all border-secondary-100 focus:border-main-300 hover:border-secondary-300 text-main-900"
+                        >
+                          {ID_TYPES.map((t) => (
+                            <option key={t} value={t} className="text-main-900">
+                              {t}
+                            </option>
+                          ))}
+                        </select>
+                        <svg
+                          className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-secondary-400 fill-current"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* ID Number Input */}
+                    <div>
+                      <label className="block text-sm font-semibold text-main-700 mb-1.5 font-heading">
+                        ID Number <span className="text-main-300 ml-1">*</span>
+                      </label>
+                      <FieldWrapper error={fields.idNumber?.touched ? fields.idNumber?.error || "" : ""}>
+                        <input
+                          type="text"
+                          id="idNumber"
+                          name="idNumber"
+                          required
+                          value={formData.idNumber}
+                          onChange={handleInputChange}
+                          onBlur={() => handleBlur("idNumber", formData.idNumber)}
+                          placeholder="e.g. NID / Passport number"
+                          className="w-full pl-10 pr-10 py-3.5 rounded-xl border-2 bg-white text-main-900 placeholder-secondary-300 text-sm font-sans transition-all outline-none border-secondary-100 focus:border-main-300 hover:border-secondary-300"
+                        />
+                      </FieldWrapper>
+                    </div>
+
+                    {/* Country Select */}
+                    <div className="md:col-span-2">
                       <label
                         htmlFor="country"
                         className="block text-sm font-semibold text-main-700 mb-1.5 font-heading"
@@ -510,7 +633,7 @@ export default function InquiryForm() {
                           type="file"
                           ref={fileInputRef}
                           onChange={handleFileChange}
-                          accept=".pdf,.doc,.docx"
+                          accept=".pdf,application/pdf"
                           className="hidden"
                         />
                         <div className="flex flex-col items-center gap-3">
@@ -530,6 +653,9 @@ export default function InquiryForm() {
                               <span className="text-main-500 underline underline-offset-2 font-medium">
                                 click to browse your files
                               </span>
+                            </p>
+                            <p className="text-xs text-secondary-400 mt-2 font-sans">
+                              📄 Only PDF files are accepted (max 5MB)
                             </p>
                           </div>
                         </div>
@@ -601,9 +727,8 @@ export default function InquiryForm() {
                   />
                 </div>
 
-                {/* ── Section 4: Confirm & Submit ── */}
+                {/* ── Section 4: Consent & Submit ── */}
                 <div className="px-6 md:px-10 py-7">
-                  {/* Consent */}
                   <label className="flex items-start gap-3 cursor-pointer group mb-6">
                     <div className="relative mt-0.5 flex-shrink-0">
                       <input
@@ -646,7 +771,6 @@ export default function InquiryForm() {
                     </span>
                   </label>
 
-                  {/* Submit */}
                   <motion.button
                     type="submit"
                     disabled={!isFormValid || isSubmitting}

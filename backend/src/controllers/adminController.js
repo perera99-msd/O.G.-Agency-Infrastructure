@@ -131,8 +131,8 @@ const getAllInquiries = async (req, res) => {
         success: true,
         source: 'mock',
         data: [
-          { id: '101', name: 'John Doe', email: 'john@example.com', destinationOfInterest: 'Romania', status: 'new' },
-          { id: '102', name: 'Alice Smith', email: 'alice@example.com', destinationOfInterest: 'Bosnia', status: 'contacted' },
+          { id: '101', senderName: 'John Doe', email: 'john@example.com', phone: '+94 77 123 4567', idType: 'NIC', idNumber: '199512345678', destinationOfInterest: 'Romania', message: 'Inquiring about Garment machine operator positions.', status: 'new', isBookmarked: true, cvUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', cvFileName: 'John_Doe_CV.pdf', submittedAt: '2026-07-28T10:00:00.000Z' },
+          { id: '102', senderName: 'Alice Smith', email: 'alice@example.com', phone: '+94 71 987 6543', idType: 'Passport', idNumber: 'N9876543', destinationOfInterest: 'Bosnia', message: 'Experience in construction supervising.', status: 'replied', isBookmarked: false, cvUrl: null, cvFileName: null, submittedAt: '2026-07-27T14:30:00.000Z' },
         ],
       });
     }

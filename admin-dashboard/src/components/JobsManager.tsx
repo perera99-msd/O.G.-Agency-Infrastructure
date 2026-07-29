@@ -7,23 +7,23 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { JobOpening } from '../types';
 import {
-  Plus, Edit3, Trash2, MapPin, DollarSign, Briefcase,
+  Plus, Edit3, Trash2, Briefcase,
   X, Check, AlertCircle, Pin, PinOff, Calendar,
-  TrendingUp, Clock, AlertTriangle, BarChart2,
+  TrendingUp, AlertTriangle, BarChart2,
   Search, Filter, RefreshCw, ChevronDown,
 } from 'lucide-react';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
-  "Construction","Garment","Healthcare","Hospitality",
-  "Manufacturing","Engineering","Retail","Admin","Accounts","Other",
+  "Construction", "Garment", "Healthcare", "Hospitality",
+  "Manufacturing", "Engineering", "Retail", "Admin", "Accounts", "Other",
 ];
 const GENDER_OPTIONS = ["Male", "Female", "No Preference"];
 
 const DATE_RANGE_OPTIONS = [
-  { label: "All time",   days: 0   },
-  { label: "Last 7 days", days: 7  },
+  { label: "All time", days: 0 },
+  { label: "Last 7 days", days: 7 },
   { label: "Last 30 days", days: 30 },
   { label: "Last 90 days", days: 90 },
 ];
@@ -57,7 +57,7 @@ interface Stats {
 
 interface JobsManagerProps {
   jobs: JobOpening[];
-  onAdd:    (job: Omit<JobOpening, 'id'>) => void;
+  onAdd: (job: Omit<JobOpening, 'id'>) => void;
   onUpdate: (id: string, job: Partial<JobOpening>) => void;
   onDelete: (id: string) => void;
   role?: 'super_user' | 'normal_user';
@@ -199,22 +199,22 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
 }) => {
 
   // ── Modal state
-  const [open, setOpen]           = useState(false);
-  const [editId, setEditId]       = useState<string | null>(null);
-  const [deleteId, setDeleteId]   = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [extendJob, setExtendJob] = useState<JobOpening | null>(null);
-  const [form, setForm]           = useState<Omit<JobOpening, 'id'>>({ ...emptyForm });
+  const [form, setForm] = useState<Omit<JobOpening, 'id'>>({ ...emptyForm });
 
   // ── Stats state (from dedicated endpoint)
-  const [stats, setStats]           = useState<Stats | null>(null);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
 
   // ── Filter state
-  const [search, setSearch]         = useState('');
+  const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive' | 'expired'>('all');
   const [filterCategory, setFilterCategory] = useState('');
-  const [filterCountry, setFilterCountry]   = useState('');
-  const [filterUrgency, setFilterUrgency]   = useState<'all' | 'urgent' | 'normal'>('all');
+  const [filterCountry, setFilterCountry] = useState('');
+  const [filterUrgency, setFilterUrgency] = useState<'all' | 'urgent' | 'normal'>('all');
   const [filterDateRange, setFilterDateRange] = useState(0); // days, 0 = all time
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -245,11 +245,11 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
 
   function calcLocalStats(j: JobOpening[]): Stats {
     return {
-      total:    j.length,
-      active:   j.filter(x => x.active && !isExpired(x.deadline)).length,
+      total: j.length,
+      active: j.filter(x => x.active && !isExpired(x.deadline)).length,
       inactive: j.filter(x => !x.active).length,
-      expired:  j.filter(x => isExpired(x.deadline)).length,
-      urgent:   j.filter(x => x.isUrgent).length,
+      expired: j.filter(x => isExpired(x.deadline)).length,
+      urgent: j.filter(x => x.isUrgent).length,
     };
   }
 
@@ -258,9 +258,9 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
     let result = [...jobs];
 
     // Status
-    if (filterStatus === 'active')   result = result.filter(j => j.active && !isExpired(j.deadline));
+    if (filterStatus === 'active') result = result.filter(j => j.active && !isExpired(j.deadline));
     if (filterStatus === 'inactive') result = result.filter(j => !j.active);
-    if (filterStatus === 'expired')  result = result.filter(j => isExpired(j.deadline));
+    if (filterStatus === 'expired') result = result.filter(j => isExpired(j.deadline));
 
     // Search
     if (search.trim()) {
@@ -320,15 +320,15 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
     setForm({ ...emptyForm, country: availableDestinations[0] });
     setOpen(true);
   };
-  const openEdit   = (j: JobOpening) => {
+  const openEdit = (j: JobOpening) => {
     setEditId(j.id);
     const { id, ...rest } = j;
     setForm({
       ...rest,
-      tags:         rest.tags || [],
+      tags: rest.tags || [],
       requirements: rest.requirements?.length ? rest.requirements : [''],
-      benefits:     rest.benefits || [],
-      ageRange:     rest.ageRange || { min: 18, max: 60 },
+      benefits: rest.benefits || [],
+      ageRange: rest.ageRange || { min: 18, max: 60 },
     });
     setOpen(true);
   };
@@ -339,15 +339,15 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
     const submission = {
       ...form,
       requirements: form.requirements?.filter(r => r.trim() !== '') || [],
-      benefits:     form.benefits?.filter(b => b.title.trim() !== '' && b.description.trim() !== '') || [],
+      benefits: form.benefits?.filter(b => b.title.trim() !== '' && b.description.trim() !== '') || [],
     };
     if (editId) onUpdate(editId, submission);
-    else        onAdd(submission);
+    else onAdd(submission);
     setOpen(false);
   };
 
   // Requirements helpers
-  const addReq    = () => setForm({ ...form, requirements: [...(form.requirements || []), ''] });
+  const addReq = () => setForm({ ...form, requirements: [...(form.requirements || []), ''] });
   const updateReq = (i: number, val: string) => {
     const arr = [...(form.requirements || [])]; arr[i] = val;
     setForm({ ...form, requirements: arr });
@@ -358,7 +358,7 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
   };
 
   // Benefits helpers
-  const addBen    = () => setForm({ ...form, benefits: [...(form.benefits || []), { title: '', description: '' }] });
+  const addBen = () => setForm({ ...form, benefits: [...(form.benefits || []), { title: '', description: '' }] });
   const updateBen = (i: number, field: 'title' | 'description', val: string) => {
     const arr = [...(form.benefits || [])]; arr[i] = { ...arr[i], [field]: val };
     setForm({ ...form, benefits: arr });
@@ -371,7 +371,8 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="animate-in">
+    <>
+      <div className="animate-in">
 
       {/* ── Page header ── */}
       <div className="page-header">
@@ -558,8 +559,8 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
       </div>
 
       {/* ── Job list ── */}
-      <div className="card" style={{ overflow: 'hidden' }}>
-        {filtered.length === 0 ? (
+      {filtered.length === 0 ? (
+        <div className="card" style={{ overflow: 'hidden' }}>
           <div className="empty-state">
             <div className="empty-state-icon"><Briefcase size={20} strokeWidth={1.5} /></div>
             <p className="empty-state-title">No vacancies found</p>
@@ -568,107 +569,136 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
               <Plus size={13} strokeWidth={2.5} /> Post Vacancy
             </button>
           </div>
-        ) : (
-          filtered.map((job, i) => {
+        </div>
+      ) : (
+        <div className="grid-3" style={{ gap: 20 }}>
+          {filtered.map((job) => {
             const expired = isExpired(job.deadline);
-            const days    = daysUntil(job.deadline);
+            const days = daysUntil(job.deadline);
             const expiringSoon = !expired && days <= 7;
 
             return (
               <div
                 key={job.id}
-                className="data-row"
+                className="card card-clickable"
                 style={{
-                  borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none',
-                  opacity: expired ? 0.65 : 1,
-                  borderLeft: job.isUrgent ? '3px solid var(--blue)' : expired ? '3px solid var(--red)' : '3px solid transparent',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderLeft: job.isUrgent ? '4px solid var(--blue)' : expired ? '4px solid var(--red)' : '4px solid var(--accent)',
+                  padding: '20px',
+                  position: 'relative',
+                  transition: 'all 0.2s ease',
+                  background: 'var(--surface)',
+                  opacity: expired ? 0.75 : 1,
                 }}
               >
-                {/* Icon */}
-                <div style={{
-                  width: 38, height: 38, borderRadius: 9, flexShrink: 0,
-                  background: expired ? 'var(--red-bg)' : job.isUrgent ? 'var(--blue-bg)' : 'var(--purple-bg)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <Briefcase size={16} strokeWidth={1.8} style={{
-                    color: expired ? 'var(--red)' : job.isUrgent ? 'var(--blue)' : 'var(--purple)',
-                  }} />
+                {/* Card Header: Country, Urgency & Status Tags */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)' }}>{job.country}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {job.isUrgent && <span className="tag tag-blue" style={{ fontSize: 9, padding: '1px 5px' }}>URGENT</span>}
+                    {expired ? (
+                      <span className="tag tag-red" style={{ fontSize: 9, padding: '1px 5px' }}>EXPIRED</span>
+                    ) : job.active ? (
+                      <span className="tag tag-green" style={{ fontSize: 9, padding: '1px 5px' }}>ACTIVE</span>
+                    ) : (
+                      <span className="tag tag-neutral" style={{ fontSize: 9, padding: '1px 5px' }}>INACTIVE</span>
+                    )}
+                  </div>
                 </div>
 
-                {/* Content */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap', marginBottom: 4 }}>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {job.title}
-                    </p>
-                    {job.isUrgent  && <span className="tag tag-blue">URGENT</span>}
-                    {expired       && <span className="tag tag-red">EXPIRED</span>}
-                    {!expired && !job.active && <span className="tag tag-neutral">Inactive</span>}
-                    {!expired && job.active  && <span className="tag tag-green">Active</span>}
-                    {expiringSoon  && <span className="tag tag-amber">Closes in {days}d</span>}
-                    <span className="tag tag-neutral">{job.category}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-muted)' }}>
-                      <MapPin size={11} /> {job.country}
-                    </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>
-                      <DollarSign size={11} />
+                {/* Job Title & Category */}
+                <div style={{ flex: 1, marginBottom: 16 }}>
+                  <h4 style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6, lineHeight: 1.3 }}>
+                    {job.title}
+                  </h4>
+                  <span className="tag tag-neutral" style={{ fontSize: 10, padding: '2px 6px' }}>{job.category}</span>
+
+                  <p className="line-clamp-2" style={{ fontSize: 12.5, color: 'var(--text-muted)', marginTop: 10, lineHeight: 1.4 }}>
+                    {job.description || "No description provided."}
+                  </p>
+                </div>
+
+                {/* Salary & Deadline details */}
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)' }}>SALARY</span>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--green)' }}>
                       {job.salary?.min?.toLocaleString()} – {job.salary?.max?.toLocaleString()} {job.salary?.currency}
                     </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: expired ? 'var(--red)' : 'var(--text-muted)' }}>
-                      <Clock size={11} />
-                      {expired ? `Expired ${formatDate(job.deadline)}` : `Closes ${formatDate(job.deadline)}`}
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)' }}>DEADLINE</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: expired ? 'var(--red)' : expiringSoon ? 'var(--amber)' : 'var(--text-secondary)' }}>
+                      {expired ? `Closed ${formatDate(job.deadline)}` : `${formatDate(job.deadline)}`}
                     </span>
+                  </div>
+
+                  {/* Metadata highlights (Age limit, Gender, Tags) */}
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+                    {job.genderPreference && job.genderPreference !== 'No Preference' && (
+                      <span style={{ fontSize: 10, background: 'rgba(99, 102, 241, 0.05)', color: 'var(--accent)', padding: '2px 6px', borderRadius: 4, fontWeight: 600 }}>
+                        {job.genderPreference}
+                      </span>
+                    )}
+                    {job.ageRange && (
+                      <span style={{ fontSize: 10, background: 'rgba(59, 130, 246, 0.05)', color: 'var(--blue)', padding: '2px 6px', borderRadius: 4, fontWeight: 600 }}>
+                        Age: {job.ageRange.min}-{job.ageRange.max}
+                      </span>
+                    )}
+                    {job.requirements && job.requirements.length > 0 && (
+                      <span style={{ fontSize: 10, background: 'rgba(16, 185, 129, 0.05)', color: 'var(--green)', padding: '2px 6px', borderRadius: 4, fontWeight: 600 }}>
+                        {job.requirements.length} Req{job.requirements.length > 1 ? 's' : ''}
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                {/* Actions */}
+                {/* Card Footer: Action buttons */}
                 {role === 'super_user' && (
-                  <div className="data-row-actions">
-                    {/* Pin / Unpin urgent */}
+                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12, display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
                     <button
                       className="btn btn-ghost btn-icon"
                       title={job.isUrgent ? 'Remove urgent' : 'Mark as urgent'}
                       onClick={() => onUpdate(job.id, { isUrgent: !job.isUrgent })}
-                      style={{ color: job.isUrgent ? 'var(--blue)' : 'var(--text-faint)' }}
+                      style={{ color: job.isUrgent ? 'var(--blue)' : 'var(--text-faint)', width: 32, height: 32 }}
                     >
-                      {job.isUrgent ? <PinOff size={14} /> : <Pin size={14} />}
+                      {job.isUrgent ? <PinOff size={13} /> : <Pin size={13} />}
                     </button>
-
-                    {/* Extend deadline */}
                     <button
                       className="btn btn-ghost btn-icon"
                       title="Extend deadline"
                       onClick={() => setExtendJob(job)}
-                      style={{ color: 'var(--amber)' }}
+                      style={{ color: 'var(--amber)', width: 32, height: 32 }}
                     >
-                      <Calendar size={14} />
+                      <Calendar size={13} />
                     </button>
-
-                    {/* Edit */}
                     <button
                       className="btn btn-ghost btn-icon"
                       title="Edit"
                       onClick={() => openEdit(job)}
+                      style={{ width: 32, height: 32 }}
                     >
-                      <Edit3 size={14} strokeWidth={2} />
+                      <Edit3 size={13} />
                     </button>
-
-                    {/* Delete */}
                     <button
-                      className="btn btn-danger btn-icon"
+                      className="btn btn-icon"
                       title="Delete"
                       onClick={() => setDeleteId(job.id)}
+                      style={{ color: 'var(--red)', background: 'var(--red-bg)', border: '1px solid var(--red-border)', width: 32, height: 32 }}
                     >
-                      <Trash2 size={14} strokeWidth={2} />
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 )}
               </div>
             );
-          })
-        )}
+          })}
+        </div>
+      )}
       </div>
 
       {/* ── Extend Deadline Modal ── */}
@@ -918,6 +948,6 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
         </div>
       )}
 
-    </div>
+    </>
   );
 };

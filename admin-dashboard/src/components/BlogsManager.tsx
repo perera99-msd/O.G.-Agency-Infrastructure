@@ -24,12 +24,13 @@ const categoryColor = (c: string) => {
 
 const emptyForm: {
   title: string; category: BlogPost['category']; readTime: string;
-  author: string; publishDate: string; excerpt: string; image: string; sourceType: 'manual' | 'ai'; file?: File;
+  author: string; publishDate: string; excerpt: string; content: string; image: string; sourceType: 'manual' | 'ai'; file?: File;
 } = {
   title: '', category: 'Visa & Legal', readTime: '5 min read',
   author: 'Legal Compliance Desk',
   publishDate: new Date().toISOString().split('T')[0],
   excerpt: '',
+  content: '',
   image: '',
   sourceType: 'manual',
 };
@@ -94,6 +95,7 @@ export const BlogsManager: React.FC<BlogsManagerProps> = ({
       author: b.author,
       publishDate: b.publishDate,
       excerpt: b.excerpt,
+      content: b.content || '',
       image: b.image || '',
       sourceType: b.sourceType || (b.category === 'AI Generated' ? 'ai' : 'manual'),
     });
@@ -273,6 +275,30 @@ export const BlogsManager: React.FC<BlogsManagerProps> = ({
                       <option value="manual">Manual</option>
                       <option value="ai">AI Generated</option>
                     </select>
+                  </div>
+
+                  <div className="field-group">
+                    <label className="field-label">Article Excerpt *</label>
+                    <textarea
+                      className="field-input"
+                      required
+                      rows={2}
+                      placeholder="Short excerpt or meta description..."
+                      value={form.excerpt}
+                      onChange={e => setForm({ ...form, excerpt: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="field-group">
+                    <label className="field-label">Article Content (Markdown or Plain Text) *</label>
+                    <textarea
+                      className="field-input"
+                      required
+                      rows={8}
+                      placeholder="Write full article body content here..."
+                      value={form.content}
+                      onChange={e => setForm({ ...form, content: e.target.value })}
+                    />
                   </div>
 
                   <div className="field-group">
