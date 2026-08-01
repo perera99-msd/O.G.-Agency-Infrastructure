@@ -2,18 +2,20 @@ import type { Metadata } from "next";
 import AppHero from "@/components/app/AppHero";
 import AppInstallWalkthrough from "@/components/app/AppInstallWalkthrough";
 import AppFeatureShowcase from "@/components/app/AppFeatureShowcase";
+import AppSecurityComparison from "@/components/app/AppSecurityComparison";
 
 export const metadata: Metadata = {
   title: "Download O.G. Relocation PWA Portal | O.G. Agency",
-  description: "Install the official O.G. Agency Progressive Web App (PWA) on iOS or Android for 24/7 real-time visa stage tracking, secure contract storage, and direct liaison chat.",
+  description: "Install the official O.G. Agency Progressive Web App (PWA) on iOS Safari or Android Chrome for 24/7 real-time visa stage tracking, secure contract storage, and direct liaison chat.",
 };
 
 export default function AppPage() {
   return (
-    <div className="flex flex-col w-full overflow-hidden bg-main-50">
+    <div className="flex flex-col w-full overflow-hidden bg-white">
       <AppHero />
       <AppInstallWalkthrough />
       <AppFeatureShowcase />
+      <AppSecurityComparison />
     </div>
   );
 }

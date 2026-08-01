@@ -40,7 +40,8 @@ export default function Navbar() {
   }, []);
 
   const isHome = pathname === "/";
-  const useLightText = (!isHome && !scrolled) || isOverDarkSection;
+  const isAppPage = pathname === "/app";
+  const useLightText = (!isHome && !isAppPage && !scrolled) || isOverDarkSection;
 
   const textColor = useLightText ? "text-white" : "text-main-900";
   const mutedTextColor = useLightText ? "text-white/70" : "text-main-900/60";

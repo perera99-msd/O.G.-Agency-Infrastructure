@@ -7,7 +7,7 @@ export default function PrivacyHero() {
     <section className="relative w-full h-[55vh] min-h-[420px] flex items-end overflow-hidden bg-main-900">
       {/* Background Design - matches TermsHero */}
       <div className="absolute inset-0 w-full h-full">
-        <div className="absolute inset-0 bg-gradient-to-b from-main-950 via-main-900 to-main-900" />
+        <div className="absolute inset-0 bg-gradient-to-b from-main-900 via-main-900 to-main-900" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,168,232,0.15),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(0,126,167,0.1),transparent_55%)]" />
         <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:32px_32px]" />
