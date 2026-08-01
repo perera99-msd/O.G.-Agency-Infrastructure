@@ -1,139 +1,168 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Smartphone, ShieldCheck, Download, ArrowDown, Sparkles, CheckCircle2 } from "lucide-react";
+import { Smartphone, ShieldCheck, Download, ArrowDown, Sparkles, CheckCircle2, Lock, Zap, Award } from "lucide-react";
+import Image from "next/image";
+
+const premiumEasing: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export default function AppHero() {
   return (
-    <section data-nav-theme="dark" className="relative w-full min-h-[85vh] bg-main-900 text-main-50 flex items-center justify-center pt-32 pb-24 px-6 lg:px-16 overflow-hidden">
-      {/* Background Decorative Glows */}
-      <div className="absolute top-1/3 right-10 w-[600px] h-[600px] bg-main-700/20 rounded-full blur-[160px] pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-[500px] h-[500px] bg-main-500/10 rounded-full blur-[140px] pointer-events-none" />
+    <section data-nav-theme="light" className="relative w-full min-h-[92vh] bg-white text-main-900 flex items-center justify-center pt-36 pb-20 px-6 lg:px-16 overflow-hidden">
+      {/* Dynamic Ambient Background Glows */}
+      <div className="absolute top-1/4 -right-20 w-[800px] h-[800px] bg-main-300/30 rounded-full blur-[200px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] -left-20 w-[700px] h-[700px] bg-blue-400/20 rounded-full blur-[180px] pointer-events-none" />
+      <div className="absolute top-10 left-1/3 w-[450px] h-[450px] bg-cyan-300/20 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="max-w-[1500px] mx-auto w-full relative z-10">
+      {/* Grid Pattern Overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:40px_40px] opacity-[0.05] pointer-events-none" />
+
+      <div className="max-w-[1550px] mx-auto w-full relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           
-          {/* Left Column: App Branding & CTAs */}
-          <div className="lg:col-span-7 flex flex-col justify-center">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-main-500/20 border border-main-500/40 text-main-300 text-xs font-bold tracking-[0.2em] uppercase backdrop-blur-md">
-                <Sparkles size={14} className="text-main-500" />
-                Progressive Web App (PWA) Hub
+          {/* Left Column: Floating Glass Container */}
+          <motion.div 
+            initial={{ opacity: 0, x: -100 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 1.2, ease: premiumEasing }}
+            className="lg:col-span-7 flex flex-col justify-center p-10 sm:p-14 rounded-[40px] bg-white/60 border border-gray-200 backdrop-blur-3xl shadow-xl relative overflow-hidden"
+          >
+            {/* Inner Glass Glow */}
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
+
+            {/* Top Badges */}
+            <div className="flex flex-wrap items-center gap-3 mb-8 relative z-10">
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-main-100 border border-main-200 text-main-800 text-xs font-bold tracking-[0.2em] uppercase backdrop-blur-md">
+                <Sparkles size={14} className="text-main-600 animate-pulse" />
+                Next-Gen PWA
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/50 border border-gray-200 text-gray-800 text-xs font-semibold backdrop-blur-md">
+                <Award size={13} className="text-yellow-500" />
+                SLBFE Approved
               </span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold text-white tracking-tight leading-[1.1] mb-6">
-              Track Your Overseas Visa <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-main-300 to-main-500">
-                Anytime, Anywhere.
+            {/* Main Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-heading font-black text-main-900 tracking-tight leading-[1.1] mb-8 relative z-10 drop-shadow-sm">
+              Your Migration. <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-main-900 via-main-700 to-main-500">
+                Always in Pocket.
               </span>
             </h1>
 
-            <p className="text-main-50/80 text-lg sm:text-xl font-normal leading-relaxed mb-8 max-w-2xl">
-              Install the official O.G. Relocation Portal directly onto your smartphone home screen. Enjoy blockchain-verified document storage, real-time embassy visa tracking, and instant notifications—all without app store fees or delays.
+            {/* Subtitle */}
+            <p className="text-gray-600 text-lg sm:text-xl font-medium leading-relaxed mb-10 max-w-2xl relative z-10">
+              Install the official O.G. Relocation App directly on your smartphone home screen. Track visa milestones in real time, view cryptographically signed contracts, and receive instant updates—with zero app store fees.
             </p>
 
-            {/* Feature Checklist */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
-              {[
-                "Instant Home Screen Installation",
-                "Blockchain Immutable Contract Vault",
-                "24/7 Real-Time Visa Stage Tracking",
-                "Offline Access & Fast Loading"
-              ].map((feat, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <CheckCircle2 size={18} className="text-main-500 shrink-0" />
-                  <span className="text-sm font-semibold text-white/90">{feat}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-4">
+            {/* Action CTAs */}
+            <div className="flex flex-wrap items-center gap-5 relative z-10">
               <a
                 href="#install-guide"
-                className="group inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-white text-main-900 font-bold text-xs uppercase tracking-wider hover:bg-main-300 transition-all duration-300 shadow-2xl"
+                className="group inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-main-900 text-white font-bold text-sm uppercase tracking-wider hover:bg-main-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
               >
-                <Download size={16} className="text-main-900" />
-                How to Install PWA App
-                <ArrowDown size={16} className="transition-transform duration-300 group-hover:translate-y-1" />
+                <Download size={18} className="font-bold text-white" />
+                Install Web App
+                <ArrowDown size={16} className="transition-transform duration-300 group-hover:translate-y-1 text-white" />
               </a>
               <a
                 href="#app-features"
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-main-700/30 border border-main-50/20 text-white font-bold text-xs uppercase tracking-wider hover:bg-main-700/50 transition-all duration-300"
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-white border border-gray-200 text-main-900 font-bold text-sm uppercase tracking-wider hover:bg-gray-50 transition-all duration-300 backdrop-blur-md"
               >
-                Explore Portal Features
+                Explore Features
               </a>
             </div>
-          </div>
 
-          {/* Right Column: Stunning Interactive Smartphone Mockup */}
-          <div className="lg:col-span-5 flex justify-center">
-            <div className="relative w-[310px] sm:w-[350px] bg-main-900 border-4 border-main-50/20 rounded-[3rem] p-4 shadow-2xl shadow-black/80">
-              {/* Phone Notch */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-20 flex items-center justify-center">
-                <div className="w-12 h-1.5 bg-white/20 rounded-full" />
+            {/* Quick Metrics Bar (Glassy) */}
+            <div className="mt-12 pt-8 border-t border-gray-200 grid grid-cols-3 gap-6 max-w-lg relative z-10">
+              <div>
+                <div className="text-2xl sm:text-3xl font-heading font-black text-main-900">10k+</div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-1">Active Users</div>
               </div>
-
-              {/* Screen Content */}
-              <div className="relative w-full bg-main-800 rounded-[2.3rem] overflow-hidden pt-10 pb-6 px-5 border border-white/10 flex flex-col gap-5">
-                {/* Header inside Phone */}
-                <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-main-500 flex items-center justify-center font-bold text-main-900 text-xs">OG</div>
-                    <span className="text-white font-bold text-xs tracking-wider uppercase">Relocation App</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-green-500/20 text-green-400 border border-green-500/30">
-                    ONLINE
-                  </span>
-                </div>
-
-                {/* Candidate Card */}
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                  <div className="flex items-center gap-3 mb-3">
-                    <img src="/gallery/garment-team-pink.jpg" alt="User" className="w-10 h-10 rounded-full object-cover border border-white/20" />
-                    <div>
-                      <h4 className="text-white font-bold text-sm">Kasun Perera</h4>
-                      <p className="text-main-300 text-[11px]">Industrial Machinists • Romania</p>
-                    </div>
-                  </div>
-                  <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
-                    <div className="w-4/5 bg-main-500 h-full rounded-full" />
-                  </div>
-                  <div className="flex justify-between text-[10px] text-white/70 mt-1.5 font-medium">
-                    <span>Visa Stage: Work Permit Issued</span>
-                    <span className="text-main-300 font-bold">80%</span>
-                  </div>
-                </div>
-
-                {/* Notifications & Actions */}
-                <div className="flex flex-col gap-2.5">
-                  <div className="p-3.5 rounded-xl bg-main-500/10 border border-main-500/30 flex items-center gap-3">
-                    <ShieldCheck className="text-main-500 shrink-0" size={20} />
-                    <div>
-                      <p className="text-white text-xs font-bold">Embassy Attestation Verified</p>
-                      <p className="text-white/60 text-[10px]">Contract uploaded to secure ledger.</p>
-                    </div>
-                  </div>
-                  <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
-                    <span className="text-white/80 text-xs font-medium">Medical Clearance</span>
-                    <span className="text-green-400 font-bold text-xs">VERIFIED ✓</span>
-                  </div>
-                </div>
-
-                {/* Mock Add to Home Screen Banner */}
-                <div className="mt-2 p-3 rounded-xl bg-white text-main-900 flex items-center justify-between shadow-lg">
-                  <div className="flex items-center gap-2">
-                    <Smartphone size={16} className="text-main-900" />
-                    <span className="text-xs font-bold">Add OG Portal to Home Screen</span>
-                  </div>
-                  <span className="text-[10px] font-bold uppercase bg-main-900 text-white px-2 py-1 rounded">
-                    INSTALL
-                  </span>
-                </div>
+              <div>
+                <div className="text-2xl sm:text-3xl font-heading font-black text-main-900">99.9%</div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-1">Uptime</div>
+              </div>
+              <div>
+                <div className="text-2xl sm:text-3xl font-heading font-black text-main-900">0%</div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-1">Store Fees</div>
               </div>
             </div>
-          </div>
+          </motion.div>
+
+          {/* Right Column: Premium Generated 3D iPhone Mockup Display */}
+          <motion.div
+            initial={{ opacity: 0, x: 100 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 1.2, delay: 0.2, ease: premiumEasing }}
+            className="lg:col-span-5 flex justify-center relative"
+          >
+            {/* Large Glass Backdrop for the Phone */}
+            <div className="absolute inset-0 bg-main-400/20 blur-3xl rounded-full scale-150" />
+            
+            <div className="relative w-full max-w-[420px] aspect-[4/5] sm:aspect-square lg:aspect-[4/5] rounded-[40px] overflow-hidden border border-gray-200 shadow-2xl bg-white/40 backdrop-blur-sm group z-10">
+              
+              {/* Generated Realistic iPhone & App Mockup */}
+              <div className="relative w-full h-full p-2">
+                <div className="relative w-full h-full rounded-[32px] overflow-hidden">
+                  <Image
+                    src="/images/app/hero-mockup.png"
+                    alt="O.G. Relocation PWA Portal Mockup"
+                    fill
+                    priority
+                    className="object-cover object-center transform group-hover:scale-105 transition-transform duration-1000 ease-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent opacity-80" />
+                </div>
+              </div>
+
+              {/* Floating Glass Status Overlay Cards */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, delay: 0.8, ease: premiumEasing }}
+                className="absolute top-8 left-8 right-8 p-5 rounded-3xl bg-white/80 border border-gray-200 backdrop-blur-2xl shadow-xl z-20"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-main-500 animate-ping" />
+                    <span className="text-xs font-bold text-main-900 tracking-wide uppercase">Live Progress</span>
+                  </div>
+                  <span className="text-[10px] font-black text-main-700 bg-main-100 px-3 py-1 rounded-full border border-main-200">
+                    80% COMPLETE
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden mb-3">
+                  <div className="w-4/5 bg-gradient-to-r from-main-500 to-main-300 h-full rounded-full" />
+                </div>
+                <div className="flex justify-between text-xs text-gray-600 font-medium">
+                  <span>Stage: <strong className="text-main-900">Work Permit</strong></span>
+                  <span className="text-main-600 font-bold">Verified ✓</span>
+                </div>
+              </motion.div>
+
+              {/* Bottom Floating Security Badge */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, delay: 1, ease: premiumEasing }}
+                className="absolute bottom-8 left-8 right-8 p-4 rounded-3xl bg-white/90 text-main-900 backdrop-blur-2xl shadow-xl flex items-center justify-between z-20 border border-gray-200"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-main-50 flex items-center justify-center shrink-0 border border-gray-100">
+                    <Lock size={20} className="text-main-500" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-main-900 leading-tight">Blockchain Vault</h4>
+                    <p className="text-[11px] text-gray-500 mt-0.5">Immutable Contract</p>
+                  </div>
+                </div>
+              </motion.div>
+
+            </div>
+          </motion.div>
 
         </div>
       </div>

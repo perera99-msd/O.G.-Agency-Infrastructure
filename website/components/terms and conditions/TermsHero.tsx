@@ -8,7 +8,7 @@ export default function TermsHero() {
       {/* Premium Background Design */}
       <div className="absolute inset-0 w-full h-full">
         {/* Sleek mesh/radial background gradients */}
-        <div className="absolute inset-0 bg-gradient-to-b from-main-950 via-main-900 to-main-900" />
+        <div className="absolute inset-0 bg-gradient-to-b from-main-900 via-main-900 to-main-900" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,168,232,0.15),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(0,126,167,0.1),transparent_55%)]" />
         

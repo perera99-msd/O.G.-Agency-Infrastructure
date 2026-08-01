@@ -157,7 +157,7 @@ export default function InteractiveCalculator() {
           </div>
 
           {/* Results Output Box */}
-          <div className="lg:col-span-5 bg-gradient-to-br from-main-950 to-main-900 border border-main-300/20 rounded-2xl p-8 flex flex-col justify-between shadow-glow-blue relative overflow-hidden">
+          <div className="lg:col-span-5 bg-gradient-to-br from-main-900 to-main-900 border border-main-300/20 rounded-2xl p-8 flex flex-col justify-between shadow-glow-blue relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-main-300/10 rounded-full blur-xl pointer-events-none" />
 
             <div>
