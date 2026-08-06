@@ -14,6 +14,15 @@ const {
   updateAdmin,
   deleteAdmin
 } = require('../controllers/adminController');
+const {
+  getAllEmployees,
+  getEmployee,
+  createEmployee,
+  updateEmployee,
+  deleteEmployee,
+  updateMedicalStatus,
+  updateTracking,
+} = require('../controllers/employeeController');
 
 /**
  * Protected administrative routes serving the Admin Dashboard
@@ -50,5 +59,14 @@ router.get('/users', verifyRole('super_user'), getAllAdmins);
 router.post('/users', verifyRole('super_user'), createAdmin);
 router.put('/users/:id', verifyRole('super_user'), updateAdmin);
 router.delete('/users/:id', verifyRole('super_user'), deleteAdmin);
+
+// --- Employee Management Routes ---
+router.get('/employees', getAllEmployees);
+router.post('/employees', createEmployee);
+router.get('/employees/:id', getEmployee);
+router.put('/employees/:id', updateEmployee);
+router.delete('/employees/:id', deleteEmployee);
+router.put('/employees/:id/medical', updateMedicalStatus);
+router.put('/employees/:id/tracking', updateTracking);
 
 module.exports = router;

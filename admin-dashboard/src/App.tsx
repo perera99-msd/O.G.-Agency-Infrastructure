@@ -10,6 +10,12 @@ import { ContactResponsesManager } from './components/ContactResponsesManager';
 import { NotificationsCenter } from './components/NotificationsCenter';
 import { LoginPage } from './components/LoginPage';
 import { ProfileManager } from './components/ProfileManager';
+import { RegisterEmployee } from './components/employees/RegisterEmployee';
+import { EmployeeStatus } from './components/employees/EmployeeStatus';
+import { SearchEmployee } from './components/employees/SearchEmployee';
+import { EditEmployee } from './components/employees/EditEmployee';
+import { FilterSystem } from './components/employees/FilterSystem';
+import { MedicalManagement } from './components/employees/MedicalManagement';
 
 import { db, auth, storage } from './firebase';
 import {
@@ -27,7 +33,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { compressImage } from './imageCompressor';
 
-import type { Destination, JobOpening, GalleryItem, BlogPost, ContactMessage, TabType, AdminUser } from './types';
+import type { Destination, JobOpening, GalleryItem, BlogPost, ContactMessage, TabType, AdminUser, Employee, MedicalStatus } from './types';
 
 const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000;
 const SESSION_EXPIRY_KEY = 'og_admin_session_expires_at';
@@ -52,6 +58,7 @@ export default function App() {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [responses, setResponses] = useState<ContactMessage[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [accessError, setAccessError] = useState('');
   const [logoutConfirmationOpen, setLogoutConfirmationOpen] = useState(false);
   const inactivityTimerRef = useRef<number | null>(null);
@@ -233,11 +240,18 @@ export default function App() {
 
     fetchJobs();
 
+    // Employees listener (Firestore)
+    const unsubEmployees = onSnapshot(collection(db, 'employees'), (snapshot) => {
+      const data = snapshot.docs.map((snapshotDoc) => ({ id: snapshotDoc.id, ...snapshotDoc.data() } as Employee));
+      setEmployees(data);
+    });
+
     return () => {
       unsubDestinations();
       unsubGallery();
       unsubBlogs();
       unsubInquiries();
+      unsubEmployees();
     };
   }, [isLoggedIn]);
 
@@ -621,6 +635,64 @@ export default function App() {
     }
   };
 
+  // Employee handlers — write directly to Firestore (same as destinations, gallery, blogs)
+  const addEmployee = async (data: Record<string, unknown>) => {
+    const id = crypto.randomUUID();
+    const defaultTracking = [
+      { step: 'Application Submitted', completed: false, date: null, fileUrl: null },
+      { step: 'Medical Examination',   completed: false, date: null, fileUrl: null },
+      { step: 'Visa Application',      completed: false, date: null, fileUrl: null },
+      { step: 'Embassy Interview',     completed: false, date: null, fileUrl: null },
+      { step: 'Flight Booking',        completed: false, date: null, fileUrl: null },
+      { step: 'Departure',             completed: false, date: null, fileUrl: null },
+    ];
+
+    const newEmployee = {
+      ...data,
+      id,
+      medicalStatus: 'pending',
+      tracking: defaultTracking,
+      status: 'active',
+      registeredAt: new Date().toISOString(),
+      registeredBy: currentUser?.email || 'admin',
+      lastUpdatedAt: new Date().toISOString(),
+      lastUpdatedBy: currentUser?.email || 'admin',
+    };
+
+    await setDoc(doc(db, 'employees', id), newEmployee);
+  };
+
+  const updateEmployee = async (id: string, data: Partial<Employee>) => {
+    try {
+      const { id: _id, ...rest } = data as Employee;
+      void _id;
+      await updateDoc(doc(db, 'employees', id), {
+        ...rest,
+        lastUpdatedAt: new Date().toISOString(),
+        lastUpdatedBy: currentUser?.email || 'admin',
+      });
+    } catch (err) {
+      console.error('updateEmployee error:', err);
+      throw err;
+    }
+  };
+
+  const updateEmployeeMedical = async (id: string, status: MedicalStatus, center?: string, date?: string, notes?: string) => {
+    try {
+      await updateDoc(doc(db, 'employees', id), {
+        medicalStatus: status,
+        ...(center !== undefined && { medicalCenter: center }),
+        ...(date !== undefined && { medicalDate: date }),
+        ...(notes !== undefined && { medicalNotes: notes }),
+        lastUpdatedAt: new Date().toISOString(),
+        lastUpdatedBy: currentUser?.email || 'admin',
+      });
+    } catch (err) {
+      console.error('updateEmployeeMedical error:', err);
+      throw err;
+    }
+  };
+
   if (authLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#0a0a0a', color: 'white' }}>
@@ -696,6 +768,32 @@ export default function App() {
               />
             )}
             {activeTab === 'profile' && <ProfileManager user={currentUser} />}
+
+            {/* Employee Management Tabs */}
+            {activeTab === 'emp-register' && (
+              <RegisterEmployee
+                onRegister={addEmployee}
+                onSuccess={() => setActiveTab('emp-status')}
+              />
+            )}
+            {activeTab === 'emp-status' && (
+              <EmployeeStatus
+                employees={employees}
+                onNavigate={(tab) => setActiveTab(tab)}
+              />
+            )}
+            {activeTab === 'emp-search' && (
+              <SearchEmployee employees={employees} />
+            )}
+            {activeTab === 'emp-edit' && (
+              <EditEmployee employees={employees} onUpdate={updateEmployee} />
+            )}
+            {activeTab === 'emp-filter' && (
+              <FilterSystem employees={employees} />
+            )}
+            {activeTab === 'emp-medical' && (
+              <MedicalManagement employees={employees} onUpdateMedical={updateEmployeeMedical} />
+            )}
           </main>
         </div>
         {logoutConfirmationOpen && (
