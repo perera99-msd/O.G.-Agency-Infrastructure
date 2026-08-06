@@ -67,7 +67,100 @@ export interface ContactMessage {
   cvFileName?: string | null;
 }
 
-export type TabType = 'overview' | 'destinations' | 'jobs' | 'gallery' | 'blogs' | 'responses' | 'notifications' | 'profile';
+export type MedicalStatus = 'pending' | 'pass' | 'fail';
+
+export interface TrackingStep {
+  step: string;
+  completed: boolean;
+  date: string | null;
+  fileUrl: string | null;
+}
+
+export interface Employee {
+  id: string;
+  // Personal
+  fullName: string;
+  passportNumber: string;
+  passportIssuedDate: string;
+  passportExpireDate: string;
+  previousPassportNumbers?: string;
+  nicNumber?: string;
+  dob?: string;
+  age?: number | null;
+  gender?: string;
+  civilStatus?: string;
+  race?: string;
+  adminDistrict?: string;
+  // Employment
+  countryApplied: string;
+  sourceAgency?: string;
+  jobCategory?: string;
+  company?: string;
+  expectedInstitutions?: string[];
+  // Contact
+  address?: string;
+  postalTown?: string;
+  email?: string;
+  phone1?: string;
+  phone2?: string;
+  whatsapp?: string;
+  dsDivision?: string;
+  gnDivision?: string;
+  // Education
+  education?: string;
+  educationOther?: string;
+  expSriLanka?: string;
+  periodSriLanka?: string;
+  abroadBefore?: string;
+  expAbroad?: string;
+  periodAbroad?: string;
+  abroadCountry?: string;
+  // Family
+  motherName?: string;
+  motherPhone?: string;
+  fatherName?: string;
+  fatherPhone?: string;
+  // Trustee
+  trusteeName?: string;
+  trusteeRelation?: string;
+  trusteeAddress?: string;
+  trusteePhone?: string;
+  trusteeNIC?: string;
+  // Banking
+  bankName?: string;
+  bankBranch?: string;
+  accountNumber?: string;
+  accountHolderName?: string;
+  // Medical
+  medicalStatus: MedicalStatus;
+  medicalCenter?: string;
+  medicalDate?: string;
+  medicalNotes?: string;
+  // Tracking
+  tracking?: TrackingStep[];
+  // Meta
+  status: 'active' | 'archived';
+  registeredAt: string;
+  registeredBy?: string;
+  lastUpdatedAt?: string;
+  lastUpdatedBy?: string;
+}
+
+export type TabType =
+  | 'overview'
+  | 'destinations'
+  | 'jobs'
+  | 'gallery'
+  | 'blogs'
+  | 'responses'
+  | 'notifications'
+  | 'profile'
+  | 'emp-register'
+  | 'emp-status'
+  | 'emp-search'
+  | 'emp-edit'
+  | 'emp-filter'
+  | 'emp-medical';
 
 export type AdminRole = 'super_user' | 'normal_user';
 

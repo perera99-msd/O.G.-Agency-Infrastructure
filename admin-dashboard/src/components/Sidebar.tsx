@@ -9,6 +9,12 @@ import {
   MessageSquare,
   UserRound,
   Bell,
+  UserPlus,
+  ClipboardList,
+  Search,
+  PenLine,
+  Filter,
+  Stethoscope,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -26,6 +32,15 @@ const mainNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: number
   { id: 'gallery', label: 'Gallery', Icon: ImageIcon },
   { id: 'blogs', label: 'Blogs & News', Icon: FileText },
   { id: 'responses', label: 'Inquiries', Icon: MessageSquare },
+];
+
+const employeeNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: number; strokeWidth?: number }> }[] = [
+  { id: 'emp-register', label: 'Register Employee', Icon: UserPlus },
+  { id: 'emp-status', label: 'Employee Status', Icon: ClipboardList },
+  { id: 'emp-search', label: 'Search Employee', Icon: Search },
+  { id: 'emp-edit', label: 'Edit Employee', Icon: PenLine },
+  { id: 'emp-filter', label: 'Filter System', Icon: Filter },
+  { id: 'emp-medical', label: 'Medical Management', Icon: Stethoscope },
 ];
 
 const accountNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: number; strokeWidth?: number }> }[] = [
@@ -58,6 +73,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unrea
           {id === 'responses' && unreadCount > 0 && (
             <span className="nav-badge">{unreadCount}</span>
           )}
+        </button>
+      ))}
+
+      <div className="sidebar-divider" />
+      <p className="sidebar-section-label">Employees</p>
+      {employeeNavItems.map(({ id, label, Icon }) => (
+        <button
+          key={id}
+          onClick={() => setActiveTab(id)}
+          className={`nav-item${activeTab === id ? ' active' : ''}`}
+        >
+          <span className="nav-item-icon">
+            <Icon size={15} strokeWidth={2} />
+          </span>
+          {label}
         </button>
       ))}
 
