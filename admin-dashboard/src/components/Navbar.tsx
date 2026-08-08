@@ -25,6 +25,8 @@ const tabLabels: Record<string, string> = {
   responses: 'Inquiries',
   notifications: 'Notification Center',
   profile: 'My Profile',
+  admins: 'Administrators',
+  'emp-manage': 'Customer Manager',
   'emp-register': 'Register Customer',
   'emp-status': 'Customer Status',
   'emp-search': 'Search Customer',

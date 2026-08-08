@@ -11,15 +11,15 @@ import {
   Phone,
   Briefcase,
   User,
-  Key,
+  Link2,
   Shield,
   Loader2,
+  Sparkles,
+  Check,
 } from 'lucide-react';
 import { db } from '../firebase';
 import type { AdminUser } from '../types';
 import { compressImage } from '../imageCompressor';
-import { AdminsManager } from './AdminsManager';
-
 
 interface ProfileManagerProps {
   user: AdminUser;
@@ -127,164 +127,229 @@ export function ProfileManager({ user }: ProfileManagerProps) {
   }
 
   return (
-    <>
-      <div className="animate-in profile-page">
-        <div className="page-header">
-          <div>
-            <h2 className="page-title">My Profile</h2>
-            <p className="page-subtitle">Manage your admin identity, contact info, and operational profile.</p>
-          </div>
+    <div className="animate-in profile-page">
+      <div className="page-header">
+        <div>
+          <h2 className="page-title">My Profile</h2>
+          <p className="page-subtitle">Manage your admin identity, contact info, and operational profile.</p>
         </div>
+      </div>
 
-        <div className="profile-layout">
-          {/* Left Column: Summary Card */}
-          <aside className="card profile-summary">
-            <div className="profile-avatar-wrapper">
-              <div className="profile-avatar">
-                {photoUrl ? <img src={photoUrl} alt="Profile Avatar" /> : <span className="avatar-initials">{initials}</span>}
-              </div>
-              <span className="profile-online-badge" title="Active Session" />
+      <div className="profile-layout">
+        {/* Left Column: Summary Card */}
+        <aside className="card profile-summary">
+          <div className="profile-avatar-wrapper">
+            <div className="profile-avatar">
+              {photoUrl ? <img src={photoUrl} alt="Profile Avatar" /> : <span className="avatar-initials">{initials}</span>}
             </div>
+            <span className="profile-online-badge" title="Active Session" />
+          </div>
 
-            <div className="profile-user-info">
-              <h3 className="profile-user-name">{displayName || 'Administrator'}</h3>
-              <p className="profile-user-title">{jobTitle || 'Administrator'}</p>
-              <div className="profile-role-badge">
-                <ShieldCheck size={13} />
-                <span>{user.role === 'super_user' ? 'Super Administrator' : 'Administrator'}</span>
-              </div>
+          <div className="profile-user-info">
+            <h3 className="profile-user-name">{displayName || 'Administrator'}</h3>
+            <p className="profile-user-title">{jobTitle || 'Administrator'}</p>
+            <div className="profile-role-badge">
+              <ShieldCheck size={13} />
+              <span>{user.role === 'super_user' ? 'Super Administrator' : 'Administrator'}</span>
             </div>
+          </div>
 
-            <div className="profile-meta-list">
+          <div className="profile-meta-list">
+            <div className="profile-meta-item">
+              <Mail size={15} />
+              <span className="meta-value">{user.email}</span>
+            </div>
+            {phone && (
               <div className="profile-meta-item">
-                <Mail size={15} />
-                <span className="meta-value">{user.email}</span>
+                <Phone size={15} />
+                <span className="meta-value">{phone}</span>
               </div>
-              {phone && (
-                <div className="profile-meta-item">
-                  <Phone size={15} />
-                  <span className="meta-value">{phone}</span>
+            )}
+          </div>
+
+          <div className="profile-security-box">
+            <div className="security-box-header">
+              <Shield size={14} />
+              <span>Security &amp; Access</span>
+            </div>
+            <p className="security-box-text">256-bit encrypted admin session, verified via Firebase Authentication.</p>
+          </div>
+        </aside>
+
+        {/* Right Column: Profile Edit Form */}
+        <form className="card profile-form" onSubmit={saveProfile}>
+          <div className="profile-form-heading">
+            <div className="heading-icon">
+              <UserRound size={20} />
+            </div>
+            <div>
+              <h3>Profile Details</h3>
+              <p>Your authentication email is managed securely by Firebase.</p>
+            </div>
+          </div>
+
+          {error && <div className="profile-error-alert">{error}</div>}
+
+          {/* ---- Photo section ---- */}
+          <div>
+            <div className="section-header" style={{ marginBottom: 14 }}>
+              <div className="section-header-left">
+                <div className="section-header-icon" style={{ width: 32, height: 32, borderRadius: 9, background: 'var(--accent-light)' }}>
+                  <Sparkles size={15} strokeWidth={2} style={{ color: 'var(--accent)' }} />
                 </div>
-              )}
-            </div>
-
-            <div className="profile-security-box">
-              <div className="security-box-header">
-                <Shield size={14} />
-                <span>Security & Access</span>
-              </div>
-              <p className="security-box-text">256-Bit Encrypted Admin Session verified via Firebase Authentication.</p>
-            </div>
-          </aside>
-
-          {/* Right Column: Profile Edit Form */}
-          <form className="card profile-form" onSubmit={saveProfile}>
-            <div className="profile-form-heading">
-              <div className="heading-icon">
-                <UserRound size={20} />
-              </div>
-              <div>
-                <h3>Profile Details</h3>
-                <p>Your authentication email is managed securely by Firebase.</p>
+                <div>
+                  <p className="section-header-title" style={{ fontSize: 13.5 }}>Profile Photo</p>
+                  <p className="section-header-desc">Upload an image, pick a preset, or link one directly</p>
+                </div>
               </div>
             </div>
-
-            {error && <div className="profile-error-alert">{error}</div>}
 
             <div className="profile-avatar-upload-row">
               <div className="upload-preview-thumb">
                 {photoUrl ? <img src={photoUrl} alt="Avatar Preview" /> : initials}
               </div>
               <div className="upload-controls">
-                <p className="upload-title">Profile Picture</p>
-                <p className="upload-desc">Upload a high resolution JPEG/PNG, choose a preset avatar, or paste an image URL.</p>
+                <p className="upload-title">Custom Image</p>
+                <p className="upload-desc">JPEG or PNG, automatically resized and compressed on upload.</p>
                 <div className="upload-btn-group">
                   <label className="btn btn-secondary upload-label">
                     <Upload size={14} />
-                    {uploading ? 'Processing...' : 'Upload Custom Image'}
+                    {uploading ? 'Processing...' : 'Upload Image'}
                     <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} hidden />
                   </label>
                   {photoUrl && (
                     <button type="button" className="btn btn-danger-subtle" onClick={() => setPhotoUrl('')}>
                       <Trash2 size={14} />
-                      Remove Photo
+                      Remove
                     </button>
                   )}
                 </div>
+              </div>
+            </div>
 
-                {/* Animated 3D & Vector Avatars Selection Grid */}
-                <div style={{ marginTop: 16 }}>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    ✨ Choose an Animated 3D Avatar:
-                  </p>
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-                    {PREDEFINED_AVATARS.map((av) => {
-                      const isSelected = photoUrl === av.url;
-                      return (
-                        <button
-                          key={av.id}
-                          type="button"
-                          onClick={() => setPhotoUrl(av.url)}
-                          title={av.label}
-                          className="avatar-preset-btn"
-                          style={{
-                            width: 48,
-                            height: 48,
-                            borderRadius: 14,
-                            padding: 0,
-                            overflow: 'hidden',
-                            border: isSelected ? '2.5px solid var(--accent)' : '2px solid var(--border)',
-                            boxShadow: isSelected
-                              ? '0 0 0 4px var(--accent-light), 0 8px 20px rgba(99, 102, 241, 0.25)'
-                              : '0 2px 8px rgba(0,0,0,0.04)',
-                            transform: isSelected ? 'scale(1.12)' : 'scale(1)',
-                            transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                            cursor: 'pointer',
-                            background: 'var(--surface-raised)',
-                            position: 'relative',
-                          }}
-                        >
-                          <img src={av.url} alt={av.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        </button>
-                      );
-                    })}
+            {/* Divider */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '18px 0 14px' }}>
+              <span style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                or choose a preset
+              </span>
+              <span style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(52px, 1fr))', gap: 10 }}>
+              {PREDEFINED_AVATARS.map((av) => {
+                const isSelected = photoUrl === av.url;
+                return (
+                  <button
+                    key={av.id}
+                    type="button"
+                    onClick={() => setPhotoUrl(av.url)}
+                    title={av.label}
+                    className="avatar-preset-btn"
+                    style={{
+                      position: 'relative',
+                      width: 52,
+                      height: 52,
+                      borderRadius: 14,
+                      padding: 0,
+                      overflow: 'hidden',
+                      border: isSelected ? '2px solid var(--accent)' : '1.5px solid var(--border)',
+                      boxShadow: isSelected
+                        ? '0 0 0 3px var(--accent-light)'
+                        : '0 1px 3px rgba(15, 23, 42, 0.04)',
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer',
+                      background: 'var(--surface-raised)',
+                    }}
+                  >
+                    <img src={av.url} alt={av.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {isSelected && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: 3,
+                          right: 3,
+                          width: 16,
+                          height: 16,
+                          borderRadius: '50%',
+                          background: 'var(--accent)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 1px 3px rgba(15, 23, 42, 0.3)',
+                        }}
+                      >
+                        <Check size={10} strokeWidth={3} style={{ color: '#fff' }} />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ marginTop: 16 }}>
+              <label className="field-label">Or paste an image URL</label>
+              <div className="input-with-icon">
+                <Link2 size={15} className="input-icon" />
+                <input
+                  className="field-input"
+                  type="url"
+                  value={photoUrl}
+                  onChange={(e) => setPhotoUrl(e.target.value)}
+                  placeholder="https://images.unsplash.com/..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="divider" />
+
+          {/* ---- Personal details section ---- */}
+          <div>
+            <div className="section-header" style={{ marginBottom: 14 }}>
+              <div className="section-header-left">
+                <div className="section-header-icon" style={{ width: 32, height: 32, borderRadius: 9, background: 'var(--blue-bg)' }}>
+                  <User size={15} strokeWidth={2} style={{ color: 'var(--blue)' }} />
+                </div>
+                <div>
+                  <p className="section-header-title" style={{ fontSize: 13.5 }}>Personal Details</p>
+                  <p className="section-header-desc">How your name and role appear across the dashboard</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="field-group">
+              <div className="field-row">
+                <div className="field-group">
+                  <label className="field-label">Display Name</label>
+                  <div className="input-with-icon">
+                    <User size={15} className="input-icon" />
+                    <input
+                      className="field-input"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="e.g. Alex Dawson"
+                    />
+                  </div>
+                </div>
+
+                <div className="field-group">
+                  <label className="field-label">Job Title / Designation</label>
+                  <div className="input-with-icon">
+                    <Briefcase size={15} className="input-icon" />
+                    <input
+                      className="field-input"
+                      value={jobTitle}
+                      onChange={(e) => setJobTitle(e.target.value)}
+                      placeholder="e.g. Operations Director"
+                    />
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="field-row">
-              <div className="field-group">
-                <label className="field-label">Display Name</label>
-                <div className="input-with-icon">
-                  <User size={15} className="input-icon" />
-                  <input
-                    className="field-input"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="e.g. Alex Dawson"
-                  />
-                </div>
-              </div>
-
-              <div className="field-group">
-                <label className="field-label">Job Title / Designation</label>
-                <div className="input-with-icon">
-                  <Briefcase size={15} className="input-icon" />
-                  <input
-                    className="field-input"
-                    value={jobTitle}
-                    onChange={(e) => setJobTitle(e.target.value)}
-                    placeholder="e.g. Operations Director"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="field-row">
               <div className="field-group">
                 <label className="field-label">Contact Phone Number</label>
-                <div className="input-with-icon">
+                <div className="input-with-icon" style={{ maxWidth: 320 }}>
                   <Phone size={15} className="input-icon" />
                   <input
                     className="field-input"
@@ -295,42 +360,22 @@ export function ProfileManager({ user }: ProfileManagerProps) {
                   />
                 </div>
               </div>
-
-              <div className="field-group">
-                <label className="field-label">Image URL (Optional)</label>
-                <div className="input-with-icon">
-                  <Key size={15} className="input-icon" />
-                  <input
-                    className="field-input"
-                    type="url"
-                    value={photoUrl}
-                    onChange={(e) => setPhotoUrl(e.target.value)}
-                    placeholder="https://images.unsplash.com/..."
-                  />
-                </div>
-              </div>
             </div>
+          </div>
 
-            <div className="profile-form-footer">
-              {saved && (
-                <span className="profile-saved">
-                  <CheckCircle2 size={16} /> Profile updated successfully
-                </span>
-              )}
-              <button className="btn btn-primary save-btn" type="submit" disabled={saving}>
-                <Save size={15} />
-                {saving ? 'Saving...' : 'Save Profile Changes'}
-              </button>
-            </div>
-          </form>
-        </div>
+          <div className="profile-form-footer">
+            {saved && (
+              <span className="profile-saved">
+                <CheckCircle2 size={16} /> Profile updated successfully
+              </span>
+            )}
+            <button className="btn btn-primary save-btn" type="submit" disabled={saving}>
+              <Save size={15} />
+              {saving ? 'Saving...' : 'Save Profile Changes'}
+            </button>
+          </div>
+        </form>
       </div>
-
-      {user.role === 'super_user' && (
-        <AdminsManager 
-          currentUserUid={user.uid} 
-        />
-      )}
-    </>
+    </div>
   );
 }
