@@ -3440,3 +3440,307 @@ textarea.emp-form-control { resize: vertical; min-height: 80px; }
   gap: 1rem;
   flex-wrap: wrap;
 }
+
+/* ============================================================
+   EMPLOYEE STATUS TAB — Light Glass Premium Theme
+   ============================================================ */
+.emp-status-wrapper {
+  animation: fadeInUp 0.35s ease;
+}
+
+/* Overall Progress Card */
+.emp-status-wrapper .emp-progress-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border-subtle);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(10px);
+  margin-bottom: 1.5rem;
+}
+
+.emp-status-wrapper .emp-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.emp-status-wrapper .emp-progress-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.emp-status-wrapper .emp-progress-percentage {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+/* Progress bar */
+.emp-status-wrapper .emp-progress-bar-container {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.06);
+  border-radius: var(--radius-full);
+  height: 10px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.03);
+}
+
+.emp-status-wrapper .emp-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--green));
+  width: 0%;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Stats grid */
+.emp-status-wrapper .emp-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.25rem;
+}
+
+.emp-status-wrapper .emp-stat-card-lite {
+  background: rgba(15, 23, 42, 0.02);
+  border: 1px solid var(--border);
+  padding: 1.2rem;
+  border-radius: var(--radius);
+  text-align: center;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.emp-status-wrapper .emp-stat-card-lite .label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+.emp-status-wrapper .emp-stat-card-lite .value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent);
+  margin-top: 0.25rem;
+}
+
+/* Details grid */
+.emp-status-wrapper .emp-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.emp-status-wrapper .emp-detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.emp-status-wrapper .emp-detail-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  margin-bottom: 0.35rem;
+}
+
+.emp-status-wrapper .emp-detail-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.emp-status-wrapper .emp-detail-value.active {
+  color: var(--green);
+}
+
+/* Custom Flags / Tags */
+.emp-status-wrapper .emp-tag-russia {
+  background: rgba(239, 68, 68, 0.08) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+}
+
+.emp-status-wrapper .emp-tag-romania {
+  background: rgba(245, 158, 11, 0.08) !important;
+  color: #d97706 !important;
+  border: 1px solid rgba(245, 158, 11, 0.2) !important;
+}
+
+/* Checklist Grid */
+.emp-status-wrapper .emp-checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.emp-status-wrapper .emp-checklist-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--glass-shadow);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.emp-status-wrapper .emp-checklist-card:hover {
+  border-color: var(--accent);
+  background: var(--surface);
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow-hover);
+}
+
+.emp-status-wrapper .emp-checklist-card.completed {
+  border-color: var(--green-border);
+  background: var(--green-bg);
+}
+
+.emp-status-wrapper .emp-checklist-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.emp-status-wrapper .emp-checklist-label {
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  flex: 1;
+  font-size: 0.92rem;
+}
+
+/* Input file style */
+.emp-status-wrapper input[type="file"] {
+  padding: 0.45rem;
+  background: rgba(15, 23, 42, 0.03);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+  width: 100%;
+}
+
+.emp-status-wrapper input[type="file"]:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.emp-status-wrapper input[type="file"]::file-selector-button {
+  background: var(--border-strong);
+  color: var(--text-primary);
+  padding: 0.35rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 0.75rem;
+  font-weight: 600;
+  font-size: 0.78rem;
+  transition: all 0.2s ease;
+}
+
+.emp-status-wrapper input[type="file"]::file-selector-button:hover {
+  background: rgba(15, 23, 42, 0.15);
+}
+
+.emp-status-wrapper .file-uploaded {
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.12) !important;
+  border-color: var(--green) !important;
+  background: var(--green-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.emp-status-wrapper .file-uploaded::file-selector-button {
+  background: var(--green) !important;
+  color: white !important;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2) !important;
+}
+
+.emp-status-wrapper .file-uploaded::file-selector-button:hover {
+  background: #059669 !important;
+}
+
+/* Document status block */
+.emp-status-wrapper .emp-file-ok {
+  color: var(--green);
+  background: var(--green-bg);
+  border: 1px solid var(--green-border);
+  padding: 0.45rem;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.emp-status-wrapper .emp-file-ok a {
+  color: var(--green);
+  text-decoration: none;
+}
+
+.emp-status-wrapper .emp-file-ok a:hover {
+  text-decoration: underline;
+}
+
+.emp-status-wrapper .emp-file-missing {
+  color: var(--red);
+  background: var(--red-bg);
+  border: 1px solid var(--red-border);
+  padding: 0.45rem;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* Actions Row */
+.emp-status-wrapper .emp-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Print override */
+@media print {
+  /* Hide dashboard main navigation and menus */
+  .premium-shell, 
+  .sidebar, 
+  .header, 
+  .emp-no-print,
+  .emp-actions-row,
+  .emp-search-box-wrap,
+  .emp-table-wrapper,
+  .emp-progress-card,
+  .emp-page-header {
+    display: none !important;
+  }
+  
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .emp-status-wrapper {
+    background: #fff !important;
+    color: #000 !important;
+    padding: 0 !important;
+  }
+  
+  #printableDetail {
+    display: block !important;
+    color: #000 !important;
+  }
+}
+
+

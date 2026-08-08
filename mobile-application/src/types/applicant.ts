@@ -131,3 +131,43 @@ export interface PaginatedResponse<T> {
   hasNext: boolean;
   hasPrev: boolean;
 }
+
+// ─── Direct Firestore Tracking Types ──────────────────────────────────────────
+
+export interface TrackingStep {
+  step: string;
+  completed: boolean;
+  date: string | null;
+  fileUrl: string | null;
+  comment?: string; // Rejection/unclear message from admin
+}
+
+export interface Employee {
+  id: string;
+  uid: string;
+  fullName: string;
+  passportNumber: string;
+  nicNumber: string;
+  countryApplied: string;
+  jobCategory?: string;
+  company?: string;
+  registeredAt: string;
+  status: 'active' | 'archived';
+  tracking: TrackingStep[];
+  mobilePin?: string;
+  email?: string;
+  displayName?: string;
+}
+
+export interface UserSubmission {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  passportNumber: string;
+  stepName: string;
+  fileUrl: string;
+  fileName: string;
+  submittedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+  comment?: string;
+}

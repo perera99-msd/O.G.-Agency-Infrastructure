@@ -41,6 +41,7 @@ const employeeNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: nu
   { id: 'emp-edit', label: 'Edit Employee', Icon: PenLine },
   { id: 'emp-filter', label: 'Filter System', Icon: Filter },
   { id: 'emp-medical', label: 'Medical Management', Icon: Stethoscope },
+  { id: 'emp-user-docs', label: 'User Documents', Icon: FileText },
 ];
 
 const accountNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: number; strokeWidth?: number }> }[] = [

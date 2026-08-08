@@ -16,6 +16,7 @@ import { SearchEmployee } from './components/employees/SearchEmployee';
 import { EditEmployee } from './components/employees/EditEmployee';
 import { FilterSystem } from './components/employees/FilterSystem';
 import { MedicalManagement } from './components/employees/MedicalManagement';
+import { UserDocuments } from './components/employees/UserDocuments';
 
 import { db, auth, storage } from './firebase';
 import {
@@ -780,6 +781,7 @@ export default function App() {
               <EmployeeStatus
                 employees={employees}
                 onNavigate={(tab) => setActiveTab(tab)}
+                onUpdate={updateEmployee}
               />
             )}
             {activeTab === 'emp-search' && (
@@ -793,6 +795,9 @@ export default function App() {
             )}
             {activeTab === 'emp-medical' && (
               <MedicalManagement employees={employees} onUpdateMedical={updateEmployeeMedical} />
+            )}
+            {activeTab === 'emp-user-docs' && (
+              <UserDocuments />
             )}
           </main>
         </div>

@@ -1,91 +1,161 @@
-// src/components/auth/LoginForm.tsx
 "use client";
 
 import { useState, type FormEvent } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { SocialLoginButton } from "@/components/auth/SocialLoginButton";
 
 export function LoginForm() {
   const router = useRouter();
-  const { login, loginWithGoogle, actionLoading, error, clearError } = useAuth();
+  const { login, setupPin, actionLoading, error, clearError } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [activeTab, setActiveTab] = useState<"signin" | "setup">("signin");
+  const [passport, setPassport] = useState("");
+  const [pin, setPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [localError, setLocalError] = useState("");
+
+  const handleTabChange = (tab: "signin" | "setup") => {
+    setActiveTab(tab);
+    setPassport("");
+    setPin("");
+    setConfirmPin("");
+    setLocalError("");
+    clearError();
+  };
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     clearError();
-    const ok = await login(email, password);
-    if (ok) {
-      // Check if PIN setup is needed
-      const { isPinSet } = require("@/lib/localAuth");
-      if (!isPinSet()) {
-        router.push("/pin-setup");
-      } else {
+    setLocalError("");
+
+    if (!passport.trim()) {
+      setLocalError("Passport number is required.");
+      return;
+    }
+
+    if (!/^\d{4}$/.test(pin)) {
+      setLocalError("PIN must be exactly 4 digits.");
+      return;
+    }
+
+    if (activeTab === "signin") {
+      const ok = await login(passport, pin);
+      if (ok) {
+        router.push("/dashboard");
+      }
+    } else {
+      if (pin !== confirmPin) {
+        setLocalError("PINs do not match.");
+        return;
+      }
+      const ok = await setupPin(passport, pin);
+      if (ok) {
         router.push("/dashboard");
       }
     }
   }
 
-  async function handleGoogle() {
-    clearError();
-    const ok = await loginWithGoogle();
-    if (ok) router.push("/dashboard");
-  }
-
   return (
     <div className="og-auth-form">
-      <span className="og-eyebrow">SIGN IN</span>
-      <h1 className="og-auth-title">Welcome back</h1>
-      <p className="og-auth-subtitle">Track your application securely</p>
+      <span className="og-eyebrow">OG APPLICANT PORTAL</span>
+      <h1 className="og-auth-title">
+        {activeTab === "signin" ? "Sign In" : "PIN Setup"}
+      </h1>
+      <p className="og-auth-subtitle">
+        {activeTab === "signin" 
+          ? "Access your visa status using your passport and PIN" 
+          : "Register your 4-digit mobile access PIN"}
+      </p>
+
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", padding: "0.25rem", background: "rgba(15, 23, 42, 0.05)", borderRadius: "8px" }}>
+        <button
+          type="button"
+          onClick={() => handleTabChange("signin")}
+          style={{
+            flex: 1,
+            padding: "0.5rem",
+            borderRadius: "6px",
+            border: "none",
+            background: activeTab === "signin" ? "#ffffff" : "transparent",
+            color: activeTab === "signin" ? "var(--text-primary)" : "var(--text-muted)",
+            fontWeight: "600",
+            cursor: "pointer",
+            boxShadow: activeTab === "signin" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+            transition: "all 0.2s"
+          }}
+        >
+          Sign In
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTabChange("setup")}
+          style={{
+            flex: 1,
+            padding: "0.5rem",
+            borderRadius: "6px",
+            border: "none",
+            background: activeTab === "setup" ? "#ffffff" : "transparent",
+            color: activeTab === "setup" ? "var(--text-primary)" : "var(--text-muted)",
+            fontWeight: "600",
+            cursor: "pointer",
+            boxShadow: activeTab === "setup" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+            transition: "all 0.2s"
+          }}
+        >
+          PIN Setup
+        </button>
+      </div>
 
       <form onSubmit={handleSubmit} noValidate>
         <Input
-          label="Email"
-          type="email"
-          autoComplete="email"
+          label="Passport Number"
+          type="text"
           required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          autoCapitalize="characters"
+          placeholder="e.g. N1234567"
+          value={passport}
+          onChange={(e) => setPassport(e.target.value)}
         />
+        
         <Input
-          label="Password"
+          label={activeTab === "signin" ? "Enter 4-Digit PIN" : "Create 4-Digit PIN"}
           type="password"
-          autoComplete="current-password"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={4}
           required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          placeholder="••••"
+          value={pin}
+          onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
         />
 
-        {error && <p className="og-form-error" role="alert">{error}</p>}
+        {activeTab === "setup" && (
+          <Input
+            label="Confirm 4-Digit PIN"
+            type="password"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={4}
+            required
+            placeholder="••••"
+            value={confirmPin}
+            onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
+          />
+        )}
 
-        <div className="og-auth-links">
-          <Link href="/forgot-password" className="og-link">
-            Forgot password?
-          </Link>
-        </div>
+        {(error || localError) && (
+          <p className="og-form-error" role="alert" style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "0.5rem", fontWeight: "600" }}>
+            {error || localError}
+          </p>
+        )}
 
-        <Button type="submit" loading={actionLoading} className="og-btn--full">
-          Sign In
+        <Button type="submit" loading={actionLoading} className="og-btn--full" style={{ marginTop: "1.5rem" }}>
+          {activeTab === "signin" ? "Sign In" : "Register and Sign In"}
         </Button>
       </form>
-
-      <div className="og-divider">
-        <span>or</span>
-      </div>
-
-      <SocialLoginButton onClick={handleGoogle} loading={actionLoading} />
-
-      <p className="og-auth-footer">
-        Don&apos;t have an account?{" "}
-        <Link href="/register" className="og-link">
-          Register
-        </Link>
-      </p>
     </div>
   );
 }
