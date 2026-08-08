@@ -3,14 +3,17 @@
 import { use, useState, useEffect } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { MapPin, DollarSign, Clock, Users, Calendar, ArrowLeft, Bookmark, ExternalLink } from "lucide-react";
+import { MapPin, Banknote, Clock, Users, Calendar, ArrowLeft, Bookmark, ExternalLink } from "lucide-react";
 import { useBookmarks } from "@/utils/hooks/useBookmarks";
 import ShareMenu from "@/components/jobs/ShareMenu";
 import JobCard from "@/components/jobs/JobCard";
 
 function formatSalary(salary) {
-  const fmt = (n) => (n >= 1000 ? `$${(n / 1000).toFixed(0)}k` : `$${n}`);
-  return `${fmt(salary.min)} – ${fmt(salary.max)} ${salary.currency}`;
+  if (!salary) return "";
+  const min = salary.min != null ? Number(salary.min).toLocaleString() : "";
+  const max = salary.max != null ? Number(salary.max).toLocaleString() : "";
+  const currency = salary.currency || "USD";
+  return `${currency === "USD" ? "$" : ""}${min} – ${currency === "USD" ? "$" : ""}${max} ${currency !== "USD" ? currency : ""}`.trim();
 }
 
 function formatDate(dateStr) {
@@ -176,7 +179,7 @@ export default function JobDetailPage({ params }) {
                     Salary
                   </p>
                   <div className="flex items-center gap-1.5">
-                    <DollarSign size={13} className="text-[var(--color-main-500)]" />
+                    <Banknote size={13} className="text-[var(--color-main-500)]" />
                     <span className="text-sm font-semibold text-[var(--color-secondary-800)]">
                       {formatSalary(job.salary)}
                     </span>

@@ -1,12 +1,17 @@
 // components/jobs/JobCardList.jsx
 "use client";
 import Link from "next/link";
-import { MapPin, DollarSign, Clock, Bookmark, ChevronRight } from "lucide-react";
+import { MapPin, Banknote, Clock, Bookmark, ChevronRight } from "lucide-react";
 import { useBookmarks } from "@/utils/hooks/useBookmarks";
 
 function formatSalary(salary) {
-  const fmt = (n) => (n >= 1000 ? `$${(n / 1000).toFixed(0)}k` : `$${n}`);
-  return `${fmt(salary.min)} – ${fmt(salary.max)}`;
+  if (!salary) return "";
+  const min = salary.min != null ? Number(salary.min).toLocaleString() : "";
+  const max = salary.max != null ? Number(salary.max).toLocaleString() : "";
+  if (salary.currency && salary.currency !== "USD" && salary.currency !== "$") {
+    return `${min} – ${max} ${salary.currency}`;
+  }
+  return `$${min} – $${max}`;
 }
 
 function daysUntil(dateStr) {
@@ -69,7 +74,7 @@ export default function JobCardList({ job }) {
               {job.country}
             </span>
             <span className="flex items-center gap-1 text-xs font-medium text-secondary-700">
-              <DollarSign size={11} className="flex-shrink-0" />
+              <Banknote size={11} className="flex-shrink-0" />
               {formatSalary(job.salary)}
             </span>
             <span className={`flex items-center gap-1 text-xs ${
