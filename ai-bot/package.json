@@ -1,0 +1,31 @@
+{
+  "name": "og-agency-ai-bot",
+  "version": "1.0.0",
+  "description": "RAG-powered FAQ & Recruitment AI Chatbot service for O.G. Agency",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "embed": "node src/rag/embed.js"
+  },
+  "keywords": [
+    "ai-chatbot",
+    "rag",
+    "gemini",
+    "groq",
+    "express"
+  ],
+  "author": "O.G. Agency Infrastructure Team",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.3.1",
+    "groq-sdk": "^0.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
