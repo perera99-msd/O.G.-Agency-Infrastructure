@@ -87,19 +87,18 @@ export default function StatusPage() {
 
   return (
     <div style={{ 
-      padding: "1rem", 
+      padding: "1.25rem 1rem", 
       maxWidth: "600px",
       margin: "0 auto",
-      minHeight: "100vh",
-      background: "#f8fafc"
+      minHeight: "100vh"
     }}>
 
-      {/* Destination Hero Banner */}
+      {/* Destination Hero Banner - Glassmorphic Hero Bento */}
       <div style={{
         width: "100%",
-        height: "160px",
-        borderRadius: "20px",
-        marginBottom: "1.5rem",
+        height: "170px",
+        borderRadius: "24px",
+        marginBottom: "1.25rem",
         position: "relative",
         overflow: "hidden",
         display: "flex",
@@ -107,21 +106,21 @@ export default function StatusPage() {
         alignItems: "center",
         justifyContent: "center",
         background: heroImage 
-          ? `linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.7)), url(${heroImage})`
+          ? `linear-gradient(rgba(15, 23, 42, 0.45), rgba(15, 23, 42, 0.75)), url(${heroImage})`
           : "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
         backgroundSize: "cover",
         backgroundPosition: "center",
-        boxShadow: "0 8px 20px rgba(0,0,0,0.15)"
+        boxShadow: "0 14px 30px -5px rgba(15, 23, 42, 0.2)"
       }}>
         {countryCode && (
           <div style={{
-            width: "56px",
-            height: "56px",
+            width: "58px",
+            height: "58px",
             borderRadius: "50%",
             border: "3px solid #ffffff",
             overflow: "hidden",
             marginBottom: "0.5rem",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.3)"
+            boxShadow: "0 8px 20px rgba(0,0,0,0.35)"
           }}>
             <img 
               src={`https://flagcdn.com/w160/${countryCode}.png`} 
@@ -132,56 +131,56 @@ export default function StatusPage() {
         )}
         <h1 style={{
           color: "#ffffff",
-          fontSize: "1.3rem",
-          fontWeight: 800,
+          fontSize: "1.4rem",
+          fontWeight: 900,
           margin: 0,
-          textShadow: "0 2px 4px rgba(0,0,0,0.5)"
+          letterSpacing: "-0.3px",
+          textShadow: "0 2px 8px rgba(0,0,0,0.6)"
         }}>
           {user?.countryApplied || "Destination"}
         </h1>
       </div>
       
-      {/* Progress Header Card */}
+      {/* Progress Header Card - Vibrant Gradient Bento */}
       <div style={{
-        background: "linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)",
-        borderRadius: "20px",
-        padding: "1.5rem",
+        background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+        borderRadius: "24px",
+        padding: "1.6rem 1.5rem",
         color: "white",
-        marginBottom: "2rem",
-        boxShadow: "0 10px 25px -5px rgba(79, 70, 229, 0.4)",
+        marginBottom: "1.75rem",
+        boxShadow: "0 14px 30px -5px rgba(37, 99, 235, 0.35)",
         position: "relative",
         overflow: "hidden"
       }}>
         {/* Decorative background shapes */}
-        <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "150px", height: "150px", background: "rgba(255,255,255,0.1)", borderRadius: "50%" }} />
-        <div style={{ position: "absolute", bottom: "-30%", left: "10%", width: "100px", height: "100px", background: "rgba(255,255,255,0.1)", borderRadius: "50%" }} />
+        <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "150px", height: "150px", background: "rgba(255,255,255,0.12)", borderRadius: "50%" }} />
         
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.75rem" }}>
             <div>
-              <h2 style={{ fontSize: "1.2rem", fontWeight: 700, margin: 0 }}>
-                {user?.countryApplied ? `${user.countryApplied} Migration` : 'Migration'}
+              <h2 style={{ fontSize: "1.3rem", fontWeight: 900, margin: 0, letterSpacing: "-0.3px" }}>
+                {user?.countryApplied ? `${user.countryApplied} Migration` : 'Migration Progress'}
               </h2>
-              <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "0.85rem", marginTop: "4px" }}>
-                Your personal checklist and progress
+              <p style={{ color: "rgba(255, 255, 255, 0.85)", fontSize: "0.82rem", marginTop: "4px", fontWeight: 600 }}>
+                Personal checklist & milestone tracking
               </p>
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-            <span style={{ fontSize: "2rem", fontWeight: 800, lineHeight: 1 }}>{progressPercentage}%</span>
-            <span style={{ fontSize: "0.85rem", fontWeight: 500, background: "rgba(255,255,255,0.2)", padding: "4px 10px", borderRadius: "12px" }}>
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "0.6rem" }}>
+            <span style={{ fontSize: "2.2rem", fontWeight: 900, lineHeight: 1 }}>{progressPercentage}%</span>
+            <span style={{ fontSize: "0.8rem", fontWeight: 800, background: "rgba(255,255,255,0.22)", backdropFilter: "blur(10px)", padding: "5px 12px", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.3)" }}>
               {completedCount} of {totalCount} done
             </span>
           </div>
           
-          {/* Progress Bar */}
-          <div style={{ width: "100%", height: "8px", background: "rgba(0, 0, 0, 0.2)", borderRadius: "4px", overflow: "hidden" }}>
+          {/* Progress Bar Track */}
+          <div style={{ width: "100%", height: "10px", background: "rgba(0, 0, 0, 0.2)", borderRadius: "30px", overflow: "hidden" }}>
             <div style={{ 
               width: `${progressPercentage}%`, 
               height: "100%", 
               background: "#10b981",
-              borderRadius: "4px",
+              borderRadius: "30px",
               transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)" 
             }} />
           </div>
@@ -194,7 +193,7 @@ export default function StatusPage() {
         paddingLeft: "0.75rem",
         display: "flex",
         flexDirection: "column",
-        gap: "1.25rem"
+        gap: "1rem"
       }}>
         {/* Vertical Timeline Line */}
         <div style={{
@@ -217,43 +216,43 @@ export default function StatusPage() {
               
               {/* Timeline Node */}
               <div style={{
-                width: "32px",
-                height: "32px",
+                width: "34px",
+                height: "34px",
                 borderRadius: "50%",
                 background: isDone ? "#10b981" : "#ffffff",
-                border: isDone ? "2px solid #10b981" : "2px solid #cbd5e1",
+                border: isDone ? "2px solid #10b981" : "2px solid #e2e8f0",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
                 marginTop: "4px",
-                boxShadow: isDone ? "0 0 0 4px rgba(16, 185, 129, 0.15)" : "none",
+                boxShadow: isDone ? "0 6px 15px rgba(16, 185, 129, 0.3)" : "0 4px 10px rgba(0,0,0,0.03)",
                 transition: "all 0.3s ease"
               }}>
                 {isDone ? (
                   <Check size={16} color="white" strokeWidth={3} />
                 ) : (
-                  <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#94a3b8" }}>{idx + 1}</span>
+                  <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "#94a3b8" }}>{idx + 1}</span>
                 )}
               </div>
 
-              {/* Content Card */}
+              {/* Content Card - Bento Box */}
               <div style={{
                 flex: 1,
                 background: "#ffffff",
-                borderRadius: "16px",
-                padding: "1rem",
-                boxShadow: "0 2px 10px rgba(0,0,0,0.03)",
-                border: "1px solid rgba(0,0,0,0.04)",
+                borderRadius: "20px",
+                padding: "1.1rem 1.25rem",
+                boxShadow: "0 10px 25px -5px rgba(0,0,0,0.03)",
+                border: "1px solid rgba(226, 232, 240, 0.8)",
                 display: "flex",
                 flexDirection: "column",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                opacity: isDone ? 1 : 0.85
+                transition: "all 0.2s ease",
+                opacity: isDone ? 1 : 0.9
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem" }}>
                   <h3 style={{ 
-                    fontSize: "0.95rem", 
-                    fontWeight: 700, 
+                    fontSize: "1rem", 
+                    fontWeight: 900, 
                     color: isDone ? "#0f172a" : "#475569",
                     margin: 0
                   }}>
@@ -262,15 +261,15 @@ export default function StatusPage() {
                   
                   {/* Status Pill */}
                   <div style={{
-                    padding: "2px 8px",
+                    padding: "3px 10px",
                     borderRadius: "20px",
                     fontSize: "0.7rem",
-                    fontWeight: 600,
+                    fontWeight: 800,
                     display: "flex",
                     alignItems: "center",
                     gap: "4px",
-                    background: isDone ? "rgba(16, 185, 129, 0.1)" : "rgba(148, 163, 184, 0.1)",
-                    color: isDone ? "#10b981" : "#64748b"
+                    background: isDone ? "#ecfdf5" : "#f1f5f9",
+                    color: isDone ? "#059669" : "#64748b"
                   }}>
                     {isDone ? "Completed" : "Pending"}
                   </div>
@@ -281,18 +280,18 @@ export default function StatusPage() {
                   display: "flex", 
                   alignItems: "center", 
                   gap: "6px",
-                  fontSize: "0.75rem",
+                  fontSize: "0.76rem",
                   color: "#94a3b8",
-                  fontWeight: 500
+                  fontWeight: 600
                 }}>
                   {isDone ? (
                     <>
-                      <CheckCircle2 size={12} color="#10b981" />
+                      <CheckCircle2 size={13} color="#10b981" />
                       Updated: {stepDate || 'Recently'}
                     </>
                   ) : (
                     <>
-                      <Clock size={12} />
+                      <Clock size={13} />
                       Awaiting completion
                     </>
                   )}

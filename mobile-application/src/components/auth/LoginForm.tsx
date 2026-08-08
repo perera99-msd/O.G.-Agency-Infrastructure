@@ -95,11 +95,11 @@ export function LoginForm() {
       <form
         onSubmit={handleSubmit}
         style={{
-          background: "var(--card-bg, #ffffff)",
-          border: "1px solid rgba(226, 232, 240, 0.8)",
-          borderRadius: "20px",
-          padding: "1.75rem 1.25rem",
-          boxShadow: "0 10px 30px -10px rgba(0, 0, 0, 0.05)",
+          background: "#ffffff",
+          border: "1px solid rgba(226, 232, 240, 0.9)",
+          borderRadius: "28px",
+          padding: "2rem 1.75rem",
+          boxShadow: "0 20px 40px -15px rgba(37, 99, 235, 0.08)",
           display: "flex",
           flexDirection: "column",
           gap: "1.25rem"
