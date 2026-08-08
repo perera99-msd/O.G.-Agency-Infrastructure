@@ -25,6 +25,7 @@ interface SidebarProps {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
   unreadCount: number;
+  pwaUnreadCount?: number;
   role: AdminRole;
   onLogout: () => void;
 }
@@ -45,6 +46,7 @@ const customerNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: nu
   { id: 'emp-medical', label: 'Medical Management', Icon: Stethoscope },
   { id: 'emp-user-docs', label: 'User Documents', Icon: FileText },
   { id: 'pwa-control', label: 'PWA Control', Icon: Smartphone },
+  { id: 'pwa-inquiries', label: 'PWA Inquiries', Icon: MessageSquare },
 ];
 
 const settingsNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: number; strokeWidth?: number }>; superOnly?: boolean }[] = [
@@ -53,7 +55,7 @@ const settingsNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: nu
   { id: 'admins', label: 'Administrators', Icon: ShieldCheck, superOnly: true },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount, role, onLogout }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount, pwaUnreadCount = 0, role, onLogout }) => {
   const visibleSettingsNavItems = settingsNavItems.filter(item => !item.superOnly || role === 'super_user');
   const isSettingsActive = visibleSettingsNavItems.some(item => item.id === activeTab);
 
@@ -129,6 +131,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unrea
               <Icon size={15} strokeWidth={2} />
             </span>
             {label}
+            {id === 'pwa-inquiries' && pwaUnreadCount > 0 && (
+              <span className="nav-badge" style={{ background: '#ef4444' }}>{pwaUnreadCount}</span>
+            )}
           </button>
         ))}
       </div>

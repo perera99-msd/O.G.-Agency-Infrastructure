@@ -269,7 +269,7 @@ export const EmployeeStatus: React.FC<Props> = ({ employees, onUpdate }) => {
     setSelectedEmployee(emp);
   };
 
-  const toggleStepCompleted = (index: number) => {
+  const toggleStepCompleted = async (index: number) => {
     const updated = [...currentTracking];
     const isCompleted = !updated[index].completed;
     updated[index] = {
@@ -278,6 +278,14 @@ export const EmployeeStatus: React.FC<Props> = ({ employees, onUpdate }) => {
       date: isCompleted ? new Date().toISOString().split('T')[0] : null,
     };
     setCurrentTracking(updated);
+
+    if (selectedEmployee) {
+      try {
+        await onUpdate?.(selectedEmployee.id, { tracking: updated });
+      } catch (err) {
+        console.error('Failed to auto-save tracking step status', err);
+      }
+    }
   };
 
   const deleteFirebaseFile = async () => {

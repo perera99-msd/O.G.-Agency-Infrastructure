@@ -18,6 +18,7 @@ import { MedicalManagement } from './components/employees/MedicalManagement';
 import { UserDocuments } from './components/employees/UserDocuments';
 import { CustomerManager } from './components/employees/CustomerManager';
 import { PWAControl } from './components/employees/PWAControl';
+import { PWAInquiries } from './components/employees/PWAInquiries';
 
 import { db, auth, storage } from './firebase';
 import {
@@ -35,7 +36,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { compressImage } from './imageCompressor';
 
-import type { Destination, JobOpening, GalleryItem, BlogPost, ContactMessage, TabType, AdminUser, Employee, MedicalStatus } from './types';
+import type { Destination, JobOpening, GalleryItem, BlogPost, ContactMessage, TabType, AdminUser, Employee, MedicalStatus, PWAChatThread } from './types';
 
 const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000;
 const SESSION_EXPIRY_KEY = 'og_admin_session_expires_at';
@@ -61,6 +62,9 @@ export default function App() {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [responses, setResponses] = useState<ContactMessage[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [pwaChats, setPwaChats] = useState<PWAChatThread[]>([]);
+  const [pwaUnreadCount, setPwaUnreadCount] = useState<number>(0);
+
   const [accessError, setAccessError] = useState('');
   const [logoutConfirmationOpen, setLogoutConfirmationOpen] = useState(false);
   const inactivityTimerRef = useRef<number | null>(null);
@@ -240,6 +244,20 @@ export default function App() {
       setResponses(data);
     });
 
+    // PWA Inquiries unread count listener
+    const unsubPwaChats = onSnapshot(collection(db, 'pwa_chats'), (snapshot) => {
+      let total = 0;
+      const chatList: PWAChatThread[] = snapshot.docs.map((docSnap) => {
+        const data = docSnap.data() as Omit<PWAChatThread, 'id'>;
+        if (data.unreadByAdmin && typeof data.unreadByAdmin === 'number') {
+          total += data.unreadByAdmin;
+        }
+        return { id: docSnap.id, ...data };
+      });
+      setPwaChats(chatList);
+      setPwaUnreadCount(total);
+    });
+
     // Jobs listener (Firestore)
     const unsubJobs = onSnapshot(collection(db, 'jobs'), (snapshot) => {
       const data = snapshot.docs.map((snapshotDoc) => {
@@ -287,6 +305,7 @@ export default function App() {
       unsubGallery();
       unsubBlogs();
       unsubInquiries();
+      unsubPwaChats();
       unsubJobs();
       unsubEmployees();
     };
@@ -824,12 +843,14 @@ export default function App() {
   return (
     <div className="dashboard-stage">
       <div className="app-shell premium-shell">
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} unreadCount={unreadCount} role={currentUser.role} onLogout={requestLogout} />
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} unreadCount={unreadCount} pwaUnreadCount={pwaUnreadCount} role={currentUser.role} onLogout={requestLogout} />
         <div className="app-main-wrapper">
           <Navbar
             activeTab={activeTab}
             unreadCount={unreadCount}
+            pwaUnreadCount={pwaUnreadCount}
             responses={responses}
+            pwaChats={pwaChats}
             onUpdateStatus={updateResponseStatus}
             onMarkAllAsRead={markAllResponsesAsRead}
             onDeleteResponse={deleteResponse}
@@ -838,6 +859,7 @@ export default function App() {
             userInitials={(currentUser.displayName || currentUser.email || 'AD').slice(0, 2).toUpperCase()}
             userPhotoUrl={currentUser.photoUrl}
           />
+
           <main className="main-content">
             {activeTab === 'overview' && (
               <BentoOverview
@@ -931,6 +953,9 @@ export default function App() {
                 employees={employees}
                 destinations={destinations}
               />
+            )}
+            {activeTab === 'pwa-inquiries' && (
+              <PWAInquiries />
             )}
           </main>
         </div>

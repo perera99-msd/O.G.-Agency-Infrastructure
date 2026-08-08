@@ -197,7 +197,8 @@ export type TabType =
   | 'emp-medical'
   | 'emp-user-docs'
   | 'emp-manage'
-  | 'pwa-control';
+  | 'pwa-control'
+  | 'pwa-inquiries';
 
 export type AdminRole = 'super_user' | 'normal_user';
 
@@ -208,3 +209,21 @@ export interface AdminUser {
   displayName?: string;
   photoUrl?: string;
 }
+
+export interface PWAChatThread {
+  id: string;
+  employeeId: string;
+  fullName: string;
+  passportNumber: string;
+  subject: string;
+  status: 'open' | 'replied' | 'closed';
+  createdAt: string;
+  lastMessageAt: string;
+  lastMessageText: string;
+  lastMessageBy: 'user' | 'admin';
+  unreadByAdmin?: number;
+  unreadByUser?: number;
+  deletedByUser?: boolean;
+}
+
+

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import type { ContactMessage } from '../types';
+import type { ContactMessage, TabType, PWAChatThread } from '../types';
 import {
   CheckCheck,
   X,
@@ -9,17 +9,31 @@ import {
   Mail,
   ArrowRight,
   Bell,
-  MapPin,
-  FileText,
+  MessageSquare,
+  Globe
 } from 'lucide-react';
+
 
 interface NotificationsDropdownProps {
   responses: ContactMessage[];
+  pwaChats?: PWAChatThread[];
   onUpdateStatus: (id: string, status: ContactMessage['status']) => void;
   onMarkAllAsRead: () => void;
   onDelete: (id: string) => void;
-  onViewAll: () => void;
+  onNavigate?: (tab: TabType) => void;
   onClose: () => void;
+}
+
+interface UnifiedNotification {
+  id: string;
+  type: 'contact' | 'pwa-inquiry';
+  title: string;
+  subtitle: string;
+  message: string;
+  timestamp: string;
+  isUnread: boolean;
+  rawContact?: ContactMessage;
+  rawPwaChat?: PWAChatThread;
 }
 
 const formatRelativeTime = (isoString?: string): string => {
@@ -42,11 +56,12 @@ const formatRelativeTime = (isoString?: string): string => {
 };
 
 export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
-  responses,
+  responses = [],
+  pwaChats = [],
   onUpdateStatus,
   onMarkAllAsRead,
   onDelete,
-  onViewAll,
+  onNavigate,
   onClose,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -62,10 +77,46 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
 
-  const unreadList = responses.filter((r) => r.status === 'new');
-  const recentList = [...responses].sort(
-    (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
-  ).slice(0, 8);
+  // Build unified notification list from contact form responses + PWA chat threads
+  const unifiedNotifications: UnifiedNotification[] = [
+    ...responses.map((r): UnifiedNotification => ({
+      id: `contact-${r.id}`,
+      type: 'contact',
+      title: r.senderName || 'Anonymous User',
+      subtitle: r.destinationOfInterest ? `Interest: ${r.destinationOfInterest}` : 'Website Inquiry',
+      message: r.message,
+      timestamp: r.submittedAt,
+      isUnread: r.status === 'new',
+      rawContact: r,
+    })),
+    ...pwaChats.map((c): UnifiedNotification => ({
+      id: `pwa-${c.id}`,
+      type: 'pwa-inquiry',
+      title: c.fullName || 'PWA Applicant',
+      subtitle: `Passport: ${c.passportNumber} • ${c.subject}`,
+      message: c.lastMessageText ? `${c.lastMessageBy === 'admin' ? 'You: ' : ''}${c.lastMessageText}` : 'No messages yet',
+      timestamp: c.lastMessageAt || c.createdAt,
+      isUnread: (c.unreadByAdmin || 0) > 0,
+      rawPwaChat: c,
+    })),
+  ];
+
+  // Sort by timestamp descending & slice most recent
+  unifiedNotifications.sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
+
+  const unreadCount = unifiedNotifications.filter((n) => n.isUnread).length;
+  const recentList = unifiedNotifications.slice(0, 10);
+
+  const handleItemClick = (item: UnifiedNotification) => {
+    onClose();
+    if (item.type === 'pwa-inquiry') {
+      onNavigate?.('pwa-inquiries');
+    } else {
+      onNavigate?.('responses');
+    }
+  };
 
   return (
     <div
@@ -75,7 +126,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
         position: 'absolute',
         top: 'calc(100% + 12px)',
         right: -8,
-        width: 380,
+        width: 390,
         maxWidth: '92vw',
         background: 'var(--surface)',
         border: '1px solid var(--border-strong)',
@@ -101,7 +152,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Bell size={16} style={{ color: 'var(--accent)' }} />
           <h4 style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>Notifications</h4>
-          {unreadList.length > 0 && (
+          {unreadCount > 0 && (
             <span
               style={{
                 fontSize: 11,
@@ -112,18 +163,18 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                 borderRadius: 10,
               }}
             >
-              {unreadList.length} unread
+              {unreadCount} unread
             </span>
           )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {unreadList.length > 0 && (
+          {responses.some(r => r.status === 'new') && (
             <button
               type="button"
               className="btn btn-secondary"
               onClick={onMarkAllAsRead}
-              title="Mark all as read"
+              title="Mark contact forms as read"
               style={{ padding: '4px 8px', fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 4 }}
             >
               <CheckCheck size={13} /> Read all
@@ -149,7 +200,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
       {/* ── Notification List ── */}
       <div
         style={{
-          maxHeight: 360,
+          maxHeight: 380,
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
@@ -162,50 +213,54 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
           </div>
         ) : (
           recentList.map((item) => {
-            const isUnread = item.status === 'new';
+            const isPwa = item.type === 'pwa-inquiry';
             return (
               <div
                 key={item.id}
+                onClick={() => handleItemClick(item)}
                 style={{
                   padding: '12px 16px',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-                  background: isUnread ? 'rgba(59, 130, 246, 0.05)' : 'transparent',
+                  borderBottom: '1px solid var(--border)',
+                  background: item.isUnread ? (isPwa ? 'rgba(99, 102, 241, 0.06)' : 'rgba(59, 130, 246, 0.05)') : 'transparent',
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: 12,
                   transition: 'background 0.15s ease',
+                  cursor: 'pointer',
                   position: 'relative',
                 }}
               >
-                {/* Avatar / Indicator */}
+                {/* Avatar / Type Indicator */}
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   <div
                     style={{
-                      width: 36,
-                      height: 36,
+                      width: 38,
+                      height: 38,
                       borderRadius: 10,
-                      background: isUnread ? 'var(--accent-light)' : 'rgba(255,255,255,0.06)',
+                      background: isPwa
+                        ? 'linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%)'
+                        : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontWeight: 700,
+                      fontWeight: 800,
                       fontSize: 14,
-                      color: isUnread ? 'var(--accent)' : 'var(--text-muted)',
+                      color: '#ffffff',
                     }}
                   >
-                    {(item.senderName || 'U').charAt(0).toUpperCase()}
+                    {item.title.charAt(0).toUpperCase()}
                   </div>
-                  {isUnread && (
+                  {item.isUnread && (
                     <span
                       style={{
                         position: 'absolute',
                         top: -2,
                         right: -2,
-                        width: 8,
-                        height: 8,
+                        width: 9,
+                        height: 9,
                         borderRadius: '50%',
                         background: '#ef4444',
-                        boxShadow: '0 0 0 2px var(--card-bg)',
+                        boxShadow: '0 0 0 2px var(--surface)',
                       }}
                     />
                   )}
@@ -214,96 +269,120 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                 {/* Content */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
-                    <p
-                      style={{
-                        fontSize: 13,
-                        fontWeight: isUnread ? 800 : 600,
-                        color: 'var(--text-primary)',
-                        margin: 0,
-                      }}
-                      className="truncate"
-                    >
-                      {item.senderName}
-                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                      <p
+                        style={{
+                          fontSize: 13,
+                          fontWeight: item.isUnread ? 800 : 600,
+                          color: 'var(--text-primary)',
+                          margin: 0,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {item.title}
+                      </p>
+                      {/* Type Badge */}
+                      <span
+                        style={{
+                          fontSize: 9.5,
+                          fontWeight: 700,
+                          padding: '1px 5px',
+                          borderRadius: 4,
+                          flexShrink: 0,
+                          background: isPwa ? 'rgba(99, 102, 241, 0.12)' : 'rgba(59, 130, 246, 0.12)',
+                          color: isPwa ? 'var(--accent)' : '#2563eb',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 3,
+                        }}
+                      >
+                        {isPwa ? <MessageSquare size={9} /> : <Globe size={9} />}
+                        {isPwa ? 'PWA Chat' : 'Web Form'}
+                      </span>
+                    </div>
+
                     <span style={{ fontSize: 10.5, color: 'var(--text-faint)', flexShrink: 0 }}>
-                      {formatRelativeTime(item.submittedAt)}
+                      {formatRelativeTime(item.timestamp)}
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                    <span style={{ fontSize: 11, color: 'var(--accent)', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                      <MapPin size={10} /> {item.destinationOfInterest}
-                    </span>
-                    {item.cvFileName && (
-                      <span style={{ fontSize: 10, color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '1px 4px', borderRadius: 3, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                        <FileText size={10} /> CV
-                      </span>
-                    )}
+                  <div style={{ fontSize: 11, color: isPwa ? 'var(--accent)' : 'var(--text-muted)', marginTop: 2, fontWeight: 600 }}>
+                    {item.subtitle}
                   </div>
 
                   <p
                     style={{
                       fontSize: 12,
-                      color: 'var(--text-muted)',
-                      margin: '4px 0 0 0',
+                      color: item.isUnread ? 'var(--text-secondary)' : 'var(--text-muted)',
+                      margin: '3px 0 0 0',
                       lineHeight: 1.3,
+                      fontWeight: item.isUnread ? 600 : 400,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                     }}
-                    className="truncate"
                   >
                     {item.message}
                   </p>
                 </div>
 
-                {/* Quick Actions */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
-                  <button
-                    type="button"
-                    title={isUnread ? 'Mark as Read' : 'Mark as Unread'}
-                    onClick={() => onUpdateStatus(item.id, isUnread ? 'replied' : 'new')}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: 4,
-                      color: isUnread ? '#22c55e' : 'var(--text-faint)',
-                      borderRadius: 4,
-                    }}
+                {/* Quick Actions for Contact Forms */}
+                {item.rawContact && (
+                  <div
+                    style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    {isUnread ? <Check size={14} /> : <Mail size={14} />}
-                  </button>
+                    <button
+                      type="button"
+                      title={item.isUnread ? 'Mark as Read' : 'Mark as Unread'}
+                      onClick={() => onUpdateStatus(item.rawContact!.id, item.isUnread ? 'replied' : 'new')}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 4,
+                        color: item.isUnread ? '#22c55e' : 'var(--text-faint)',
+                        borderRadius: 4,
+                      }}
+                    >
+                      {item.isUnread ? <Check size={14} /> : <Mail size={14} />}
+                    </button>
 
-                  <button
-                    type="button"
-                    title="Archive"
-                    onClick={() => onUpdateStatus(item.id, 'archived')}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: 4,
-                      color: 'var(--text-faint)',
-                      borderRadius: 4,
-                    }}
-                  >
-                    <Archive size={13} />
-                  </button>
+                    <button
+                      type="button"
+                      title="Archive"
+                      onClick={() => onUpdateStatus(item.rawContact!.id, 'archived')}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 4,
+                        color: 'var(--text-faint)',
+                        borderRadius: 4,
+                      }}
+                    >
+                      <Archive size={13} />
+                    </button>
 
-                  <button
-                    type="button"
-                    title="Delete"
-                    onClick={() => onDelete(item.id)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: 4,
-                      color: 'var(--text-faint)',
-                      borderRadius: 4,
-                    }}
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      title="Delete"
+                      onClick={() => onDelete(item.rawContact!.id)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 4,
+                        color: 'var(--text-faint)',
+                        borderRadius: 4,
+                      }}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })
@@ -313,16 +392,39 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
       {/* ── Dropdown Footer ── */}
       <div
         style={{
-          padding: '10px 16px',
+          padding: '12px 16px',
           borderTop: '1px solid var(--border)',
           background: 'var(--surface-raised)',
-          textAlign: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
         }}
       >
         <button
           type="button"
           onClick={() => {
-            onViewAll();
+            onNavigate?.('notifications');
+            onClose();
+          }}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: 12.5,
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
+          Web Inquiries <ArrowRight size={13} />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            onNavigate?.('pwa-inquiries');
             onClose();
           }}
           style={{
@@ -337,7 +439,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
             gap: 6,
           }}
         >
-          View All Notifications <ArrowRight size={13} />
+          PWA Inquiries <ArrowRight size={13} />
         </button>
       </div>
     </div>
