@@ -12,11 +12,11 @@ import { LoginPage } from './components/LoginPage';
 import { ProfileManager } from './components/ProfileManager';
 import { RegisterEmployee } from './components/employees/RegisterEmployee';
 import { EmployeeStatus } from './components/employees/EmployeeStatus';
-import { SearchEmployee } from './components/employees/SearchEmployee';
-import { EditEmployee } from './components/employees/EditEmployee';
-import { FilterSystem } from './components/employees/FilterSystem';
+
 import { MedicalManagement } from './components/employees/MedicalManagement';
 import { UserDocuments } from './components/employees/UserDocuments';
+import { CustomerManager } from './components/employees/CustomerManager';
+import { PWAControl } from './components/employees/PWAControl';
 
 import { db, auth, storage } from './firebase';
 import {
@@ -705,6 +705,26 @@ export default function App() {
 
   // Employee handlers — write directly to Firestore (same as destinations, gallery, blogs)
   const addEmployee = async (data: Record<string, unknown>) => {
+    // Try to create via backend API (enforces duplicate checks). Fallback to direct Firestore write on failure.
+    try {
+      const authHeaders = await getAuthHeaders();
+      const res = await fetch(`${API_BASE_URL}/api/v1/admin/employees`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json && json.success) return;
+        // otherwise fallthrough to client write
+      }
+    } catch (err) {
+      console.warn('API createEmployee failed, falling back to client write', err);
+    }
+
     const id = crypto.randomUUID();
     const defaultTracking = [
       { step: 'Application Submitted', completed: false, date: null, fileUrl: null },
@@ -716,9 +736,20 @@ export default function App() {
     ];
 
     const newEmployee = {
+      // Explicit document & detail placeholders
+      nicDocUrl: data.nicDocUrl || null,
+      nicDocName: data.nicDocName || null,
+      passportDocUrl: data.passportDocUrl || null,
+      passportDocName: data.passportDocName || null,
+      policeReportUrl: data.policeReportUrl || null,
+      policeReportName: data.policeReportName || null,
+      photoUrl: data.photoDocUrl || data.photoUrl || null,
+      photoDocName: data.photoDocName || null,
+      trusteeDob: data.trusteeDob || null,
+      childrenDetails: data.childrenDetails || [],
       ...data,
       id,
-      medicalStatus: 'pending',
+      medicalStatus: 'not_dated',
       tracking: defaultTracking,
       status: 'active',
       registeredAt: new Date().toISOString(),
@@ -728,6 +759,22 @@ export default function App() {
     };
 
     await setDoc(doc(db, 'employees', id), newEmployee);
+  };
+
+  const deleteEmployeeApi = async (id: string) => {
+    try {
+      const authHeaders = await getAuthHeaders();
+      const res = await fetch(`${API_BASE_URL}/api/v1/admin/employees/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders,
+      });
+      if (!res.ok) {
+        throw new Error('API delete failed');
+      }
+    } catch (err) {
+      console.error('deleteEmployeeApi error:', err);
+      throw err;
+    }
   };
 
   const updateEmployee = async (id: string, data: Partial<Employee>) => {
@@ -840,6 +887,7 @@ export default function App() {
             {/* Employee Management Tabs */}
             {activeTab === 'emp-register' && (
               <RegisterEmployee
+                destinations={destinations}
                 onRegister={addEmployee}
                 onSuccess={() => setActiveTab('emp-status')}
               />
@@ -851,20 +899,36 @@ export default function App() {
                 onUpdate={updateEmployee}
               />
             )}
-            {activeTab === 'emp-search' && (
-              <SearchEmployee employees={employees} />
+            {activeTab === 'emp-manage' && (
+              <CustomerManager
+                employees={employees}
+                currentUser={currentUser}
+                addEmployee={addEmployee}
+                updateEmployee={updateEmployee}
+                updateEmployeeMedical={updateEmployeeMedical}
+                deleteEmployeeApi={deleteEmployeeApi}
+              />
             )}
-            {activeTab === 'emp-edit' && (
-              <EditEmployee employees={employees} onUpdate={updateEmployee} />
-            )}
-            {activeTab === 'emp-filter' && (
-              <FilterSystem employees={employees} />
-            )}
+
             {activeTab === 'emp-medical' && (
-              <MedicalManagement employees={employees} onUpdateMedical={updateEmployeeMedical} />
+              <MedicalManagement
+                employees={employees}
+                destinations={destinations}
+                onUpdate={updateEmployee}
+              />
             )}
             {activeTab === 'emp-user-docs' && (
-              <UserDocuments />
+              <UserDocuments
+                employees={employees}
+                destinations={destinations}
+                onUpdate={updateEmployee}
+              />
+            )}
+            {activeTab === 'pwa-control' && (
+              <PWAControl
+                employees={employees}
+                destinations={destinations}
+              />
             )}
           </main>
         </div>

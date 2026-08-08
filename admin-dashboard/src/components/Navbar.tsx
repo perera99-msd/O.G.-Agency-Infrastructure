@@ -25,6 +25,14 @@ const tabLabels: Record<string, string> = {
   responses: 'Inquiries',
   notifications: 'Notification Center',
   profile: 'My Profile',
+  'emp-register': 'Register Customer',
+  'emp-status': 'Customer Status',
+  'emp-search': 'Search Customer',
+  'emp-edit': 'Edit Customer',
+  'emp-filter': 'Filter System',
+  'emp-medical': 'Medical Management',
+  'emp-user-docs': 'User Documents',
+  'pwa-control': 'PWA Access Control',
 };
 
 export const Navbar: React.FC<NavbarProps> = ({
