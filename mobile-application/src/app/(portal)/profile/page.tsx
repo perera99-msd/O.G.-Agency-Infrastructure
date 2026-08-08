@@ -1,610 +1,314 @@
-// src/app/(portal)/profile/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useState, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { fetchCandidateProfile } from "@/lib/api/client";
-import type { ApplicantProfile } from "@/types/applicant";
 import {
-  ArrowLeft,
-  Save,
   User,
-  Mail,
-  Phone,
-  Calendar,
-  MapPin,
-  Globe,
-  FileText,
-  AlertCircle,
-  CheckCircle2,
   Shield,
-  Fingerprint,
+  Key,
+  Globe,
+  Briefcase,
+  Phone,
+  Mail,
+  CheckCircle2,
+  AlertCircle,
   Lock,
   Eye,
-  EyeOff,
+  EyeOff
 } from "lucide-react";
 
-const COUNTRIES = [
-  "Sri Lanka", "India", "Pakistan", "Bangladesh", "Nepal",
-  "Romania", "Bosnia", "Russia", "Germany", "Cyprus",
-  "Qatar", "UAE", "Saudi Arabia", "Kuwait", "Oman",
-  "Malaysia", "Jordan", "Israel",
-];
-
 export default function ProfilePage() {
-  const router = useRouter();
-  const { user, logout } = useAuth();
-  const [profile, setProfile] = useState<ApplicantProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const { user, changePassword } = useAuth();
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    dateOfBirth: "",
-    nationality: "",
-    destinationOfInterest: "",
-  });
+  // Password Form State
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
+  // Status State
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  async function loadProfile() {
-    try {
-      const res = await fetchCandidateProfile();
-      if (res.success && res.data) {
-        setProfile(res.data);
-        setFormData({
-          fullName: res.data.fullName || "",
-          email: res.data.email || "",
-          phone: res.data.phone || "",
-          dateOfBirth: res.data.dateOfBirth || "",
-          nationality: res.data.nationality || "",
-          destinationOfInterest: res.data.destinationOfInterest || "",
-        });
-      } else if (user) {
-        // Fallback to Firebase user data
-        setFormData({
-          fullName: user.displayName || "",
-          email: user.email || "",
-          phone: "",
-          dateOfBirth: "",
-          nationality: "",
-          destinationOfInterest: "",
-        });
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load profile");
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setError(null);
-    setSuccess(null);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setIsSaving(true);
-    setError(null);
-    setSuccess(null);
+    setMessage(null);
 
-    try {
-      // In a full implementation, this would call the API to update the profile
-      // await updateCandidateProfile(formData);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setSuccess("Profile updated successfully!");
-      setProfile((prev) => prev ? { ...prev, ...formData } : null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update profile");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    router.push("/login");
-  };
-
-  // ── Security / Lock Settings ──────────────────────────────────────────
-  const [showPinForm, setShowPinForm] = useState(false);
-  const [newPin, setNewPin] = useState("");
-  const [confirmNewPin, setConfirmNewPin] = useState("");
-  const [pinError, setPinError] = useState("");
-  const [pinSuccess, setPinSuccess] = useState("");
-  const [biometricEnabled, setBiometricEnabled] = useState(false);
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
-  const [biometricType, setBiometricType] = useState<string>("");
-  const [showCurrentPin, setShowCurrentPin] = useState(false);
-
-  useEffect(() => {
-    // Refresh biometric state when profile loads
-    import("@/lib/localAuth").then(({ isBiometricEnabled, checkBiometricSupport }) => {
-      const enabled = isBiometricEnabled();
-      setBiometricEnabled(enabled);
-      if (enabled) {
-        checkBiometricSupport().then((support) => {
-          setBiometricAvailable(support.available);
-          setBiometricType(support.type || "");
-        });
-      } else {
-        setBiometricAvailable(false);
-        setBiometricType("");
-      }
-    });
-  }, []);
-
-  const handleChangePin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setPinError("");
-    setPinSuccess("");
-
-    if (!/^\d{4,6}$/.test(newPin)) {
-      setPinError("PIN must be 4-6 digits.");
-      return;
-    }
-    if (newPin !== confirmNewPin) {
-      setPinError("PINs don't match.");
+    if (!currentPassword.trim()) {
+      setMessage({ type: "error", text: "Please enter your current password." });
       return;
     }
 
-    // Change PIN via local auth - directly set new PIN (no old PIN required for security settings)
-    import("@/lib/localAuth").then(({ setPin }) => {
-      const success = setPin(newPin);
-      if (success) {
-        setPinSuccess("PIN updated successfully!");
-        setNewPin("");
-        setConfirmNewPin("");
-        setShowPinForm(false);
-      } else {
-        setPinError("Failed to update PIN. Please try again.");
-      }
-    });
-  };
+    if (newPassword.length < 4) {
+      setMessage({ type: "error", text: "New password must be at least 4 characters." });
+      return;
+    }
 
-  const handleToggleBiometric = async () => {
-    const { setBiometricEnabled, isBiometricEnabled, checkBiometricSupport, createBiometricCredential } = await import("@/lib/localAuth");
-    const currentlyEnabled = isBiometricEnabled();
+    if (newPassword !== confirmPassword) {
+      setMessage({ type: "error", text: "New passwords do not match." });
+      return;
+    }
 
-    if (!currentlyEnabled) {
-      // Enabling biometric - check support first
-      const support = await checkBiometricSupport();
-      if (!support.available) {
-        setPinError("Biometric authentication is not available on this device.");
-        return;
-      }
-      // Create credential
-      const success = await createBiometricCredential(user?.uid || "user");
-      if (success) {
-        setBiometricEnabled(true);
-        setBiometricAvailable(true);
-        setPinSuccess("Biometric login enabled!");
-      } else {
-        setPinError("Failed to enable biometric login. Please try again.");
-      }
+    setLoading(true);
+    const res = await changePassword(currentPassword, newPassword);
+    setLoading(false);
+
+    if (res.success) {
+      setMessage({ type: "success", text: res.message || "Password updated successfully!" });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
     } else {
-      // Disabling biometric
-      setBiometricEnabled(false);
-      setBiometricAvailable(false);
-      setPinSuccess("Biometric login disabled.");
+      setMessage({ type: "error", text: res.message || "Failed to update password." });
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="profile-loading">
-        <div className="profile-loading__spinner" />
-        <p>Loading your profile...</p>
-      </div>
-    );
-  }
-
-  const statusLabel = profile?.status
-    ? profile.status.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())
-    : "New Applicant";
 
   return (
-    <div className="profile-page">
-      {/* ── Header ── */}
-      <header className="profile-header">
-        <Link href="/dashboard" className="profile-header__back">
-          <ArrowLeft size={20} />
-        </Link>
-        <h1>My Profile</h1>
-      </header>
-
-      {/* ── Profile Overview ── */}
-      <section className="profile-section">
-        <div className="profile-overview">
-          <div className="profile-overview__avatar">
-            <User size={48} />
+    <div style={{ padding: "1.25rem 1rem", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      {/* Header Banner */}
+      <div style={{
+        background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
+        borderRadius: "18px",
+        padding: "1.5rem",
+        color: "#ffffff",
+        boxShadow: "0 10px 25px -5px rgba(15, 23, 42, 0.3)",
+        position: "relative",
+        overflow: "hidden"
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <div style={{
+            width: "56px",
+            height: "56px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "1.5rem",
+            fontWeight: 800,
+            boxShadow: "0 4px 12px rgba(59, 130, 246, 0.4)",
+            flexShrink: 0
+          }}>
+            {user?.fullName ? user.fullName.charAt(0).toUpperCase() : <User size={28} />}
           </div>
-          <div className="profile-overview__info">
-            <h2>{formData.fullName || "Not set"}</h2>
-            <p className="profile-overview__email">{formData.email}</p>
-            <div className="profile-overview__meta">
-              {profile?.assignedDestination && (
-                <span className="profile-overview__item">
-                  <MapPin size={16} />
-                  {profile.assignedDestination}
-                </span>
-              )}
-              {profile?.createdAt && (
-                <span className="profile-overview__item">
-                  <Calendar size={16} />
-                  Member since {new Date(profile.createdAt).toLocaleDateString()}
-                </span>
-              )}
+          <div>
+            <h2 style={{ fontSize: "1.3rem", fontWeight: 800, margin: 0, lineHeight: 1.2 }}>
+              {user?.fullName || "Applicant User"}
+            </h2>
+            <div style={{ fontSize: "0.82rem", color: "#94a3b8", marginTop: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
+              <Shield size={14} style={{ color: "#38bdf8" }} />
+              <span>Passport: {user?.passportNumber || "—"}</span>
             </div>
-            <span className={`status-badge status-${profile?.status?.replace("_", "-") || "new"}`}>
-              {statusLabel}
-            </span>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* ── Document Summary ── */}
-      {profile && (
-        <section className="profile-section">
-          <div className="profile-doc-summary">
-            <div className="profile-doc-summary__item">
-              <FileText size={20} />
-              <div>
-                <span className="profile-doc-summary__count">
-                  {profile.documentsUploaded}/{profile.totalDocuments}
-                </span>
-                <span className="profile-doc-summary__label">Documents</span>
-              </div>
+      {/* User Information Card */}
+      <div style={{
+        background: "#ffffff",
+        borderRadius: "16px",
+        padding: "1.25rem",
+        border: "1px solid #e2e8f0",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.03)"
+      }}>
+        <h3 style={{
+          fontSize: "1rem",
+          fontWeight: 700,
+          color: "#0f172a",
+          marginTop: 0,
+          marginBottom: "1rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px"
+        }}>
+          <User size={18} style={{ color: "#2563eb" }} />
+          <span>Personal & Job Details</span>
+        </h3>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+          <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "10px", border: "1px solid #f1f5f9" }}>
+            <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>NIC Number</span>
+            <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "#1e293b", marginTop: "2px" }}>
+              {user?.nicNumber || "Not Specified"}
             </div>
-            {profile.cvUrl && (
-              <div className="profile-doc-summary__item">
-                <FileText size={20} />
-                <div>
-                  <span className="profile-doc-summary__label">CV Uploaded</span>
-                  <span className="profile-doc-summary__value">
-                    {profile.cvFileName}
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
-        </section>
-      )}
 
-      {/* ── Edit Form ── */}
-      <section className="profile-section">
-        <h2 className="profile-section__title">Edit Profile</h2>
-
-        {error && (
-          <div className="profile-error">
-            <AlertCircle size={16} />
-            <span>{error}</span>
+          <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "10px", border: "1px solid #f1f5f9" }}>
+            <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Country Applied</span>
+            <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "#2563eb", marginTop: "2px", display: "flex", alignItems: "center", gap: "4px" }}>
+              <Globe size={14} />
+              <span>{user?.countryApplied || "General"}</span>
+            </div>
           </div>
-        )}
 
-        {success && (
-          <div className="profile-success">
-            <CheckCircle2 size={16} />
-            <span>{success}</span>
+          <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "10px", border: "1px solid #f1f5f9" }}>
+            <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Job Position</span>
+            <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "#1e293b", marginTop: "2px", display: "flex", alignItems: "center", gap: "4px" }}>
+              <Briefcase size={14} style={{ color: "#64748b" }} />
+              <span>{user?.jobApplied || "General Worker"}</span>
+            </div>
           </div>
-        )}
 
-        <form onSubmit={handleSubmit} className="profile-form">
-          <div className="profile-form__grid">
-            {/* Full Name */}
-            <div className="profile-form__group">
-              <label className="profile-form__label">
-                <User size={16} />
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={formData.fullName}
-                onChange={(e) => handleChange("fullName", e.target.value)}
-                className="profile-form__input"
-                placeholder="Enter your full name"
-              />
+          <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "10px", border: "1px solid #f1f5f9" }}>
+            <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Contact Phone</span>
+            <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "#1e293b", marginTop: "2px", display: "flex", alignItems: "center", gap: "4px" }}>
+              <Phone size={14} style={{ color: "#10b981" }} />
+              <span>{user?.phoneNumber || "—"}</span>
             </div>
+          </div>
+        </div>
+      </div>
 
-            {/* Email */}
-            <div className="profile-form__group">
-              <label className="profile-form__label">
-                <Mail size={16} />
-                Email Address
-              </label>
+      {/* Change Password Card */}
+      <div style={{
+        background: "#ffffff",
+        borderRadius: "16px",
+        padding: "1.25rem",
+        border: "1px solid #e2e8f0",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.03)"
+      }}>
+        <h3 style={{
+          fontSize: "1rem",
+          fontWeight: 700,
+          color: "#0f172a",
+          marginTop: 0,
+          marginBottom: "0.4rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px"
+        }}>
+          <Key size={18} style={{ color: "#2563eb" }} />
+          <span>Security & Change PIN / Password</span>
+        </h3>
+        <p style={{ fontSize: "0.8rem", color: "#64748b", marginTop: 0, marginBottom: "1rem" }}>
+          Update your PWA password. Changes sync directly with Admin.
+        </p>
+
+        <form onSubmit={handlePasswordSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          {/* Current Password */}
+          <div>
+            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>
+              Current Password / PIN
+            </label>
+            <div style={{ position: "relative" }}>
               <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleChange("email", e.target.value)}
-                className="profile-form__input"
-                placeholder="Enter your email"
-                disabled
+                type={showCurrent ? "text" : "password"}
+                required
+                placeholder="Enter current PIN"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem 2.5rem 0.75rem 0.85rem",
+                  fontSize: "0.9rem",
+                  borderRadius: "10px",
+                  border: "1.5px solid #cbd5e1",
+                  outline: "none"
+                }}
               />
-              <p className="profile-form__hint">Email cannot be changed</p>
-            </div>
-
-            {/* Phone */}
-            <div className="profile-form__group">
-              <label className="profile-form__label">
-                <Phone size={16} />
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => handleChange("phone", e.target.value)}
-                className="profile-form__input"
-                placeholder="+94 70 123 4567"
-              />
-            </div>
-
-            {/* Date of Birth */}
-            <div className="profile-form__group">
-              <label className="profile-form__label">
-                <Calendar size={16} />
-                Date of Birth
-              </label>
-              <input
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => handleChange("dateOfBirth", e.target.value)}
-                className="profile-form__input"
-              />
-            </div>
-
-            {/* Nationality */}
-            <div className="profile-form__group">
-              <label className="profile-form__label">
-                <Globe size={16} />
-                Nationality
-              </label>
-              <select
-                value={formData.nationality}
-                onChange={(e) => handleChange("nationality", e.target.value)}
-                className="profile-form__select"
+              <button
+                type="button"
+                onClick={() => setShowCurrent(!showCurrent)}
+                style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#64748b", cursor: "pointer" }}
               >
-                <option value="">Select nationality</option>
-                {COUNTRIES.map((country) => (
-                  <option key={country} value={country}>
-                    {country}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Destination of Interest */}
-            <div className="profile-form__group">
-              <label className="profile-form__label">
-                <MapPin size={16} />
-                Destination of Interest
-              </label>
-              <select
-                value={formData.destinationOfInterest}
-                onChange={(e) =>
-                  handleChange("destinationOfInterest", e.target.value)
-                }
-                className="profile-form__select"
-              >
-                <option value="">Select destination</option>
-                {COUNTRIES.map((country) => (
-                  <option key={country} value={country}>
-                    {country}
-                  </option>
-                ))}
-              </select>
+                {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
+
+          {/* New Password */}
+          <div>
+            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>
+              New Password / PIN
+            </label>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showNew ? "text" : "password"}
+                required
+                placeholder="Enter new PIN"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem 2.5rem 0.75rem 0.85rem",
+                  fontSize: "0.9rem",
+                  borderRadius: "10px",
+                  border: "1.5px solid #cbd5e1",
+                  outline: "none"
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNew(!showNew)}
+                style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#64748b", cursor: "pointer" }}
+              >
+                {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>
+              Confirm New Password
+            </label>
+            <input
+              type="password"
+              required
+              placeholder="Re-enter new PIN"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "0.75rem 0.85rem",
+                fontSize: "0.9rem",
+                borderRadius: "10px",
+                border: "1.5px solid #cbd5e1",
+                outline: "none"
+              }}
+            />
+          </div>
+
+          {/* Alert Feedback */}
+          {message && (
+            <div style={{
+              padding: "0.75rem 1rem",
+              borderRadius: "10px",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              background: message.type === "success" ? "#ecfdf5" : "#fef2f2",
+              color: message.type === "success" ? "#047857" : "#dc2626",
+              border: `1px solid ${message.type === "success" ? "#a7f3d0" : "#fecaca"}`
+            }}>
+              {message.type === "success" ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+              <span>{message.text}</span>
+            </div>
+          )}
 
           <button
             type="submit"
-            className="profile-form__submit"
-            disabled={isSaving}
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "0.85rem",
+              borderRadius: "10px",
+              border: "none",
+              background: "#2563eb",
+              color: "#ffffff",
+              fontSize: "0.95rem",
+              fontWeight: 700,
+              cursor: loading ? "not-allowed" : "pointer",
+              boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)"
+            }}
           >
-            {isSaving ? (
-              <>
-                <div className="profile-form__spinner" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save size={16} />
-                Save Changes
-              </>
-            )}
+            {loading ? "Updating Password..." : "Update Password"}
           </button>
         </form>
-      </section>
-
-      {/* ── Account Actions ── */}
-      <section className="profile-section">
-        <h2 className="profile-section__title">Account</h2>
-        <div className="profile-account">
-          <button
-            className="profile-account__btn profile-account__btn--logout"
-            onClick={handleLogout}
-          >
-            Log Out
-          </button>
-        </div>
-      </section>
-
-      {/* ── Security Settings ── */}
-      <section className="profile-section">
-        <h2 className="profile-section__title">Security</h2>
-
-        {/* Biometric Toggle */}
-        <div className="dashboard-card" style={{ marginBottom: "1rem" }}>
-          <div className="dashboard-card__header">
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: 10,
-                background: "var(--bg-tertiary)", display: "flex", alignItems: "center", justifyContent: "center",
-                color: "var(--accent-color)",
-              }}>
-                <Fingerprint size={20} />
-              </div>
-              <div>
-                <h3 style={{ fontSize: "1rem", fontWeight: 600 }}>Biometric Login</h3>
-                <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>
-                  {biometricAvailable
-                    ? `Use ${biometricType === "face" ? "Face ID" : "fingerprint"} to unlock`
-                    : biometricEnabled
-                    ? "Biometric enabled"
-                    : "Not available on this device"}
-                </p>
-              </div>
-            </div>
-            <label style={{ position: "relative", display: "inline-block", width: 48, height: 24 }}>
-              <input
-                type="checkbox"
-                checked={biometricEnabled}
-                onChange={handleToggleBiometric}
-                style={{ opacity: 0, width: 0, height: 0 }}
-              />
-              <span
-                style={{
-                  position: "absolute", cursor: "pointer", top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundColor: biometricEnabled ? "var(--accent-color)" : "var(--bg-tertiary)",
-                  borderRadius: 24, transition: "0.3s",
-                }}
-              >
-                <span
-                  style={{
-                    position: "absolute", content: '""', height: 18, width: 18,
-                    left: biometricEnabled ? 26 : 4, bottom: 3,
-                    backgroundColor: "white", borderRadius: "50%", transition: "0.3s",
-                  }}
-                />
-              </span>
-            </label>
-          </div>
-        </div>
-
-        {/* Change PIN */}
-        <div className="dashboard-card">
-          <div className="dashboard-card__header">
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: 10,
-                background: "var(--bg-tertiary)", display: "flex", alignItems: "center", justifyContent: "center",
-                color: "var(--accent-color)",
-              }}>
-                <Lock size={20} />
-              </div>
-              <div>
-                <h3 style={{ fontSize: "1rem", fontWeight: 600 }}>App PIN</h3>
-                <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>
-                  Change your 4-6 digit app PIN
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {pinError && (
-            <div className="dashboard-error" style={{ marginBottom: "1rem" }}>
-              <AlertCircle size={16} />
-              <span>{pinError}</span>
-            </div>
-          )}
-          {pinSuccess && (
-            <div style={{
-              display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1rem",
-              background: "var(--success-bg)", border: "1px solid rgba(34, 197, 94, 0.2)", borderRadius: "var(--radius-md)",
-              marginBottom: "1rem", color: "var(--success-color)", fontSize: "0.875rem",
-            }}>
-              <CheckCircle2 size={16} /> {pinSuccess}
-            </div>
-          )}
-
-          {!showPinForm ? (
-            <button
-              onClick={() => setShowPinForm(true)}
-              style={{
-                width: "100%", padding: "0.75rem", borderRadius: "var(--radius-md)",
-                border: "1px solid var(--border-color)", background: "var(--bg-tertiary)",
-                color: "var(--text-primary)", cursor: "pointer", fontSize: "0.875rem", fontWeight: 500,
-              }}
-            >
-              Change PIN
-            </button>
-          ) : (
-            <form onSubmit={handleChangePin}>
-              <div className="profile-form__grid" style={{ marginBottom: "1rem" }}>
-                <div className="profile-form__group">
-                  <label className="profile-form__label">
-                    <Lock size={16} />
-                    New PIN (4-6 digits)
-                  </label>
-                  <input
-                    type={showCurrentPin ? "text" : "password"}
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={6}
-                    className="profile-form__input"
-                    value={newPin}
-                    onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
-                    placeholder="Enter new PIN"
-                    autoFocus
-                  />
-                </div>
-                <div className="profile-form__group">
-                  <label className="profile-form__label">
-                    <Shield size={16} />
-                    Confirm New PIN
-                  </label>
-                  <input
-                    type={showCurrentPin ? "text" : "password"}
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={6}
-                    className="profile-form__input"
-                    value={confirmNewPin}
-                    onChange={(e) => setConfirmNewPin(e.target.value.replace(/\D/g, ""))}
-                    placeholder="Confirm new PIN"
-                  />
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: "0.75rem" }}>
-                <button
-                  type="submit"
-                  className="profile-form__submit"
-                  style={{ flex: 1 }}
-                  disabled={!newPin || !confirmNewPin}
-                >
-                  <Save size={16} />
-                  Update PIN
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowPinForm(false);
-                    setNewPin("");
-                    setConfirmNewPin("");
-                    setPinError("");
-                  }}
-                  style={{
-                    flex: 1, padding: "0.75rem", borderRadius: "var(--radius-md)",
-                    border: "1px solid var(--border-color)", background: "transparent",
-                    color: "var(--text-secondary)", cursor: "pointer", fontSize: "0.875rem",
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-      </section>
+      </div>
     </div>
   );
 }
