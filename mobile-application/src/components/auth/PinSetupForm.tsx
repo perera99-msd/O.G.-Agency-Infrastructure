@@ -53,7 +53,7 @@ export function PinSetupForm({ userId, onComplete, onSkip }: PinSetupFormProps) 
       return;
     }
 
-    const saved = setPin(pin);
+    const saved = (setPin as any)(pin);
     if (!saved) {
       setError("Failed to save PIN. Please try again.");
       return;

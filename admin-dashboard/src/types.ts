@@ -160,7 +160,8 @@ export type TabType =
   | 'emp-search'
   | 'emp-edit'
   | 'emp-filter'
-  | 'emp-medical';
+  | 'emp-medical'
+  | 'emp-user-docs';
 
 export type AdminRole = 'super_user' | 'normal_user';
 

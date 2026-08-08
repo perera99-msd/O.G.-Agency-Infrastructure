@@ -60,9 +60,10 @@ export async function verifyIdToken(
   try {
     // Only import firebase-admin on the server side
     if (typeof window === "undefined") {
-      const admin = await import("firebase-admin");
-      if (admin.apps.length > 0) {
-        const decoded = await admin.auth().verifyIdToken(idToken);
+      const admin = (await import("firebase-admin")) as any;
+      const adminInstance = admin.default || admin;
+      if (adminInstance.apps && adminInstance.apps.length > 0) {
+        const decoded = await adminInstance.auth().verifyIdToken(idToken);
         return decoded as unknown as DecodedToken;
       }
     }
