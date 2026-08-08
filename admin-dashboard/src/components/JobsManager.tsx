@@ -4,13 +4,13 @@
 // All modal/layout fixes are scoped locally in this file via the <JobsManagerStyles /> block
 // so no other page or component is affected.
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import type { JobOpening } from '../types';
 import {
   Plus, Edit3, Trash2, Briefcase,
   X, Check, AlertCircle, Pin, PinOff, Calendar,
   TrendingUp, AlertTriangle, BarChart2,
-  Search, Filter, RefreshCw, ChevronDown,
+  Search, Filter, ChevronDown,
 } from 'lucide-react';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -205,9 +205,16 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
   const [extendJob, setExtendJob] = useState<JobOpening | null>(null);
   const [form, setForm] = useState<Omit<JobOpening, 'id'>>({ ...emptyForm });
 
-  // ── Stats state (from dedicated endpoint)
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(true);
+  // ── Stats state
+  const liveStats = useMemo<Stats>(() => {
+    return {
+      total: jobs.length,
+      active: jobs.filter(x => x.active && !isExpired(x.deadline)).length,
+      inactive: jobs.filter(x => !x.active).length,
+      expired: jobs.filter(x => isExpired(x.deadline)).length,
+      urgent: jobs.filter(x => x.isUrgent).length,
+    };
+  }, [jobs]);
 
   // ── Filter state
   const [search, setSearch] = useState('');
@@ -219,39 +226,10 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const countryOptions = useMemo(() => {
+    const defaults = ['Bosnia', 'Cyprus', 'Germany', 'Kuwait', 'Malaysia', 'Poland', 'Qatar', 'Romania', 'Saudi Arabia', 'UAE'];
     const fromJobs = jobs.map((job) => job.country).filter(Boolean);
-    return Array.from(new Set([...availableDestinations, ...fromJobs])).sort((a, b) => a.localeCompare(b));
+    return Array.from(new Set([...availableDestinations, ...fromJobs, ...defaults])).filter(Boolean).sort((a, b) => a.localeCompare(b));
   }, [availableDestinations, jobs]);
-
-  // ── Fetch stats from dedicated endpoint
-  const fetchStats = () => {
-    setStatsLoading(true);
-    fetch('http://localhost:5000/api/v1/admin/jobs/stats', {
-      headers: { Authorization: 'Bearer dev-mock-token' },
-    })
-      .then(r => r.json())
-      .then(json => {
-        if (json.success) setStats(json.data);
-        else {
-          // Fallback: calculate from local jobs array until endpoint is ready
-          setStats(calcLocalStats(jobs));
-        }
-      })
-      .catch(() => setStats(calcLocalStats(jobs)))
-      .finally(() => setStatsLoading(false));
-  };
-
-  useEffect(() => { fetchStats(); }, [jobs]);
-
-  function calcLocalStats(j: JobOpening[]): Stats {
-    return {
-      total: j.length,
-      active: j.filter(x => x.active && !isExpired(x.deadline)).length,
-      inactive: j.filter(x => !x.active).length,
-      expired: j.filter(x => isExpired(x.deadline)).length,
-      urgent: j.filter(x => x.isUrgent).length,
-    };
-  }
 
   // ── Filtered jobs (client-side, hybrid-ready)
   const filtered = useMemo(() => {
@@ -315,31 +293,64 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
 
   // ── Form handlers
   const openCreate = () => {
-    if (!availableDestinations.length) return;
+    const initialCountry = availableDestinations[0] || countryOptions[0] || 'Qatar';
     setEditId(null);
-    setForm({ ...emptyForm, country: availableDestinations[0] });
+    setForm({
+      ...emptyForm,
+      country: initialCountry,
+      salary: { min: 1000, max: 2000, currency: 'USD' },
+      ageRange: { min: 20, max: 50 },
+      tags: [],
+      requirements: [''],
+      benefits: [],
+    });
     setOpen(true);
   };
+
   const openEdit = (j: JobOpening) => {
     setEditId(j.id);
     const { id, ...rest } = j;
     setForm({
+      ...emptyForm,
       ...rest,
-      tags: rest.tags || [],
+      salary: rest.salary ? {
+        min: typeof rest.salary.min === 'number' ? rest.salary.min : 0,
+        max: typeof rest.salary.max === 'number' ? rest.salary.max : 0,
+        currency: rest.salary.currency || 'USD',
+      } : { min: 1000, max: 2000, currency: 'USD' },
+      tags: Array.isArray(rest.tags) ? rest.tags : [],
       requirements: rest.requirements?.length ? rest.requirements : [''],
-      benefits: rest.benefits || [],
-      ageRange: rest.ageRange || { min: 18, max: 60 },
+      benefits: Array.isArray(rest.benefits) ? rest.benefits : [],
+      ageRange: rest.ageRange ? {
+        min: typeof rest.ageRange.min === 'number' ? rest.ageRange.min : 18,
+        max: typeof rest.ageRange.max === 'number' ? rest.ageRange.max : 60,
+      } : { min: 18, max: 60 },
+      category: rest.category || CATEGORIES[0],
+      deadline: rest.deadline || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      genderPreference: rest.genderPreference || 'No Preference',
     });
     setOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title || !form.country) return;
+    if (!form.title.trim() || !form.country.trim()) return;
     const submission = {
       ...form,
-      requirements: form.requirements?.filter(r => r.trim() !== '') || [],
-      benefits: form.benefits?.filter(b => b.title.trim() !== '' && b.description.trim() !== '') || [],
+      title: form.title.trim(),
+      country: form.country.trim(),
+      category: form.category || CATEGORIES[0],
+      salary: {
+        min: Number(form.salary?.min) || 0,
+        max: Number(form.salary?.max) || 0,
+        currency: form.salary?.currency || 'USD',
+      },
+      requirements: (form.requirements || []).map(r => r.trim()).filter(Boolean),
+      benefits: (form.benefits || []).filter(b => b.title.trim() !== '' || b.description.trim() !== ''),
+      ageRange: {
+        min: Number(form.ageRange?.min) || 18,
+        max: Number(form.ageRange?.max) || 60,
+      },
     };
     if (editId) onUpdate(editId, submission);
     else onAdd(submission);
@@ -381,57 +392,41 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
           <p className="page-subtitle">Post, moderate, and manage all employment vacancies.</p>
         </div>
         <div className="page-actions">
-          <button
-            className="btn btn-secondary"
-            onClick={fetchStats}
-            title="Refresh stats"
-          >
-            <RefreshCw size={14} />
-            Refresh
-          </button>
           {role === 'super_user' && (
-            <button className="btn btn-primary" onClick={openCreate} disabled={!availableDestinations.length}>
+            <button className="btn btn-primary" onClick={openCreate}>
               <Plus size={14} strokeWidth={2.5} /> Post Vacancy
             </button>
           )}
         </div>
       </div>
 
-      {!availableDestinations.length && (
-        <div className="card" style={{ padding: '12px 14px', marginBottom: 16, borderColor: 'var(--amber-border)', background: 'var(--amber-bg)' }}>
-          <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-            No active destinations found. Create and activate a destination first, then you can post jobs.
-          </p>
-        </div>
-      )}
-
       {/* ── KPI Cards ── */}
       <div className="grid-4" style={{ marginBottom: 28 }}>
         <KpiCard
           icon={<Briefcase size={18} />}
           label="Total Listings"
-          value={statsLoading ? '—' : (stats?.total ?? 0)}
+          value={liveStats.total}
           sub="all time"
           color="var(--accent)"
         />
         <KpiCard
           icon={<TrendingUp size={18} />}
           label="Active Jobs"
-          value={statsLoading ? '—' : (stats?.active ?? 0)}
+          value={liveStats.active}
           sub="live on portal"
           color="var(--green)"
         />
         <KpiCard
           icon={<AlertTriangle size={18} />}
           label="Expired"
-          value={statsLoading ? '—' : (stats?.expired ?? 0)}
+          value={liveStats.expired}
           sub="past deadline"
           color="var(--red)"
         />
         <KpiCard
           icon={<BarChart2 size={18} />}
           label="Urgent"
-          value={statsLoading ? '—' : (stats?.urgent ?? 0)}
+          value={liveStats.urgent}
           sub="pinned to top"
           color="var(--blue)"
         />
@@ -777,7 +772,7 @@ export const JobsManager: React.FC<JobsManagerProps> = ({
                       <label className="field-label">Destination Country *</label>
                       <select className="field-input" value={form.country}
                         onChange={e => setForm({ ...form, country: e.target.value })}>
-                        {Array.from(new Set([form.country, ...availableDestinations].filter(Boolean))).map(c => <option key={c} value={c}>{c}</option>)}
+                        {Array.from(new Set([form.country, ...countryOptions].filter(Boolean))).map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                     <div>

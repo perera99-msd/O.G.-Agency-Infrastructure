@@ -80,7 +80,7 @@ const getDaysActive = (registeredAt: string): string => {
   }
 };
 
-export const EmployeeStatus: React.FC<Props> = ({ employees, onNavigate, onUpdate }) => {
+export const EmployeeStatus: React.FC<Props> = ({ employees, onNavigate: _onNavigate, onUpdate }) => {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchError, setSearchError] = useState('');
