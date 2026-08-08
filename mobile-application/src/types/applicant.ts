@@ -150,6 +150,8 @@ export interface Employee {
   nicNumber: string;
   countryApplied: string;
   jobCategory?: string;
+  jobApplied?: string;
+  phoneNumber?: string;
   company?: string;
   registeredAt: string;
   status: 'active' | 'archived';

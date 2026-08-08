@@ -67,13 +67,29 @@ export interface ContactMessage {
   cvFileName?: string | null;
 }
 
-export type MedicalStatus = 'pending' | 'pass' | 'fail';
+export type MedicalStatus = 'not_dated' | 'date_fixed' | 'pending' | 'pass' | 'fail';
 
 export interface TrackingStep {
   step: string;
   completed: boolean;
   date: string | null;
   fileUrl: string | null;
+}
+
+export interface AdvancePayment {
+  id: string;
+  description: string;
+  date: string;
+  amount: number;
+  paymentType: 'Bank Deposit' | 'Hand Over Money';
+  receiptUrl?: string | null;
+}
+
+export interface AgentPayment {
+  id: string;
+  agentName: string;
+  amount: number;
+  receiptUrl?: string | null;
 }
 
 export interface Employee {
@@ -126,6 +142,18 @@ export interface Employee {
   trusteeAddress?: string;
   trusteePhone?: string;
   trusteeNIC?: string;
+  trusteeDob?: string | null;
+  // Children
+  childrenDetails?: { childName: string; childAge: string }[];
+  // Documents
+  nicDocUrl?: string | null;
+  nicDocName?: string | null;
+  passportDocUrl?: string | null;
+  passportDocName?: string | null;
+  policeReportUrl?: string | null;
+  policeReportName?: string | null;
+  photoUrl?: string | null;
+  photoDocName?: string | null;
   // Banking
   bankName?: string;
   bankBranch?: string;
@@ -138,6 +166,11 @@ export interface Employee {
   medicalNotes?: string;
   // Tracking
   tracking?: TrackingStep[];
+  // Money Management
+  totalAgreedAmount?: number;
+  agreedAmountReceipt?: string | null;
+  advances?: AdvancePayment[];
+  agentPayments?: AgentPayment[];
   // Meta
   status: 'active' | 'archived';
   registeredAt: string;
@@ -157,11 +190,10 @@ export type TabType =
   | 'profile'
   | 'emp-register'
   | 'emp-status'
-  | 'emp-search'
-  | 'emp-edit'
-  | 'emp-filter'
   | 'emp-medical'
-  | 'emp-user-docs';
+  | 'emp-user-docs'
+  | 'emp-manage'
+  | 'pwa-control';
 
 export type AdminRole = 'super_user' | 'normal_user';
 

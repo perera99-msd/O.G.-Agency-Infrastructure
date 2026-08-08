@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import type { TabType, AdminRole } from '../types';
 import {
   LayoutDashboard,
@@ -11,10 +12,12 @@ import {
   Bell,
   UserPlus,
   ClipboardList,
-  Search,
-  PenLine,
-  Filter,
   Stethoscope,
+  ChevronDown,
+  Globe,
+  Users,
+  Settings,
+  Smartphone,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -34,22 +37,34 @@ const mainNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: number
   { id: 'responses', label: 'Inquiries', Icon: MessageSquare },
 ];
 
-const employeeNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: number; strokeWidth?: number }> }[] = [
-  { id: 'emp-register', label: 'Register Employee', Icon: UserPlus },
-  { id: 'emp-status', label: 'Employee Status', Icon: ClipboardList },
-  { id: 'emp-search', label: 'Search Employee', Icon: Search },
-  { id: 'emp-edit', label: 'Edit Employee', Icon: PenLine },
-  { id: 'emp-filter', label: 'Filter System', Icon: Filter },
+const customerNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: number; strokeWidth?: number }> }[] = [
+  { id: 'emp-manage', label: 'Customer Manager', Icon: Users },
+  { id: 'emp-register', label: 'Register Customer', Icon: UserPlus },
+  { id: 'emp-status', label: 'Customer Status', Icon: ClipboardList },
   { id: 'emp-medical', label: 'Medical Management', Icon: Stethoscope },
   { id: 'emp-user-docs', label: 'User Documents', Icon: FileText },
+  { id: 'pwa-control', label: 'PWA Control', Icon: Smartphone },
 ];
 
-const accountNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: number; strokeWidth?: number }> }[] = [
+const settingsNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: number; strokeWidth?: number }> }[] = [
   { id: 'notifications', label: 'Notifications', Icon: Bell },
   { id: 'profile', label: 'My Profile', Icon: UserRound },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount, role: _role, onLogout }) => {
+  const isSettingsActive = settingsNavItems.some(item => item.id === activeTab);
+
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    settings: isSettingsActive,
+  });
+
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
@@ -60,63 +75,101 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unrea
         </div>
       </div>
 
-      <p className="sidebar-section-label">Main</p>
-      {mainNavItems.map(({ id, label, Icon }) => (
-        <button
-          key={id}
-          onClick={() => setActiveTab(id)}
-          className={`nav-item${activeTab === id ? ' active' : ''}`}
-        >
-          <span className="nav-item-icon">
-            <Icon size={15} strokeWidth={2} />
-          </span>
-          {label}
-          {id === 'responses' && unreadCount > 0 && (
-            <span className="nav-badge">{unreadCount}</span>
-          )}
-        </button>
-      ))}
+      {/* Website Section - Static, always listed */}
+      <div className="sidebar-accordion-header" style={{ cursor: 'default' }}>
+        <div className="sidebar-accordion-header-left">
+          <Globe size={16} strokeWidth={2} style={{ color: 'var(--accent)' }} />
+          <div>
+            <div className="sidebar-accordion-title">Website</div>
+            <div className="sidebar-accordion-sub">Main Content</div>
+          </div>
+        </div>
+      </div>
 
-      <div className="sidebar-divider" />
-      <p className="sidebar-section-label">Employees</p>
-      {employeeNavItems.map(({ id, label, Icon }) => (
-        <button
-          key={id}
-          onClick={() => setActiveTab(id)}
-          className={`nav-item${activeTab === id ? ' active' : ''}`}
-        >
-          <span className="nav-item-icon">
-            <Icon size={15} strokeWidth={2} />
-          </span>
-          {label}
-        </button>
-      ))}
+      <div className="sidebar-accordion-content">
+        {mainNavItems.map(({ id, label, Icon }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`nav-item${activeTab === id ? ' active' : ''}`}
+          >
+            <span className="nav-item-icon">
+              <Icon size={15} strokeWidth={2} />
+            </span>
+            {label}
+            {id === 'responses' && unreadCount > 0 && (
+              <span className="nav-badge">{unreadCount}</span>
+            )}
+          </button>
+        ))}
+      </div>
 
-      <div className="sidebar-divider" />
-      <p className="sidebar-section-label">Account</p>
-      {accountNavItems.map(({ id, label, Icon }) => (
-        <button
-          key={id}
-          onClick={() => setActiveTab(id)}
-          className={`nav-item${activeTab === id ? ' active' : ''}`}
-        >
-          <span className="nav-item-icon">
-            <Icon size={15} strokeWidth={2} />
-          </span>
-          {label}
-          {id === 'notifications' && unreadCount > 0 && (
-            <span className="nav-badge">{unreadCount}</span>
-          )}
-        </button>
-      ))}
+      {/* Customers Section - Static, always listed */}
+      <div className="sidebar-accordion-header" style={{ cursor: 'default' }}>
+        <div className="sidebar-accordion-header-left">
+          <Users size={16} strokeWidth={2} style={{ color: 'var(--accent)' }} />
+          <div>
+            <div className="sidebar-accordion-title">Customers</div>
+            <div className="sidebar-accordion-sub">Customer Content</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="sidebar-accordion-content">
+        {customerNavItems.map(({ id, label, Icon }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`nav-item${activeTab === id ? ' active' : ''}`}
+          >
+            <span className="nav-item-icon">
+              <Icon size={15} strokeWidth={2} />
+            </span>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Settings Section - Accordion dropdown logic kept */}
+      <button 
+        className="sidebar-accordion-header" 
+        onClick={() => toggleSection('settings')}
+        type="button"
+      >
+        <div className="sidebar-accordion-header-left">
+          <Settings size={16} strokeWidth={2} style={{ color: 'var(--accent)' }} />
+          <div>
+            <div className="sidebar-accordion-title">Settings</div>
+            <div className="sidebar-accordion-sub">Profile & Notification</div>
+          </div>
+        </div>
+        <ChevronDown 
+          size={16} 
+          className={`sidebar-accordion-chevron${openSections.settings ? ' open' : ''}`} 
+        />
+      </button>
+
+      {openSections.settings && (
+        <div className="sidebar-accordion-content">
+          {settingsNavItems.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`nav-item${activeTab === id ? ' active' : ''}`}
+            >
+              <span className="nav-item-icon">
+                <Icon size={15} strokeWidth={2} />
+              </span>
+              {label}
+              {id === 'notifications' && unreadCount > 0 && (
+                <span className="nav-badge">{unreadCount}</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="sidebar-footer">
-        <div className="sidebar-footer-card">
-          <p className="sidebar-footer-label">Live Operations</p>
-          <p className="sidebar-footer-desc">
-            All data synced with Firebase and backend APIs in real-time.
-          </p>
-        </div>
         <button className="sidebar-logout" onClick={onLogout}>
           <LogOut size={15} strokeWidth={2} />
           Log out

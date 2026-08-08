@@ -40,6 +40,8 @@ export const ROUTES: RouteConfig[] = [
   { path: "/dashboard", requiresAuth: true, redirectTo: "/login" },
   { path: "/documents", requiresAuth: true, redirectTo: "/login" },
   { path: "/profile", requiresAuth: true, redirectTo: "/login" },
+  { path: "/status", requiresAuth: true, redirectTo: "/login" },
+  { path: "/inquiry", requiresAuth: true, redirectTo: "/login" },
   { path: "/applications", requiresAuth: true, redirectTo: "/login" },
   { path: "/notifications", requiresAuth: true, redirectTo: "/login" },
 ];
