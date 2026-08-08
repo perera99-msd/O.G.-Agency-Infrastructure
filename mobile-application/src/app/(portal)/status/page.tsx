@@ -1,166 +1,311 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
-import { Activity, CheckCircle2, Clock, Globe, ArrowRight } from "lucide-react";
+import { CheckCircle2, Circle, Clock, Check } from "lucide-react";
+import { useMemo, useEffect, useState } from "react";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
 
-const DEFAULT_11_STEPS = [
-  "Document Submission",
-  "Medical Test",
-  "Passport Submission",
-  "Visa Application",
-  "Visa Approval",
-  "Fingerprint & Biometrics",
-  "Insurance & Contract",
-  "Bureau Clearance",
-  "Flight Booking",
-  "Pre-Departure Briefing",
-  "Final Clearance & Departure"
-];
+const getCountrySteps = (country?: string) => {
+  const dest = country || 'Destination';
+  const isRussia = dest.toLowerCase() === 'russia';
+  const isRomania = dest.toLowerCase() === 'romania';
+  const adj = isRussia ? 'Russian' : isRomania ? 'Romanian' : dest;
+
+  return [
+    'Video Upload',
+    'Photo Upload',
+    'Medical Receipt',
+    'Medical Report',
+    'Apply the Company',
+    'Invitation',
+    `${adj} Agreement`,
+    'English Agreement',
+    `${adj} Embassy Process`,
+    'Bureau Done',
+    'Tickets',
+  ];
+};
+
+const getCountryIsoCode = (country?: string) => {
+  if (!country) return null;
+  const c = country.toLowerCase();
+  if (c.includes('russia')) return 'ru';
+  if (c.includes('romania')) return 'ro';
+  if (c.includes('qatar')) return 'qa';
+  if (c.includes('saudi') || c.includes('ksa')) return 'sa';
+  if (c.includes('dubai') || c.includes('uae') || c.includes('emirates')) return 'ae';
+  if (c.includes('kuwait')) return 'kw';
+  if (c.includes('oman')) return 'om';
+  if (c.includes('bahrain')) return 'bh';
+  if (c.includes('malaysia')) return 'my';
+  if (c.includes('singapore')) return 'sg';
+  if (c.includes('maldives')) return 'mv';
+  if (c.includes('cyprus')) return 'cy';
+  if (c.includes('poland')) return 'pl';
+  return null;
+};
 
 export default function StatusPage() {
   const { user } = useAuth();
-  const trackingList = user?.tracking || [];
+  const [heroImage, setHeroImage] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (!user?.countryApplied) return;
+    const fetchDest = async () => {
+      try {
+        const q = query(collection(db, "destinations"), where("country", "==", user.countryApplied));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const dest = snap.docs[0].data();
+          if (dest.heroImage) setHeroImage(dest.heroImage);
+        }
+      } catch (err) {
+        console.error("Failed to fetch destination image:", err);
+      }
+    };
+    fetchDest();
+  }, [user?.countryApplied]);
 
-  const completedCount = trackingList.filter(t => t.completed).length;
-  const progressPercent = Math.round((completedCount / 11) * 100);
+  const displaySteps = useMemo(() => {
+    if (user?.tracking && user.tracking.length > 0) {
+      return user.tracking;
+    }
+    return getCountrySteps(user?.countryApplied).map(step => ({
+      step,
+      completed: false,
+      date: null,
+      fileUrl: null
+    }));
+  }, [user]);
+
+  const completedCount = displaySteps.filter(s => s.completed).length;
+  const totalCount = displaySteps.length;
+  const progressPercentage = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
+  
+  const countryCode = getCountryIsoCode(user?.countryApplied);
 
   return (
-    <div style={{ padding: "1.25rem 1rem", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-      {/* Overview Banner */}
-      <div style={{
-        background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
-        borderRadius: "18px",
-        padding: "1.5rem",
-        color: "#ffffff",
-        boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.4)"
-      }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-          <div>
-            <span style={{ fontSize: "0.75rem", fontWeight: 700, opacity: 0.8, textTransform: "uppercase", letterSpacing: "1px" }}>
-              Migration Progress
-            </span>
-            <h2 style={{ fontSize: "1.4rem", fontWeight: 800, margin: "2px 0 0" }}>
-              {completedCount} of 11 Steps Complete
-            </h2>
-          </div>
-          <div style={{
-            background: "rgba(255, 255, 255, 0.2)",
-            backdropFilter: "blur(8px)",
-            borderRadius: "12px",
-            padding: "8px 14px",
-            fontSize: "1.1rem",
-            fontWeight: 800
-          }}>
-            {progressPercent}%
-          </div>
-        </div>
+    <div style={{ 
+      padding: "1rem", 
+      maxWidth: "600px",
+      margin: "0 auto",
+      minHeight: "100vh",
+      background: "#f8fafc"
+    }}>
 
-        {/* Progress Bar */}
-        <div style={{
-          width: "100%",
-          height: "8px",
-          background: "rgba(255, 255, 255, 0.25)",
-          borderRadius: "4px",
-          overflow: "hidden"
-        }}>
+      {/* Destination Hero Banner */}
+      <div style={{
+        width: "100%",
+        height: "160px",
+        borderRadius: "20px",
+        marginBottom: "1.5rem",
+        position: "relative",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        background: heroImage 
+          ? `linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.7)), url(${heroImage})`
+          : "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        boxShadow: "0 8px 20px rgba(0,0,0,0.15)"
+      }}>
+        {countryCode && (
           <div style={{
-            width: `${progressPercent}%`,
-            height: "100%",
-            background: "#ffffff",
-            borderRadius: "4px",
-            transition: "width 0.4s ease"
-          }} />
+            width: "56px",
+            height: "56px",
+            borderRadius: "50%",
+            border: "3px solid #ffffff",
+            overflow: "hidden",
+            marginBottom: "0.5rem",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.3)"
+          }}>
+            <img 
+              src={`https://flagcdn.com/w160/${countryCode}.png`} 
+              alt="Flag"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </div>
+        )}
+        <h1 style={{
+          color: "#ffffff",
+          fontSize: "1.3rem",
+          fontWeight: 800,
+          margin: 0,
+          textShadow: "0 2px 4px rgba(0,0,0,0.5)"
+        }}>
+          {user?.countryApplied || "Destination"}
+        </h1>
+      </div>
+      
+      {/* Progress Header Card */}
+      <div style={{
+        background: "linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)",
+        borderRadius: "20px",
+        padding: "1.5rem",
+        color: "white",
+        marginBottom: "2rem",
+        boxShadow: "0 10px 25px -5px rgba(79, 70, 229, 0.4)",
+        position: "relative",
+        overflow: "hidden"
+      }}>
+        {/* Decorative background shapes */}
+        <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "150px", height: "150px", background: "rgba(255,255,255,0.1)", borderRadius: "50%" }} />
+        <div style={{ position: "absolute", bottom: "-30%", left: "10%", width: "100px", height: "100px", background: "rgba(255,255,255,0.1)", borderRadius: "50%" }} />
+        
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem" }}>
+            <div>
+              <h2 style={{ fontSize: "1.2rem", fontWeight: 700, margin: 0 }}>
+                {user?.countryApplied ? `${user.countryApplied} Migration` : 'Migration'}
+              </h2>
+              <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "0.85rem", marginTop: "4px" }}>
+                Your personal checklist and progress
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+            <span style={{ fontSize: "2rem", fontWeight: 800, lineHeight: 1 }}>{progressPercentage}%</span>
+            <span style={{ fontSize: "0.85rem", fontWeight: 500, background: "rgba(255,255,255,0.2)", padding: "4px 10px", borderRadius: "12px" }}>
+              {completedCount} of {totalCount} done
+            </span>
+          </div>
+          
+          {/* Progress Bar */}
+          <div style={{ width: "100%", height: "8px", background: "rgba(0, 0, 0, 0.2)", borderRadius: "4px", overflow: "hidden" }}>
+            <div style={{ 
+              width: `${progressPercentage}%`, 
+              height: "100%", 
+              background: "#10b981",
+              borderRadius: "4px",
+              transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)" 
+            }} />
+          </div>
         </div>
       </div>
 
-      {/* 11 Steps List */}
-      <div style={{
-        background: "#ffffff",
-        borderRadius: "16px",
-        padding: "1.25rem",
-        border: "1px solid #e2e8f0",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.03)"
+      {/* Timeline List */}
+      <div style={{ 
+        position: "relative", 
+        paddingLeft: "0.75rem",
+        display: "flex",
+        flexDirection: "column",
+        gap: "1.25rem"
       }}>
-        <h3 style={{
-          fontSize: "1rem",
-          fontWeight: 700,
-          color: "#0f172a",
-          marginTop: 0,
-          marginBottom: "1.25rem",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px"
-        }}>
-          <Activity size={18} style={{ color: "#2563eb" }} />
-          <span>Migration Checklist Steps</span>
-        </h3>
+        {/* Vertical Timeline Line */}
+        <div style={{
+          position: "absolute",
+          left: "24px",
+          top: "20px",
+          bottom: "20px",
+          width: "2px",
+          background: "linear-gradient(to bottom, #10b981 0%, #e2e8f0 100%)",
+          zIndex: 0
+        }} />
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-          {DEFAULT_11_STEPS.map((stepTitle, idx) => {
-            const trackingItem = trackingList.find(t => t.step === stepTitle) || trackingList[idx];
-            const isDone = trackingItem?.completed || false;
-            const stepDate = trackingItem?.date;
+        {displaySteps.map((trackingItem, idx) => {
+          const stepTitle = trackingItem.step;
+          const isDone = trackingItem.completed;
+          const stepDate = trackingItem.date;
 
-            return (
-              <div
-                key={stepTitle}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "0.85rem 1rem",
-                  borderRadius: "12px",
-                  background: isDone ? "#f0fdf4" : "#f8fafc",
-                  border: isDone ? "1px solid #bbf7d0" : "1px solid #f1f5f9"
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          return (
+            <div key={stepTitle + idx} style={{ display: "flex", gap: "1rem", position: "relative", zIndex: 1 }}>
+              
+              {/* Timeline Node */}
+              <div style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "50%",
+                background: isDone ? "#10b981" : "#ffffff",
+                border: isDone ? "2px solid #10b981" : "2px solid #cbd5e1",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                marginTop: "4px",
+                boxShadow: isDone ? "0 0 0 4px rgba(16, 185, 129, 0.15)" : "none",
+                transition: "all 0.3s ease"
+              }}>
+                {isDone ? (
+                  <Check size={16} color="white" strokeWidth={3} />
+                ) : (
+                  <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#94a3b8" }}>{idx + 1}</span>
+                )}
+              </div>
+
+              {/* Content Card */}
+              <div style={{
+                flex: 1,
+                background: "#ffffff",
+                borderRadius: "16px",
+                padding: "1rem",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.03)",
+                border: "1px solid rgba(0,0,0,0.04)",
+                display: "flex",
+                flexDirection: "column",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                opacity: isDone ? 1 : 0.85
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem" }}>
+                  <h3 style={{ 
+                    fontSize: "0.95rem", 
+                    fontWeight: 700, 
+                    color: isDone ? "#0f172a" : "#475569",
+                    margin: 0
+                  }}>
+                    {stepTitle}
+                  </h3>
+                  
+                  {/* Status Pill */}
                   <div style={{
-                    width: "28px",
-                    height: "28px",
-                    borderRadius: "50%",
-                    background: isDone ? "#10b981" : "#cbd5e1",
-                    color: "#ffffff",
+                    padding: "2px 8px",
+                    borderRadius: "20px",
+                    fontSize: "0.7rem",
+                    fontWeight: 600,
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "0.78rem",
-                    fontWeight: 800,
-                    flexShrink: 0
+                    gap: "4px",
+                    background: isDone ? "rgba(16, 185, 129, 0.1)" : "rgba(148, 163, 184, 0.1)",
+                    color: isDone ? "#10b981" : "#64748b"
                   }}>
-                    {isDone ? <CheckCircle2 size={16} /> : idx + 1}
-                  </div>
-                  <div>
-                    <div style={{
-                      fontSize: "0.9rem",
-                      fontWeight: 700,
-                      color: isDone ? "#15803d" : "#334155"
-                    }}>
-                      Step {idx + 1}: {stepTitle}
-                    </div>
-                    {stepDate && (
-                      <div style={{ fontSize: "0.72rem", color: "#64748b", marginTop: "2px" }}>
-                        Completed on {stepDate}
-                      </div>
-                    )}
+                    {isDone ? "Completed" : "Pending"}
                   </div>
                 </div>
 
-                <div style={{
+                {/* Date or Pending Text */}
+                <div style={{ 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: "6px",
                   fontSize: "0.75rem",
-                  fontWeight: 700,
-                  padding: "4px 8px",
-                  borderRadius: "6px",
-                  background: isDone ? "#dcfce7" : "#e2e8f0",
-                  color: isDone ? "#166534" : "#64748b"
+                  color: "#94a3b8",
+                  fontWeight: 500
                 }}>
-                  {isDone ? "Done" : "Pending"}
+                  {isDone ? (
+                    <>
+                      <CheckCircle2 size={12} color="#10b981" />
+                      Updated: {stepDate || 'Recently'}
+                    </>
+                  ) : (
+                    <>
+                      <Clock size={12} />
+                      Awaiting completion
+                    </>
+                  )}
                 </div>
               </div>
-            );
-          })}
-        </div>
+
+            </div>
+          );
+        })}
       </div>
+      
+      {/* Footer spacer */}
+      <div style={{ height: "40px" }} />
     </div>
   );
 }
