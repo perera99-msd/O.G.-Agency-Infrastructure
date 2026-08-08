@@ -219,33 +219,26 @@ export default function DocumentsPage() {
         position: "relative",
         overflow: "hidden"
       }}>
-        {/* Glassmorphic Decor */}
-        <div style={{ position: "absolute", top: "-30%", right: "-10%", width: "150px", height: "150px", background: "rgba(255,255,255,0.1)", borderRadius: "50%", filter: "blur(4px)" }} />
-        <div style={{ position: "absolute", bottom: "-40%", left: "5%", width: "120px", height: "120px", background: "rgba(255,255,255,0.1)", borderRadius: "50%", filter: "blur(2px)" }} />
-        
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
             <div style={{
               width: "48px",
               height: "48px",
-              borderRadius: "14px",
-              background: "rgba(255, 255, 255, 0.2)",
-              backdropFilter: "blur(10px)",
-              WebkitBackdropFilter: "blur(10px)",
+              borderRadius: "16px",
+              background: "rgba(56, 189, 248, 0.15)",
+              color: "#38bdf8",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              marginBottom: "1rem",
-              boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
+              backdropFilter: "blur(10px)"
             }}>
-              <FileText size={26} color="white" />
+              <FileCheck size={26} />
             </div>
 
-            {/* Country Flag Logo */}
             {countryCode && (
               <div style={{
-                width: "42px",
-                height: "42px",
+                width: "44px",
+                height: "44px",
                 borderRadius: "50%",
                 border: "2px solid rgba(255, 255, 255, 0.8)",
                 overflow: "hidden",
@@ -261,10 +254,10 @@ export default function DocumentsPage() {
             )}
           </div>
           
-          <h2 style={{ fontSize: "1.6rem", fontWeight: 800, margin: 0, letterSpacing: "-0.5px" }}>
+          <h2 style={{ fontSize: "1.5rem", fontWeight: 900, margin: 0, letterSpacing: "-0.4px" }}>
             My Documents
           </h2>
-          <p style={{ fontSize: "0.85rem", color: "rgba(255, 255, 255, 0.85)", margin: "8px 0 0", lineHeight: 1.4 }}>
+          <p style={{ fontSize: "0.82rem", color: "#94a3b8", margin: "6px 0 0", lineHeight: 1.4, fontWeight: 500 }}>
             Manage and upload your required files. Admin approved files are locked safely into your official record.
           </p>
         </div>

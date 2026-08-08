@@ -288,15 +288,17 @@ export default function InquiryPage() {
       {activeThread ? (
         <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 70px)", background: "#f1f5f9" }}>
           
-          {/* WhatsApp Header */}
+          {/* Active Chat Glassmorphic Header */}
           <div style={{
-            padding: "0.85rem 1rem",
-            background: "#ffffff",
-            borderBottom: "1px solid #e2e8f0",
+            padding: "0.85rem 1.25rem",
+            background: "rgba(255, 255, 255, 0.9)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            borderBottom: "1px solid rgba(226, 232, 240, 0.8)",
             display: "flex",
             alignItems: "center",
             gap: "0.75rem",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.03)",
             position: "sticky",
             top: 0,
             zIndex: 10
@@ -504,23 +506,23 @@ export default function InquiryPage() {
         /* ────────────────── THREADS LIST VIEW ────────────────── */
         <div style={{ padding: "1.25rem 1rem", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
           
-          {/* Header Card */}
+          {/* Header Hero Card - Dark Indigo Bento */}
           <div style={{
             background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)",
-            borderRadius: "20px",
-            padding: "1.5rem",
+            borderRadius: "24px",
+            padding: "1.6rem 1.5rem",
             color: "#ffffff",
-            boxShadow: "0 10px 25px -5px rgba(49, 46, 129, 0.3)",
+            boxShadow: "0 14px 30px -5px rgba(49, 46, 129, 0.35)",
             position: "relative",
             overflow: "hidden"
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
-                <h2 style={{ fontSize: "1.35rem", fontWeight: 800, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+                <h2 style={{ fontSize: "1.4rem", fontWeight: 900, margin: 0, display: "flex", alignItems: "center", gap: "10px", letterSpacing: "-0.3px" }}>
                   <MessageSquare size={24} style={{ color: "#a5b4fc" }} />
                   <span>Support Chat</span>
                 </h2>
-                <p style={{ fontSize: "0.82rem", color: "#c7d2fe", margin: "6px 0 0" }}>
+                <p style={{ fontSize: "0.82rem", color: "#c7d2fe", margin: "6px 0 0", fontWeight: 500 }}>
                   Direct real-time inquiry messaging with O.G. Agency staff.
                 </p>
               </div>
@@ -528,18 +530,19 @@ export default function InquiryPage() {
               <button
                 onClick={() => setShowNewModal(true)}
                 style={{
-                  padding: "0.65rem 1rem",
-                  borderRadius: "12px",
+                  padding: "0.7rem 1.1rem",
+                  borderRadius: "16px",
                   border: "none",
                   background: "#ffffff",
                   color: "#312e81",
                   fontSize: "0.85rem",
-                  fontWeight: 800,
+                  fontWeight: 900,
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
-                  boxShadow: "0 4px 14px rgba(255, 255, 255, 0.2)"
+                  boxShadow: "0 8px 20px rgba(255, 255, 255, 0.2)",
+                  transition: "transform 0.15s"
                 }}
               >
                 <Plus size={18} />

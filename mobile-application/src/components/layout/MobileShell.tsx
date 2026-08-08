@@ -205,23 +205,25 @@ export function MobileShell({ children }: MobileShellProps) {
         {children}
       </main>
 
-      {/* Fixed Bottom Mobile Navbar */}
+      {/* Fixed Floating Bottom Mobile Navbar */}
       <nav style={{
         position: "fixed",
-        bottom: 0,
+        bottom: "16px",
         left: "50%",
         transform: "translateX(-50%)",
-        width: "100%",
-        maxWidth: "500px",
-        height: "68px",
-        background: "#ffffff",
-        borderTop: "1px solid #e2e8f0",
+        width: "calc(100% - 32px)",
+        maxWidth: "468px",
+        height: "64px",
+        background: "rgba(255, 255, 255, 0.88)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        border: "1px solid rgba(255, 255, 255, 0.9)",
+        borderRadius: "32px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-around",
         zIndex: 50,
-        boxShadow: "0 -4px 20px rgba(0, 0, 0, 0.05)",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)"
+        boxShadow: "0 12px 35px -5px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04)"
       }}>
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -234,25 +236,27 @@ export function MobileShell({ children }: MobileShellProps) {
                 href={item.href}
                 style={{
                   position: "relative",
-                  top: "-14px",
+                  top: "-10px",
                   textDecoration: "none"
                 }}
               >
                 <div style={{
-                  width: "52px",
-                  height: "52px",
+                  width: "50px",
+                  height: "50px",
                   borderRadius: "50%",
                   background: isActive
                     ? "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)"
-                    : "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                    : "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   color: "#ffffff",
-                  boxShadow: "0 6px 18px rgba(37, 99, 235, 0.45)",
-                  border: "3px solid #ffffff"
+                  boxShadow: "0 8px 20px rgba(37, 99, 235, 0.4)",
+                  border: "3px solid #ffffff",
+                  transition: "transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                  transform: isActive ? "scale(1.08)" : "scale(1)"
                 }}>
-                  <Icon size={24} />
+                  <Icon size={22} />
                 </div>
               </Link>
             );
@@ -269,26 +273,30 @@ export function MobileShell({ children }: MobileShellProps) {
                 gap: "3px",
                 textDecoration: "none",
                 color: isActive ? "#2563eb" : "#94a3b8",
-                transition: "color 0.2s",
+                transition: "all 0.2s ease",
                 padding: "6px 12px",
-                position: "relative"
+                position: "relative",
+                borderRadius: "16px",
+                background: isActive ? "rgba(37, 99, 235, 0.08)" : "transparent"
               }}
             >
-              <Icon size={20} style={{ strokeWidth: isActive ? 2.5 : 2 }} />
+              <Icon size={19} style={{ strokeWidth: isActive ? 2.5 : 2 }} />
               {!!item.badge && item.badge > 0 && (
                 <span style={{
                   position: "absolute",
-                  top: "2px",
-                  right: "16px",
+                  top: "4px",
+                  right: "14px",
                   width: "8px",
                   height: "8px",
                   borderRadius: "50%",
-                  background: "#ef4444"
+                  background: "#ef4444",
+                  boxShadow: "0 0 0 2px #ffffff"
                 }} />
               )}
               <span style={{
-                fontSize: "0.68rem",
-                fontWeight: isActive ? 700 : 500
+                fontSize: "0.65rem",
+                fontWeight: isActive ? 800 : 600,
+                letterSpacing: "-0.2px"
               }}>
                 {item.label}
               </span>
