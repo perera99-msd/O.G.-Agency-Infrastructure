@@ -87,10 +87,18 @@ const MOCK_JOBS = [
 
 const destinationExistsAndActive = async (country) => {
   if (!db || !country) return true;
-  const snap = await db.collection('destinations').where('country', '==', country).limit(5).get();
-  if (snap.empty) return false;
+  const snap = await db.collection('destinations').get();
+  if (snap.empty) return true;
 
-  return snap.docs.some((doc) => {
+  const targetCountry = country.trim().toLowerCase();
+  const matchingDocs = snap.docs.filter((doc) => {
+    const data = doc.data() || {};
+    return (data.country || '').trim().toLowerCase() === targetCountry;
+  });
+
+  if (matchingDocs.length === 0) return true;
+
+  return matchingDocs.some((doc) => {
     const data = doc.data() || {};
     if (typeof data.isActive === 'boolean') return data.isActive;
     if (typeof data.active === 'boolean') return data.active;
@@ -194,8 +202,15 @@ const getAllJobsAdmin = async (req, res) => {
       });
     }
 
-    const snapshot = await db.collection('jobs').orderBy('createdAt', 'desc').get();
+    const snapshot = await db.collection('jobs').get();
     const jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Safely sort in memory by createdAt / postedAt descending
+    jobs.sort((a, b) => {
+      const timeA = new Date(a.createdAt || a.postedAt || 0).getTime();
+      const timeB = new Date(b.createdAt || b.postedAt || 0).getTime();
+      return timeB - timeA;
+    });
 
     return res.status(200).json({ success: true, count: jobs.length, data: jobs });
   } catch (error) {

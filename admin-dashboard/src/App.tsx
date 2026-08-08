@@ -239,6 +239,40 @@ export default function App() {
       setResponses(data);
     });
 
+    // Jobs listener (Firestore)
+    const unsubJobs = onSnapshot(collection(db, 'jobs'), (snapshot) => {
+      const data = snapshot.docs.map((snapshotDoc) => {
+        const payload = snapshotDoc.data() as Partial<JobOpening>;
+        return {
+          id: snapshotDoc.id,
+          title: payload.title || '',
+          slug: payload.slug || '',
+          category: payload.category || 'Other',
+          tags: payload.tags || [],
+          country: payload.country || '',
+          salary: payload.salary || { min: 0, max: 0, currency: 'USD' },
+          deadline: payload.deadline || '',
+          postedAt: payload.postedAt || '',
+          isUrgent: !!payload.isUrgent,
+          genderPreference: payload.genderPreference || 'No Preference',
+          ageRange: payload.ageRange || { min: 18, max: 60 },
+          description: payload.description || '',
+          requirements: payload.requirements || [],
+          benefits: payload.benefits || [],
+          companyLogo: payload.companyLogo || null,
+          active: typeof payload.active === 'boolean' ? payload.active : true,
+          createdAt: (payload as any).createdAt || '',
+          updatedAt: (payload as any).updatedAt || '',
+        } as JobOpening;
+      });
+      data.sort((a, b) => {
+        const timeA = new Date((a as any).createdAt || a.postedAt || 0).getTime();
+        const timeB = new Date((b as any).createdAt || b.postedAt || 0).getTime();
+        return timeB - timeA;
+      });
+      setJobs(data);
+    });
+
     fetchJobs();
 
     // Employees listener (Firestore)
@@ -252,6 +286,7 @@ export default function App() {
       unsubGallery();
       unsubBlogs();
       unsubInquiries();
+      unsubJobs();
       unsubEmployees();
     };
   }, [isLoggedIn]);
@@ -400,19 +435,29 @@ export default function App() {
         body: JSON.stringify(j)
       });
       const json = await res.json();
-      if (!json.success) {
+      if (!res.ok || !json.success) {
         throw new Error(json.message || 'Failed to create job.');
       }
       await fetchJobs();
     } catch (err) {
-      console.error('Error adding job via API:', err);
+      console.error('Error adding job via API, writing directly to Firestore:', err);
+      try {
+        const newDocRef = doc(collection(db, 'jobs'));
+        await setDoc(newDocRef, {
+          ...j,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      } catch (fbErr) {
+        console.error('Error adding job to Firestore fallback:', fbErr);
+      }
     }
   };
 
   const updateJob = async (id: string, j: Partial<JobOpening>) => {
     try {
       const authHeaders = await getAuthHeaders();
-      await fetch(`${API_BASE_URL}/api/v1/admin/jobs/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/admin/jobs/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -420,22 +465,43 @@ export default function App() {
         },
         body: JSON.stringify(j)
       });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || 'Failed to update job.');
+      }
       await fetchJobs();
     } catch (err) {
-      console.error('Error updating job via API:', err);
+      console.error('Error updating job via API, updating directly in Firestore:', err);
+      try {
+        await updateDoc(doc(db, 'jobs', id), {
+          ...j,
+          updatedAt: new Date().toISOString(),
+        });
+      } catch (fbErr) {
+        console.error('Error updating job in Firestore fallback:', fbErr);
+      }
     }
   };
 
   const deleteJob = async (id: string) => {
     try {
       const authHeaders = await getAuthHeaders();
-      await fetch(`${API_BASE_URL}/api/v1/admin/jobs/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/admin/jobs/${id}`, {
         method: 'DELETE',
         headers: authHeaders,
       });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || 'Failed to delete job.');
+      }
       await fetchJobs();
     } catch (err) {
-      console.error('Error deleting job via API:', err);
+      console.error('Error deleting job via API, deleting directly from Firestore:', err);
+      try {
+        await deleteDoc(doc(db, 'jobs', id));
+      } catch (fbErr) {
+        console.error('Error deleting job in Firestore fallback:', fbErr);
+      }
     }
   };
 
@@ -526,9 +592,10 @@ export default function App() {
       publishDate: b.publishDate || new Date().toISOString().split('T')[0],
       readTime: b.readTime || '3 min read',
       excerpt: b.excerpt,
+      content: b.content || '',
       image: finalImageUrl,
       author: b.author || 'Admin Team',
-      sourceType: b.sourceType || (b.category === 'AI Generated' ? 'ai' : 'manual'),
+      sourceType: b.sourceType || (b.category === 'Automation & Tech' || b.category === 'AI Generated' ? 'ai' : 'manual'),
     };
 
     try {

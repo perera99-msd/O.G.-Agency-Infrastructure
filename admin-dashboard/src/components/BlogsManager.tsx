@@ -12,12 +12,24 @@ interface BlogsManagerProps {
   role?: 'super_user' | 'normal_user';
 }
 
+const BLOG_CATEGORIES = [
+  'Garment Factories',
+  'Visa & Legal',
+  'Market Trends',
+  'Candidate Stories',
+  'Automation & Tech',
+] as const;
+
 const categoryColor = (c: string) => {
   const m: Record<string, string> = {
+    'Garment Factories': 'tag-purple',
     'Visa & Legal': 'tag-blue',
+    'Market Trends': 'tag-green',
+    'Candidate Stories': 'tag-amber',
+    'Automation & Tech': 'tag-cyan',
+    'AI Generated': 'tag-amber',
     'Success Stories': 'tag-green',
     'Industry News': 'tag-purple',
-    'AI Generated': 'tag-amber',
   };
   return m[c] ?? 'tag-neutral';
 };
@@ -26,7 +38,9 @@ const emptyForm: {
   title: string; category: BlogPost['category']; readTime: string;
   author: string; publishDate: string; excerpt: string; content: string; image: string; sourceType: 'manual' | 'ai'; file?: File;
 } = {
-  title: '', category: 'Visa & Legal', readTime: '5 min read',
+  title: '',
+  category: 'Garment Factories',
+  readTime: '5 min read',
   author: 'Legal Compliance Desk',
   publishDate: new Date().toISOString().split('T')[0],
   excerpt: '',
@@ -78,7 +92,7 @@ export const BlogsManager: React.FC<BlogsManagerProps> = ({
     setEditId(null);
     setForm({
       ...emptyForm,
-      category: 'AI Generated',
+      category: 'Automation & Tech',
       author: 'Automation Pipeline (n8n)',
       publishDate: new Date().toISOString().split('T')[0],
       sourceType: 'ai',
@@ -90,14 +104,14 @@ export const BlogsManager: React.FC<BlogsManagerProps> = ({
     setEditId(b.id);
     setForm({
       title: b.title,
-      category: b.category,
-      readTime: b.readTime,
-      author: b.author,
-      publishDate: b.publishDate,
-      excerpt: b.excerpt,
+      category: b.category || 'Garment Factories',
+      readTime: b.readTime || '5 min read',
+      author: b.author || 'Legal Compliance Desk',
+      publishDate: b.publishDate || new Date().toISOString().split('T')[0],
+      excerpt: b.excerpt || '',
       content: b.content || '',
       image: b.image || '',
-      sourceType: b.sourceType || (b.category === 'AI Generated' ? 'ai' : 'manual'),
+      sourceType: b.sourceType || (b.category === 'Automation & Tech' || b.category === 'AI Generated' ? 'ai' : 'manual'),
     });
     setOpen(true);
   };
@@ -242,10 +256,9 @@ export const BlogsManager: React.FC<BlogsManagerProps> = ({
                     <div className="field-group">
                       <label className="field-label">Category</label>
                       <select className="field-input" value={form.category} onChange={e => setForm({ ...form, category: e.target.value as any })}>
-                        <option value="Visa & Legal">Visa & Legal</option>
-                        <option value="Success Stories">Success Stories</option>
-                        <option value="Industry News">Industry News</option>
-                        <option value="AI Generated">AI Generated</option>
+                        {BLOG_CATEGORIES.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
                       </select>
                     </div>
                     <div className="field-group">

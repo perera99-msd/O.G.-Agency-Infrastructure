@@ -13,6 +13,7 @@ export interface Destination {
 export interface JobOpening {
   id: string;
   title: string;
+  slug?: string;
   country: string;
   category: string;
   salary: { min: number; max: number; currency: string };
@@ -28,6 +29,8 @@ export interface JobOpening {
   active: boolean;
   postedAt?: string;
   positionsAvailable?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface GalleryItem {
@@ -41,7 +44,7 @@ export interface GalleryItem {
 export interface BlogPost {
   id: string;
   title: string;
-  category: 'Visa & Legal' | 'Success Stories' | 'Industry News' | 'AI Generated';
+  category: 'Garment Factories' | 'Visa & Legal' | 'Market Trends' | 'Candidate Stories' | 'Automation & Tech' | string;
   readTime: string;
   author: string;
   publishDate: string;
