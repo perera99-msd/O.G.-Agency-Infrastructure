@@ -1,16 +1,18 @@
 "use client";
 
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { db } from "@/lib/firebase/config";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 import {
   Home,
   User,
   FileText,
   Activity,
   MessageSquare,
-  LogOut,
+  Bell,
   ShieldCheck
 } from "lucide-react";
 
@@ -21,22 +23,45 @@ interface MobileShellProps {
 export function MobileShell({ children }: MobileShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const navItems = [
     { label: "Profile", href: "/profile", icon: User },
     { label: "Status", href: "/status", icon: Activity },
     { label: "Home", href: "/dashboard", icon: Home, isCenter: true },
     { label: "Docs", href: "/documents", icon: FileText },
-    { label: "Inquiry", href: "/inquiry", icon: MessageSquare },
+    { label: "Inquiry", href: "/inquiry", icon: MessageSquare, badge: unreadCount },
   ];
 
-  const handleLogout = async () => {
-    if (confirm("Are you sure you want to sign out?")) {
-      await logout();
-      router.push("/login");
+  // Listen to unread messages/chats count for current user
+  useEffect(() => {
+    if (!user?.id) {
+      setUnreadCount(0);
+      return;
     }
-  };
+
+    const q = query(
+      collection(db, "pwa_chats"),
+      where("employeeId", "==", user.id)
+    );
+
+    const unsub = onSnapshot(q, (snapshot) => {
+      let totalUnread = 0;
+      snapshot.docs.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (!data.deletedByUser && data.unreadByUser && typeof data.unreadByUser === "number") {
+          totalUnread += data.unreadByUser;
+        }
+      });
+
+      setUnreadCount(totalUnread);
+    }, (err) => {
+      console.error("Unread count listener error:", err);
+    });
+
+    return () => unsub();
+  }, [user?.id]);
 
   return (
     <div style={{
@@ -91,7 +116,7 @@ export function MobileShell({ children }: MobileShellProps) {
           </div>
         </div>
 
-        {/* User Quick Info & Logout */}
+        {/* User Quick Info, Notifications & Profile Button */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
           <div style={{
             padding: "4px 8px",
@@ -108,25 +133,67 @@ export function MobileShell({ children }: MobileShellProps) {
             <span>{user?.passportNumber || "PWA"}</span>
           </div>
 
-          <button
-            onClick={handleLogout}
-            title="Sign Out"
+          {/* Notification Bell Button */}
+          <Link
+            href="/inquiry"
+            title="Inquiries & Notifications"
             style={{
-              width: "34px",
-              height: "34px",
+              width: "36px",
+              height: "36px",
               borderRadius: "50%",
               border: "1px solid #e2e8f0",
               background: "#ffffff",
-              color: "#ef4444",
+              color: "#334155",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              cursor: "pointer",
-              transition: "background 0.2s"
+              position: "relative",
+              textDecoration: "none"
             }}
           >
-            <LogOut size={16} />
-          </button>
+            <Bell size={17} />
+            {unreadCount > 0 && (
+              <span style={{
+                position: "absolute",
+                top: "-2px",
+                right: "-2px",
+                width: "16px",
+                height: "16px",
+                borderRadius: "50%",
+                background: "#ef4444",
+                color: "#ffffff",
+                fontSize: "0.65rem",
+                fontWeight: 800,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 0 0 2px #ffffff"
+              }}>
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </Link>
+
+          {/* Profile Navigation Button (Replaced Logout) */}
+          <Link
+            href="/profile"
+            title="My Profile"
+            style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              border: pathname === "/profile" ? "2px solid #2563eb" : "1px solid #cbd5e1",
+              background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+              color: "#1d4ed8",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textDecoration: "none",
+              boxShadow: "0 2px 6px rgba(37, 99, 235, 0.15)"
+            }}
+          >
+            <User size={18} />
+          </Link>
         </div>
       </header>
 
@@ -203,10 +270,22 @@ export function MobileShell({ children }: MobileShellProps) {
                 textDecoration: "none",
                 color: isActive ? "#2563eb" : "#94a3b8",
                 transition: "color 0.2s",
-                padding: "6px 12px"
+                padding: "6px 12px",
+                position: "relative"
               }}
             >
               <Icon size={20} style={{ strokeWidth: isActive ? 2.5 : 2 }} />
+              {!!item.badge && item.badge > 0 && (
+                <span style={{
+                  position: "absolute",
+                  top: "2px",
+                  right: "16px",
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: "#ef4444"
+                }} />
+              )}
               <span style={{
                 fontSize: "0.68rem",
                 fontWeight: isActive ? 700 : 500

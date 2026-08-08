@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Bell } from 'lucide-react';
-import type { ContactMessage, TabType } from '../types';
+import type { ContactMessage, TabType, PWAChatThread } from '../types';
 import { NotificationsDropdown } from './NotificationsDropdown';
 
 interface NavbarProps {
   activeTab: string;
   unreadCount: number;
+  pwaUnreadCount?: number;
   responses?: ContactMessage[];
+  pwaChats?: PWAChatThread[];
   onUpdateStatus?: (id: string, status: ContactMessage['status']) => void;
   onMarkAllAsRead?: () => void;
   onDeleteResponse?: (id: string) => void;
@@ -33,12 +35,15 @@ const tabLabels: Record<string, string> = {
   'emp-medical': 'Medical Management',
   'emp-user-docs': 'User Documents',
   'pwa-control': 'PWA Access Control',
+  'pwa-inquiries': 'PWA Customer Inquiries',
 };
 
 export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   unreadCount,
+  pwaUnreadCount = 0,
   responses = [],
+  pwaChats = [],
   onUpdateStatus = () => {},
   onMarkAllAsRead = () => {},
   onDeleteResponse = () => {},
@@ -48,6 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   userPhotoUrl,
 }) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const totalUnreadBadge = unreadCount + pwaUnreadCount;
 
   return (
     <header className="header">
@@ -73,7 +79,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             style={{ position: 'relative' }}
           >
             <Bell size={15} strokeWidth={2} />
-            {unreadCount > 0 && (
+            {totalUnreadBadge > 0 && (
               <span
                 style={{
                   position: 'absolute',
@@ -93,7 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   boxShadow: '0 0 0 2px var(--bg)',
                 }}
               >
-                {unreadCount > 9 ? '9+' : unreadCount}
+                {totalUnreadBadge > 9 ? '9+' : totalUnreadBadge}
               </span>
             )}
           </button>
@@ -101,14 +107,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           {isNotifOpen && (
             <NotificationsDropdown
               responses={responses}
+              pwaChats={pwaChats}
               onUpdateStatus={onUpdateStatus}
               onMarkAllAsRead={onMarkAllAsRead}
               onDelete={onDeleteResponse}
-              onViewAll={() => onNavigate('notifications')}
+              onNavigate={onNavigate}
               onClose={() => setIsNotifOpen(false)}
             />
           )}
         </div>
+
 
         {/* User Profile Avatar Button */}
         <button

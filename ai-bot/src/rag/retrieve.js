@@ -3,6 +3,7 @@ const path = require('path');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const EMBEDDINGS_FILE = path.join(__dirname, '../../data/embeddings.json');
+const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/api/v1/website';
 
 // Helper: Cosine similarity for numerical vectors
 function cosineSimilarity(vecA, vecB) {
@@ -65,6 +66,69 @@ function loadEmbeddings() {
 }
 
 /**
+ * Dynamically query the Backend API / Firestore for live jobs and countries
+ */
+async function fetchLiveDatabaseContext(question) {
+  const qLower = question.toLowerCase();
+  const isJobQuery = /job|vacancy|vacancies|opening|openings|hiring|work|career|position/i.test(qLower);
+  const isCountryQuery = /country|countries|destination|destinations|romania|qatar|dubai|saudi|kuwait|oman/i.test(qLower);
+
+  if (!isJobQuery && !isCountryQuery) {
+    return [];
+  }
+
+  const liveChunks = [];
+
+  if (isJobQuery) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/jobs`, { signal: AbortSignal.timeout(3000) });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          const jobsSummary = json.data.map((j, idx) => 
+            `${idx + 1}. Job Title: ${j.title || j.role || 'N/A'} | Country: ${j.country || 'N/A'} | Category: ${j.category || 'General'} | Deadline: ${j.deadline || 'Open'}`
+          ).join('\n');
+
+          liveChunks.push({
+            id: 'live-jobs-db',
+            source: 'Firestore Database (Live Vacancies)',
+            title: 'Current Active Job Openings',
+            text: `Here are the official currently active job vacancies in the O.G. Agency database:\n${jobsSummary}\n\nCandidates can apply on our Jobs page (https://ogagency.com/jobs) or send their CV to info@ogagency.lk.`,
+            score: 10.0
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[RAG] Live jobs fetch failed/timed out:', err.message);
+    }
+  }
+
+  if (isCountryQuery) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/destinations`, { signal: AbortSignal.timeout(3000) });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          const countrySummary = json.data.map(d => `- ${d.country} (${d.status || 'Active'})`).join('\n');
+
+          liveChunks.push({
+            id: 'live-destinations-db',
+            source: 'Firestore Database (Live Destinations)',
+            title: 'Current Active Destination Countries',
+            text: `O.G. Agency currently recruits and places workers for the following active destination countries in our database:\n${countrySummary}`,
+            score: 10.0
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[RAG] Live destinations fetch failed/timed out:', err.message);
+    }
+  }
+
+  return liveChunks;
+}
+
+/**
  * Retrieve top K chunks matching the user question
  * @param {string} question 
  * @param {number} topK 
@@ -75,8 +139,12 @@ async function retrieveContext(question, topK = 5) {
     return [];
   }
 
+  // 1. Fetch live database context for jobs/countries queries
+  const liveChunks = await fetchLiveDatabaseContext(question);
+
+  // 2. Load static embedding vectors
   const embeddings = cachedEmbeddings || loadEmbeddings();
-  if (!embeddings || embeddings.length === 0) {
+  if ((!embeddings || embeddings.length === 0) && liveChunks.length === 0) {
     return [];
   }
 
@@ -96,7 +164,7 @@ async function retrieveContext(question, topK = 5) {
     }
   }
 
-  const scoredChunks = embeddings.map(chunk => {
+  const scoredChunks = (embeddings || []).map(chunk => {
     let score = 0;
     if (queryVector && Array.isArray(chunk.vector)) {
       score = cosineSimilarity(queryVector, chunk.vector);
@@ -117,11 +185,11 @@ async function retrieveContext(question, topK = 5) {
     };
   });
 
-  // Sort descending by score
-  scoredChunks.sort((a, b) => b.score - a.score);
+  // Combine live database chunks (high priority score) with top vector matches
+  const combined = [...liveChunks, ...scoredChunks];
+  combined.sort((a, b) => b.score - a.score);
 
-  // Return top K items
-  return scoredChunks.slice(0, topK);
+  return combined.slice(0, topK);
 }
 
 module.exports = {
