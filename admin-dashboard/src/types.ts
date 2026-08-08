@@ -44,7 +44,7 @@ export interface GalleryItem {
 export interface BlogPost {
   id: string;
   title: string;
-  category: 'Visa & Legal' | 'Success Stories' | 'Industry News' | 'AI Generated';
+  category: 'Garment Factories' | 'Visa & Legal' | 'Market Trends' | 'Candidate Stories' | 'Automation & Tech' | string;
   readTime: string;
   author: string;
   publishDate: string;

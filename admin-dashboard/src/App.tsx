@@ -592,9 +592,10 @@ export default function App() {
       publishDate: b.publishDate || new Date().toISOString().split('T')[0],
       readTime: b.readTime || '3 min read',
       excerpt: b.excerpt,
+      content: b.content || '',
       image: finalImageUrl,
       author: b.author || 'Admin Team',
-      sourceType: b.sourceType || (b.category === 'AI Generated' ? 'ai' : 'manual'),
+      sourceType: b.sourceType || (b.category === 'Automation & Tech' || b.category === 'AI Generated' ? 'ai' : 'manual'),
     };
 
     try {
