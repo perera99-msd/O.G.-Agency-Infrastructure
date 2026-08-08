@@ -10,6 +10,7 @@ import { ContactResponsesManager } from './components/ContactResponsesManager';
 import { NotificationsCenter } from './components/NotificationsCenter';
 import { LoginPage } from './components/LoginPage';
 import { ProfileManager } from './components/ProfileManager';
+import { AdminsManager } from './components/AdminsManager';
 import { RegisterEmployee } from './components/employees/RegisterEmployee';
 import { EmployeeStatus } from './components/employees/EmployeeStatus';
 
@@ -905,6 +906,7 @@ export default function App() {
               />
             )}
             {activeTab === 'profile' && <ProfileManager user={currentUser} />}
+            {activeTab === 'admins' && <AdminsManager currentUserUid={currentUser.uid} />}
 
             {/* Employee Management Tabs */}
             {activeTab === 'emp-register' && (

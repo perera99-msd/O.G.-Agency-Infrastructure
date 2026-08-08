@@ -191,6 +191,7 @@ export type TabType =
   | 'responses'
   | 'notifications'
   | 'profile'
+  | 'admins'
   | 'emp-register'
   | 'emp-status'
   | 'emp-medical'

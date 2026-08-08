@@ -18,6 +18,7 @@ import {
   Users,
   Settings,
   Smartphone,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -48,16 +49,18 @@ const customerNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: nu
   { id: 'pwa-inquiries', label: 'PWA Inquiries', Icon: MessageSquare },
 ];
 
-const settingsNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: number; strokeWidth?: number }> }[] = [
+const settingsNavItems: { id: TabType; label: string; Icon: React.FC<{ size?: number; strokeWidth?: number }>; superOnly?: boolean }[] = [
   { id: 'notifications', label: 'Notifications', Icon: Bell },
   { id: 'profile', label: 'My Profile', Icon: UserRound },
+  { id: 'admins', label: 'Administrators', Icon: ShieldCheck, superOnly: true },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount, pwaUnreadCount = 0, role: _role, onLogout }) => {
-  const isSettingsActive = settingsNavItems.some(item => item.id === activeTab);
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount, pwaUnreadCount = 0, role, onLogout }) => {
+  const visibleSettingsNavItems = settingsNavItems.filter(item => !item.superOnly || role === 'super_user');
+  const isSettingsActive = visibleSettingsNavItems.some(item => item.id === activeTab);
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    settings: isSettingsActive,
+    settings: isSettingsActive || settingsNavItems.some(item => item.id === activeTab),
   });
 
   const toggleSection = (section: string) => {
@@ -156,7 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unrea
 
       {openSections.settings && (
         <div className="sidebar-accordion-content">
-          {settingsNavItems.map(({ id, label, Icon }) => (
+          {visibleSettingsNavItems.map(({ id, label, Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
