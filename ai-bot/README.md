@@ -121,6 +121,36 @@ node -e "fetch('http://localhost:4000/api/chat', { method: 'POST', headers: { 'C
 
 ---
 
+---
+
+## 🌐 Render Deployment Instructions (Standalone Web Service)
+
+Deploy the `ai-bot` microservice as a 4th standalone Web Service on Render:
+
+1. Go to your [Render Dashboard](https://dashboard.render.com).
+2. Click **New +** -> **Web Service**.
+3. Connect your repository and configure:
+   - **Name:** `og-agency-ai-bot` (or your preferred service name)
+   - **Environment:** `Node`
+   - **Root Directory:** `ai-bot`
+   - **Build Command:** `npm install`
+   - **Start Command:** `npm start`
+   - **Health Check Path:** `/api/health`
+4. Under **Environment Variables**, set:
+   - `NODE_ENV`: `production`
+   - `GEMINI_API_KEY`: Google Gemini API Key ([Get Key](https://aistudio.google.com/apikey))
+   - `GROQ_API_KEY`: Groq API Key ([Get Key](https://console.groq.com/keys))
+   - `ALLOWED_ORIGIN`: Your website domain (e.g. `https://og-agency-website.onrender.com`)
+   - `BACKEND_API_URL`: Your backend API domain (e.g. `https://og-agency-backend.onrender.com/api/v1/website`)
+5. Click **Create Web Service**.
+6. Once deployed, copy the service URL (e.g. `https://og-agency-ai-bot.onrender.com`).
+7. In your existing **Website Web Service** on Render, add an environment variable:
+   - `NEXT_PUBLIC_CHATBOT_API_URL`: `https://og-agency-ai-bot.onrender.com/api/chat`
+8. Trigger a redeploy on the Website service so it picks up the new chatbot API URL.
+
+
+---
+
 ## 📂 Project Structure
 
 ```

@@ -6,6 +6,7 @@
 "use client";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { jobs as fallbackJobs } from "@/utils/data/jobs";
 
 export const JOBS_PER_PAGE = 24;
 
@@ -36,21 +37,22 @@ export function useJobFilters() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch jobs from backend
+  // Fetch jobs from backend with fallback
   useEffect(() => {
     async function fetchJobs() {
       try {
-        const res = await fetch("http://localhost:5000/api/v1/website/jobs");
-        if (!res.ok) throw new Error("Failed to fetch jobs");
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+        const res = await fetch(`${baseUrl}/api/v1/website/jobs`);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const json = await res.json();
-        if (json.success) {
-          setJobsList(json.data || []);
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setJobsList(json.data);
         } else {
-          throw new Error(json.message || "Failed to fetch jobs");
+          setJobsList(fallbackJobs);
         }
       } catch (err) {
-        console.error("Error fetching jobs:", err);
-        setError(err.message);
+        console.warn("Using fallback job data due to API error:", err);
+        setJobsList(fallbackJobs);
       } finally {
         setIsLoading(false);
       }
