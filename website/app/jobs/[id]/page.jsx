@@ -7,6 +7,7 @@ import { MapPin, Banknote, Clock, Users, Calendar, ArrowLeft, Bookmark, External
 import { useBookmarks } from "@/utils/hooks/useBookmarks";
 import ShareMenu from "@/components/jobs/ShareMenu";
 import JobCard from "@/components/jobs/JobCard";
+import { jobs as fallbackJobs } from "@/utils/data/jobs";
 
 function formatSalary(salary) {
   if (!salary) return "";
@@ -47,13 +48,18 @@ export default function JobDetailPage({ params }) {
   useEffect(() => {
     async function fetchJobs() {
       try {
-        const res = await fetch("http://localhost:5000/api/v1/website/jobs");
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+        const res = await fetch(`${baseUrl}/api/v1/website/jobs`);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const json = await res.json();
-        if (json.success) {
-          setJobs(json.data || []);
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setJobs(json.data);
+        } else {
+          setJobs(fallbackJobs);
         }
       } catch (err) {
-        console.error("Error fetching jobs:", err);
+        console.warn("Using fallback job data due to API error:", err);
+        setJobs(fallbackJobs);
       } finally {
         setIsLoading(false);
       }
